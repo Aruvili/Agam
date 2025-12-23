@@ -1,16 +1,3 @@
-﻿Below is the **final, production-ready README.md** for **அகம் (Agam)**, aligned with everything you decided:
-
-* ✅ **User-focused**
-* ✅ **No developer internals**
-* ✅ **No “Build from Source”**
-* ✅ **Prebuilt binary coming soon**
-* ✅ **Credits included**
-* ✅ **Ready to push to GitHub**
-
-You can **copy–paste this directly** as `README.md`.
-
----
-
 # அகம் (Agam) — Tamil Programming Language
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
@@ -216,5 +203,8 @@ MIT License.
 
 Created by **Balapriyan B**
 Assisted by **Claude Sonnet 4.5**
+
+### README.md
+Credits To CHATGPT
 
 ---

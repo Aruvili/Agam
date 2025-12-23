@@ -97,6 +97,10 @@ jobs:
     - name: Build Windows Installer
       if: runner.os == 'Windows'
       run: |
+        # Ensure target/release exists and copy the binary there so Inno Setup finds it
+        New-Item -ItemType Directory -Path "target\release" -Force | Out-Null
+        Copy-Item "target\${{ matrix.target }}\release\agam.exe" -Destination "target\release\agam.exe"
+        
         & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DSkipIcon scripts\installer.iss
       shell: pwsh
 

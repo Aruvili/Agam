@@ -195,7 +195,7 @@ Feedback, ideas, and contributions are welcome.
 
 ## 📜 License
 
-MIT License.
+[MIT License](LICENSE).
 
 ---
 

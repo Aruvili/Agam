@@ -1,0 +1,131 @@
+{
+    "name": "agam",
+    "displayName": "agam - Tamil Programming Language",
+    "description": "அகம் - Syntax highlighting, autocomplete, and snippets for agam Tamil programming language",
+    "version": "0.1.0",
+    "publisher": "agam",
+    "icon": "images/icon.png",
+    "engines": {
+        "vscode": "^1.74.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Snippets",
+        "Formatters"
+    ],
+    "keywords": [
+        "agam",
+        "tamil",
+        "தமிழ்",
+        "programming",
+        "india"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aruvili/agam"
+    },
+    "bugs": {
+        "url": "https://github.com/aruvili/agam/issues"
+    },
+    "activationEvents": [
+        "onLanguage:agam"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "languages": [
+            {
+                "id": "agam",
+                "aliases": [
+                    "agam",
+                    "agam",
+                    "அகம்"
+                ],
+                "extensions": [
+                    ".agam",
+                    ".aru"
+                ],
+                "configuration": "./language-configuration.json",
+                "icon": {
+                    "light": "./images/icon.png",
+                    "dark": "./images/icon.png"
+                }
+            }
+        ],
+        "grammars": [
+            {
+                "language": "agam",
+                "scopeName": "source.agam",
+                "path": "./syntaxes/agam.tmLanguage.json"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "agam",
+                "path": "./snippets/agam.json"
+            }
+        ],
+        "configuration": {
+            "title": "agam",
+            "properties": {
+                "agam.enableAutoComplete": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable agam autocomplete suggestions"
+                },
+                "agam.interpreterPath": {
+                    "type": "string",
+                    "default": "agam",
+                    "description": "Path to the agam interpreter"
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "agam.runFile",
+                "title": "agam: Run Current File",
+                "icon": "$(play)"
+            },
+            {
+                "command": "agam.runSelection",
+                "title": "agam: Run Selection"
+            },
+            {
+                "command": "agam.openRepl",
+                "title": "agam: Open REPL"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "agam.runFile",
+                "key": "f5",
+                "when": "editorLangId == agam"
+            },
+            {
+                "command": "agam.runSelection",
+                "key": "shift+enter",
+                "when": "editorLangId == agam && editorHasSelection"
+            }
+        ],
+        "menus": {
+            "editor/title/run": [
+                {
+                    "command": "agam.runFile",
+                    "when": "editorLangId == agam",
+                    "group": "navigation"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "package": "vsce package"
+    },
+    "devDependencies": {
+        "@types/node": "^18.0.0",
+        "@types/vscode": "^1.74.0",
+        "typescript": "^5.0.0",
+        "@vscode/vsce": "^2.22.0"
+    }
+}

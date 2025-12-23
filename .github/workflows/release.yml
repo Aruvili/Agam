@@ -1,0 +1,154 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-release:
+    name: Build Release - ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: agam
+            asset_name: agam-linux-x86_64
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            artifact_name: agam
+            asset_name: agam-linux-x86_64-musl
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: agam.exe
+            asset_name: agam-windows-x86_64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: agam
+            asset_name: agam-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: agam
+            asset_name: agam-macos-aarch64
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-action@stable
+      with:
+        targets: ${{ matrix.target }}
+
+    - name: Install musl tools (Linux)
+      if: matrix.target == 'x86_64-unknown-linux-musl'
+      run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+    - name: Build release binary
+      run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Create release directory
+      run: mkdir -p release
+
+    - name: Package (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release/
+        cp README.md release/
+        cp LICENSE release/
+        cp -r examples release/
+        cp -r docs release/
+        cd release && tar -czvf ../${{ matrix.asset_name }}.tar.gz *
+
+    - name: Package (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        Copy-Item "target/${{ matrix.target }}/release/${{ matrix.artifact_name }}" -Destination "release/"
+        Copy-Item "README.md" -Destination "release/"
+        Copy-Item "LICENSE" -Destination "release/"
+        Copy-Item "examples" -Destination "release/" -Recurse
+        Copy-Item "docs" -Destination "release/" -Recurse
+        Copy-Item "scripts/install.bat" -Destination "release/" -ErrorAction SilentlyContinue
+        Compress-Archive -Path "release/*" -DestinationPath "${{ matrix.asset_name }}.zip"
+
+    - name: Upload artifact (Unix)
+      if: runner.os != 'Windows'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.asset_name }}
+        path: ${{ matrix.asset_name }}.tar.gz
+
+    - name: Upload artifact (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.asset_name }}
+        path: ${{ matrix.asset_name }}.zip
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Display structure
+      run: ls -R artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: அகம் (agam) ${{ github.ref_name }}
+        body: |
+          # அகம் (agam) ${{ github.ref_name }}
+          
+          🎉 **தமிழ் நிரலாக்க மொழி! (Tamil Programming Language!)**
+          
+          ## Downloads
+          
+          | Platform | Download |
+          |----------|----------|
+          | Windows (x64) | `agam-windows-x86_64.zip` |
+          | Linux (x64) | `agam-linux-x86_64.tar.gz` |
+          | Linux (musl) | `agam-linux-x86_64-musl.tar.gz` |
+          | macOS (Intel) | `agam-macos-x86_64.tar.gz` |
+          | macOS (Apple Silicon) | `agam-macos-aarch64.tar.gz` |
+          
+          ## Installation
+          
+          ### Windows
+          1. Download and extract `agam-windows-x86_64.zip`
+          2. Run `install.bat` as Administrator (optional - adds to PATH)
+          3. Or run `agam.exe` directly
+          
+          ### Linux / macOS
+          ```bash
+          tar -xzf agam-*.tar.gz
+          sudo mv agam /usr/local/bin/
+          ```
+          
+          ## Quick Start
+          ```
+          அச்சிடு("வணக்கம் உலகம்!")
+          ```
+          
+          See [README](https://github.com/agam/agam#readme) for more examples.
+        files: |
+          artifacts/**/*.tar.gz
+          artifacts/**/*.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

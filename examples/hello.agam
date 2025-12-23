@@ -1,0 +1,12 @@
+# வணக்கம் உலகம்! - Hello World in agam
+# This is the first program in Tamil
+
+அச்சிடு("வணக்கம் உலகம்!")
+அச்சிடு("Welcome to agam - Tamil Programming Language!")
+
+# Variables in Tamil
+மாறி பெயர் = "தமிழ்"
+மாறி வயது = 2024
+
+அச்சிடு("மொழி பெயர்: " + பெயர்)
+அச்சிடு("ஆண்டு: " + சரமாக(வயது))

@@ -1,0 +1,299 @@
+{
+    "Function (Tamil)": {
+        "prefix": [
+            "செயல்",
+            "seyal",
+            "function"
+        ],
+        "body": [
+            "செயல் ${1:பெயர்}(${2:அளவுருக்கள்}):",
+            "    ${3:# செயல் உள்ளடக்கம்}",
+            "    திரும்பு ${4:மதிப்பு}",
+            "$0"
+        ],
+        "description": "Create a new function - புதிய செயல் உருவாக்கு"
+    },
+    "Function (English)": {
+        "prefix": [
+            "fn",
+            "func",
+            "def"
+        ],
+        "body": [
+            "fn ${1:name}(${2:params}):",
+            "    ${3:# function body}",
+            "    return ${4:value}",
+            "$0"
+        ],
+        "description": "Create a new function"
+    },
+    "Variable (Tamil)": {
+        "prefix": [
+            "மாறி",
+            "maari",
+            "var"
+        ],
+        "body": [
+            "மாறி ${1:பெயர்} = ${2:மதிப்பு}$0"
+        ],
+        "description": "Declare a variable - மாறி அறிவிப்பு"
+    },
+    "Variable (English)": {
+        "prefix": [
+            "let",
+            "variable"
+        ],
+        "body": [
+            "let ${1:name} = ${2:value}$0"
+        ],
+        "description": "Declare a variable"
+    },
+    "Constant (Tamil)": {
+        "prefix": [
+            "மாறாத",
+            "maaraadha",
+            "const"
+        ],
+        "body": [
+            "மாறாத ${1:பெயர்} = ${2:மதிப்பு}$0"
+        ],
+        "description": "Declare a constant - மாறாத அறிவிப்பு"
+    },
+    "If Statement (Tamil)": {
+        "prefix": [
+            "என்றால்",
+            "endraal",
+            "if"
+        ],
+        "body": [
+            "என்றால் ${1:நிபந்தனை}:",
+            "    ${2:# செயல்}",
+            "$0"
+        ],
+        "description": "If statement - என்றால் நிபந்தனை"
+    },
+    "If-Else (Tamil)": {
+        "prefix": [
+            "என்றால்இல்லை",
+            "ifelse"
+        ],
+        "body": [
+            "என்றால் ${1:நிபந்தனை}:",
+            "    ${2:# உண்மை செயல்}",
+            "இல்லை:",
+            "    ${3:# பொய் செயல்}",
+            "$0"
+        ],
+        "description": "If-else statement"
+    },
+    "If-Elif-Else (Tamil)": {
+        "prefix": [
+            "என்றால்முழு",
+            "ifelifelse"
+        ],
+        "body": [
+            "என்றால் ${1:நிபந்தனை1}:",
+            "    ${2:# செயல் 1}",
+            "இல்லையென்றால் ${3:நிபந்தனை2}:",
+            "    ${4:# செயல் 2}",
+            "இல்லை:",
+            "    ${5:# இயல்பு செயல்}",
+            "$0"
+        ],
+        "description": "Full if-elif-else block"
+    },
+    "While Loop (Tamil)": {
+        "prefix": [
+            "வரை",
+            "varai",
+            "while"
+        ],
+        "body": [
+            "வரை ${1:நிபந்தனை}:",
+            "    ${2:# வளைய உள்ளடக்கம்}",
+            "$0"
+        ],
+        "description": "While loop - வரை வளையம்"
+    },
+    "For Loop (Tamil)": {
+        "prefix": [
+            "ஒவ்வொரு",
+            "ovvoru",
+            "for"
+        ],
+        "body": [
+            "ஒவ்வொரு ${1:உறுப்பு} உள்ள ${2:பட்டியல்}:",
+            "    ${3:# வளைய உள்ளடக்கம்}",
+            "$0"
+        ],
+        "description": "For loop - ஒவ்வொரு வளையம்"
+    },
+    "For Range (Tamil)": {
+        "prefix": [
+            "ஒவ்வொருவரம்பு",
+            "forrange"
+        ],
+        "body": [
+            "ஒவ்வொரு ${1:எண்} உள்ள வரம்பு(${2:முடிவு}):",
+            "    ${3:# வளைய உள்ளடக்கம்}",
+            "$0"
+        ],
+        "description": "For loop with range"
+    },
+    "Print (Tamil)": {
+        "prefix": [
+            "அச்சிடு",
+            "print",
+            "log"
+        ],
+        "body": [
+            "அச்சிடு(${1:\"உரை\"})$0"
+        ],
+        "description": "Print output - அச்சிடு"
+    },
+    "Input (Tamil)": {
+        "prefix": [
+            "உள்ளீடு",
+            "input"
+        ],
+        "body": [
+            "மாறி ${1:பதில்} = உள்ளீடு(${2:\"கேள்வி: \"})$0"
+        ],
+        "description": "Get user input - உள்ளீடு"
+    },
+    "Struct (Tamil)": {
+        "prefix": [
+            "கட்டமைப்பு",
+            "struct"
+        ],
+        "body": [
+            "கட்டமைப்பு ${1:பெயர்}:",
+            "    ${2:புலம்1}",
+            "    ${3:புலம்2}",
+            "$0"
+        ],
+        "description": "Define a struct - கட்டமைப்பு"
+    },
+    "Enum (Tamil)": {
+        "prefix": [
+            "விருப்பம்",
+            "enum"
+        ],
+        "body": [
+            "விருப்பம் ${1:பெயர்}:",
+            "    ${2:மதிப்பு1}",
+            "    ${3:மதிப்பு2}",
+            "$0"
+        ],
+        "description": "Define an enum - விருப்பம்"
+    },
+    "Try-Catch (Tamil)": {
+        "prefix": [
+            "முயற்சி",
+            "try",
+            "trycatch"
+        ],
+        "body": [
+            "முயற்சி:",
+            "    ${1:# ஆபத்தான குறியீடு}",
+            "பிடி ${2:பிழை}:",
+            "    அச்சிடு(\"பிழை:\", ${2:பிழை})",
+            "$0"
+        ],
+        "description": "Try-catch block - முயற்சி-பிடி"
+    },
+    "Pattern Match (Tamil)": {
+        "prefix": [
+            "பொருத்து",
+            "match"
+        ],
+        "body": [
+            "பொருத்து ${1:மதிப்பு}:",
+            "    ${2:1} => ${3:அச்சிடு(\"ஒன்று\")}",
+            "    ${4:2} => ${5:அச்சிடு(\"இரண்டு\")}",
+            "    _ => ${6:அச்சிடு(\"வேறு\")}",
+            "$0"
+        ],
+        "description": "Pattern match - பொருத்து"
+    },
+    "List": {
+        "prefix": [
+            "பட்டியல்",
+            "list",
+            "array"
+        ],
+        "body": [
+            "மாறி ${1:பெயர்} = [${2:உறுப்புகள்}]$0"
+        ],
+        "description": "Create a list - பட்டியல்"
+    },
+    "Dictionary": {
+        "prefix": [
+            "அகராதி",
+            "dict",
+            "object"
+        ],
+        "body": [
+            "மாறி ${1:பெயர்} = {\"${2:சாவி}\": ${3:மதிப்பு}}$0"
+        ],
+        "description": "Create a dictionary - அகராதி"
+    },
+    "Main Template": {
+        "prefix": [
+            "main",
+            "start",
+            "template"
+        ],
+        "body": [
+            "# ${1:நிரல் பெயர்}",
+            "# ${2:விளக்கம்}",
+            "",
+            "செயல் பிரதான():",
+            "    ${3:# உங்கள் குறியீடு இங்கே}",
+            "    அச்சிடு(\"வணக்கம் உலகம்!\")",
+            "",
+            "# நிரலை இயக்கு",
+            "பிரதான()",
+            "$0"
+        ],
+        "description": "Main program template"
+    },
+    "Hello World": {
+        "prefix": [
+            "hello",
+            "வணக்கம்"
+        ],
+        "body": [
+            "அச்சிடு(\"வணக்கம் உலகம்!\")$0"
+        ],
+        "description": "Hello World in Tamil"
+    },
+    "Factorial": {
+        "prefix": [
+            "factorial",
+            "காரணியம்"
+        ],
+        "body": [
+            "செயல் காரணியம்(எண்):",
+            "    என்றால் எண் <= 1:",
+            "        திரும்பு 1",
+            "    திரும்பு எண் * காரணியம்(எண் - 1)",
+            "$0"
+        ],
+        "description": "Factorial function template"
+    },
+    "Fibonacci": {
+        "prefix": [
+            "fibonacci",
+            "ஃபிபோ"
+        ],
+        "body": [
+            "செயல் ஃபிபோ(எண்):",
+            "    என்றால் எண் <= 1:",
+            "        திரும்பு எண்",
+            "    திரும்பு ஃபிபோ(எண் - 1) + ஃபிபோ(எண் - 2)",
+            "$0"
+        ],
+        "description": "Fibonacci function template"
+    }
+}

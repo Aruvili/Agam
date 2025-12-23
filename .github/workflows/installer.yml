@@ -1,0 +1,178 @@
+name: Build Installer
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows-installer:
+    name: Build Windows GUI Installer
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+
+    - name: Build release binary
+      run: cargo build --release
+
+    - name: Download Inno Setup & ImageMagick
+      run: |
+        choco install innosetup -y
+        choco install imagemagick -y
+
+    - name: Create assets directory and icon
+      run: |
+        New-Item -ItemType Directory -Path "assets" -Force | Out-Null
+        magick convert "vscode-extension/images/icon.png" -define icon:auto-resize=256,128,64,48,32,16 "assets/icon.ico"
+
+    - name: Build Windows installer
+      run: |
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DSkipIcon scripts\installer.iss
+      shell: pwsh
+
+    - name: Upload Windows Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: agam-windows-installer
+        path: dist/installer/*.exe
+
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: dist/installer/*.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux-installer:
+    name: Build Linux Installer Package
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+
+    - name: Build release binary
+      run: cargo build --release
+
+    - name: Create .deb package
+      run: |
+        mkdir -p dist/deb/DEBIAN
+        mkdir -p dist/deb/usr/local/bin
+        mkdir -p dist/deb/usr/share/agam/examples
+        mkdir -p dist/deb/usr/share/agam/docs
+        mkdir -p dist/deb/usr/share/applications
+        
+        cp target/release/agam dist/deb/usr/local/bin/
+        cp -r examples/* dist/deb/usr/share/agam/examples/
+        cp -r docs/* dist/deb/usr/share/agam/docs/
+        
+        cat > dist/deb/DEBIAN/control << EOF
+        Package: agam
+        Version: 0.1.0
+        Section: devel
+        Priority: optional
+        Architecture: amd64
+        Maintainer: Aruvili 
+        Description: அகம் (agam) - Tamil Programming Language
+         A Tamil-first programming language with Python-like syntax,
+         built using Rust for performance and memory safety.
+        EOF
+        
+        dpkg-deb --build dist/deb dist/agam_0.1.0_amd64.deb
+
+    - name: Create .tar.gz standalone
+      run: |
+        mkdir -p dist/agam-0.1.0-linux-x64
+        cp target/release/agam dist/agam-0.1.0-linux-x64/
+        cp README.md LICENSE CHANGELOG.md dist/agam-0.1.0-linux-x64/
+        cp -r examples dist/agam-0.1.0-linux-x64/
+        cp -r docs dist/agam-0.1.0-linux-x64/
+        cp scripts/install.sh dist/agam-0.1.0-linux-x64/
+        cd dist && tar -czvf agam-0.1.0-linux-x64.tar.gz agam-0.1.0-linux-x64
+
+    - name: Upload Linux packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: agam-linux-packages
+        path: |
+          dist/*.deb
+          dist/*.tar.gz
+
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          dist/*.deb
+          dist/*.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos-installer:
+    name: Build macOS Installer
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+
+    - name: Build release binary (Universal)
+      run: |
+        rustup target add aarch64-apple-darwin
+        cargo build --release --target x86_64-apple-darwin
+        cargo build --release --target aarch64-apple-darwin
+        
+        # Create universal binary
+        mkdir -p target/release
+        lipo -create -output target/release/agam \
+          target/x86_64-apple-darwin/release/agam \
+          target/aarch64-apple-darwin/release/agam
+
+    - name: Create .pkg installer
+      run: |
+        mkdir -p dist/macos/scripts
+        mkdir -p dist/macos/root/usr/local/bin
+        mkdir -p dist/macos/root/usr/local/share/agam
+        
+        cp target/release/agam dist/macos/root/usr/local/bin/
+        cp -r examples dist/macos/root/usr/local/share/agam/
+        cp -r docs dist/macos/root/usr/local/share/agam/
+        
+        # Create postinstall script
+        cat > dist/macos/scripts/postinstall << 'EOF'
+        #!/bin/bash
+        chmod +x /usr/local/bin/agam
+        echo "அகம் installed successfully!"
+        EOF
+        chmod +x dist/macos/scripts/postinstall
+        
+        # Build package
+        pkgbuild --root dist/macos/root \
+                 --scripts dist/macos/scripts \
+                 --identifier org.agam.agam \
+                 --version 0.1.0 \
+                 dist/agam-0.1.0-macos-universal.pkg
+
+    - name: Upload macOS Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: agam-macos-installer
+        path: dist/*.pkg
+
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: dist/*.pkg
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

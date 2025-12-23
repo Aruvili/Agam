@@ -1,0 +1,51 @@
+# math_utils.agam - கணித பயன்பாட்டு செயல்கள்
+# Math utility functions module
+
+# Square function - வர்க்கம்
+செயல் square(n):
+    திரும்பு n * n
+
+# Cube function - கனம்
+செயல் cube(n):
+    திரும்பு n * n * n
+
+# Double function - இரட்டிப்பு
+செயல் double(n):
+    திரும்பு n * 2
+
+# Triple function - மும்மடங்கு
+செயல் triple(n):
+    திரும்பு n * 3
+
+# Sum of squares - வர்க்கங்களின் கூட்டு
+செயல் sum_of_squares(a, b):
+    திரும்பு square(a) + square(b)
+
+# Factorial function - காரணியம்
+செயல் factorial(n):
+    என்றால் n <= 1:
+        திரும்பு 1
+    இல்லை:
+        திரும்பு n * factorial(n - 1)
+
+# is_even - இரட்டை எண்ணா
+செயல் is_even(n):
+    திரும்பு n % 2 == 0
+
+# is_odd - ஒற்றை எண்ணா
+செயல் is_odd(n):
+    திரும்பு n % 2 != 0
+
+# max of two - இரண்டில் பெரியது
+செயல் max_of_two(a, b):
+    என்றால் a > b:
+        திரும்பு a
+    இல்லை:
+        திரும்பு b
+
+# min of two - இரண்டில் சிறியது
+செயல் min_of_two(a, b):
+    என்றால் a < b:
+        திரும்பு a
+    இல்லை:
+        திரும்பு b

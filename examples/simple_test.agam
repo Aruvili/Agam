@@ -1,0 +1,7 @@
+# simple_test.agam - Test importing simple_module
+
+இறக்குமதி simple_module
+
+அச்சிடு("Testing add:", add(5, 3))
+அச்சிடு("Testing multiply:", multiply(4, 7))
+அச்சிடு("Import test passed!")

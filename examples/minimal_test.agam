@@ -1,0 +1,14 @@
+# Minimal test using Tamil keywords
+
+மாறி mylist = [1, 2, 3, 4, 5]
+அச்சிடு("List created:", mylist)
+
+# Use Tamil keyword நீளம் for length
+மாறி length = நீளம்(mylist)
+அச்சிடு("Length:", length)
+
+# Use Tamil keyword வகை for type
+மாறி mytype = வகை(mylist)
+அச்சிடு("Type:", mytype)
+
+அச்சிடு("Test passed!")

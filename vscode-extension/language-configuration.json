@@ -1,0 +1,81 @@
+{
+    "comments": {
+        "lineComment": "#"
+    },
+    "brackets": [
+        [
+            "{",
+            "}"
+        ],
+        [
+            "[",
+            "]"
+        ],
+        [
+            "(",
+            ")"
+        ]
+    ],
+    "autoClosingPairs": [
+        {
+            "open": "{",
+            "close": "}"
+        },
+        {
+            "open": "[",
+            "close": "]"
+        },
+        {
+            "open": "(",
+            "close": ")"
+        },
+        {
+            "open": "\"",
+            "close": "\"",
+            "notIn": [
+                "string"
+            ]
+        },
+        {
+            "open": "'",
+            "close": "'",
+            "notIn": [
+                "string",
+                "comment"
+            ]
+        }
+    ],
+    "surroundingPairs": [
+        [
+            "{",
+            "}"
+        ],
+        [
+            "[",
+            "]"
+        ],
+        [
+            "(",
+            ")"
+        ],
+        [
+            "\"",
+            "\""
+        ],
+        [
+            "'",
+            "'"
+        ]
+    ],
+    "indentationRules": {
+        "increaseIndentPattern": "^\\s*(செயல்|fn|என்றால்|if|இல்லையென்றால்|elif|இல்லை|else|வரை|while|ஒவ்வொரு|for|கட்டமைப்பு|struct|விருப்பம்|enum|முயற்சி|try|பிடி|catch|பொருத்து|match).*:\\s*$",
+        "decreaseIndentPattern": "^\\s*(இல்லையென்றால்|elif|இல்லை|else|பிடி|catch).*:\\s*$"
+    },
+    "folding": {
+        "markers": {
+            "start": "^\\s*#\\s*region\\b",
+            "end": "^\\s*#\\s*endregion\\b"
+        }
+    },
+    "wordPattern": "[அ-ஔக-னa-zA-Z_][அ-ஔக-னa-zA-Z0-9_]*"
+}

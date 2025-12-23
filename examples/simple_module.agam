@@ -1,0 +1,7 @@
+# simple_module.agam - Simple module for testing imports
+
+செயல் add(a, b):
+    திரும்பு a + b
+
+செயல் multiply(a, b):
+    திரும்பு a * b

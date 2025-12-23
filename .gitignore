@@ -1,0 +1,36 @@
+# Rust compile output
+/target/
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test outputs
+*.txt
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Distribution builds
+dist/installer/*.exe
+dist/**/*.zip
+dist/**/*.tar.gz
+dist/**/*.deb
+dist/**/*.pkg
+
+# Temporary files
+*.tmp
+*.log
+
+*/node_modules
+node_modules

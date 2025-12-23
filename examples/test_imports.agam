@@ -1,0 +1,74 @@
+# test_imports.agam - இறக்குமதி சோதனை
+# Test file for module imports
+
+அச்சிடு("=== இறக்குமதி சோதனை / Import Test ===")
+அச்சிடு("")
+
+# Import math utilities
+# கணித செயல்களை இறக்குமதி செய்
+இறக்குமதி math_utils
+
+அச்சிடு("--- கணித செயல்கள் சோதனை ---")
+
+# Test square function
+மாறி sq = square(5)
+அச்சிடு("square(5) =", sq)
+
+# Test cube function
+மாறி cb = cube(3)
+அச்சிடு("cube(3) =", cb)
+
+# Test double function
+மாறி dbl = double(7)
+அச்சிடு("double(7) =", dbl)
+
+# Test triple function
+மாறி trp = triple(4)
+அச்சிடு("triple(4) =", trp)
+
+# Test sum_of_squares function
+மாறி sos = sum_of_squares(3, 4)
+அச்சிடு("sum_of_squares(3, 4) =", sos)
+
+# Test factorial function
+மாறி fact5 = factorial(5)
+அச்சிடு("factorial(5) =", fact5)
+
+# Test is_even and is_odd
+அச்சிடு("is_even(4) =", is_even(4))
+அச்சிடு("is_odd(7) =", is_odd(7))
+
+# Test max_of_two and min_of_two
+அச்சிடு("max_of_two(10, 20) =", max_of_two(10, 20))
+அச்சிடு("min_of_two(10, 20) =", min_of_two(10, 20))
+
+அச்சிடு("")
+
+# Import string utilities
+# சர செயல்களை இறக்குமதி செய்
+இறக்குமதி string_utils
+
+அச்சிடு("--- சர செயல்கள் சோதனை ---")
+
+# Test greet function
+மாறி greeting = greet("தமிழன்")
+அச்சிடு(greeting)
+
+# Test farewell function
+மாறி bye = farewell("நண்பா")
+அச்சிடு(bye)
+
+# Test make_title function
+மாறி title = make_title("அகம்")
+அச்சிடு(title)
+
+# Test wrap_brackets function
+மாறி wrapped = wrap_brackets("முக்கியம்")
+அச்சிடு(wrapped)
+
+# Test repeat_text function
+மாறி repeated = repeat_text("★ ", 5)
+அச்சிடு("stars:", repeated)
+
+அச்சிடு("")
+அச்சிடு("=== அனைத்து இறக்குமதி சோதனைகளும் வெற்றி! ===")

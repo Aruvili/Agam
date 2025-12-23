@@ -1,0 +1,38 @@
+# Test new built-in functions
+
+# Math functions
+அச்சிடு("=== Math Functions ===")
+அச்சிடு("sqrt(16):", sqrt(16))
+அச்சிடு("pow(2, 10):", pow(2, 10))
+அச்சிடு("floor(3.7):", floor(3.7))
+அச்சிடு("ceil(3.2):", ceil(3.2))
+அச்சிடு("abs(-42):", abs(-42))
+அச்சிடு("min(5, 3, 8, 1):", min(5, 3, 8, 1))
+அச்சிடு("max(5, 3, 8, 1):", max(5, 3, 8, 1))
+அச்சிடு("sum([1,2,3,4,5]):", sum([1,2,3,4,5]))
+
+# String functions  
+அச்சிடு("\n=== String Functions ===")
+அச்சிடு("upper('hello'):", upper("hello"))
+அச்சிடு("lower('WORLD'):", lower("WORLD"))
+அச்சிடு("trim('  hi  '):", trim("  hi  "))
+அச்சிடு("replace('hello', 'l', 'y'):", replace("hello", "l", "y"))
+அச்சிடு("startswith('hello', 'he'):", startswith("hello", "he"))
+அச்சிடு("endswith('hello', 'lo'):", endswith("hello", "lo"))
+அச்சிடு("contains('hello', 'ell'):", contains("hello", "ell"))
+
+# List functions
+அச்சிடு("\n=== List Functions ===")
+மாறி numbers = [5, 2, 8, 1, 9]
+அச்சிடு("Original:", numbers)
+அச்சிடு("sort:", sort(numbers))
+அச்சிடு("reverse:", reverse(numbers))
+
+# Split and join
+மாறி text = "a,b,c,d"
+மாறி parts = split(text, ",")
+அச்சிடு("split('a,b,c,d', ','):", parts)
+அச்சிடு("join('-', parts):", join("-", parts))
+
+# Success message
+அச்சிடு("\n✅ All new functions work!")

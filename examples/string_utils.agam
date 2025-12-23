@@ -1,0 +1,25 @@
+# string_utils.agam - சரம் பயன்பாட்டு செயல்கள்
+# String utility functions module
+
+# Greet function - வாழ்த்து
+செயல் greet(name):
+    திரும்பு "வணக்கம், " + name + "!"
+
+# Farewell function - விடைபெறு
+செயல் farewell(name):
+    திரும்பு "விடைபெறுகிறேன், " + name + "!"
+
+# Make title - தலைப்பாக்கு
+செயல் make_title(text):
+    திரும்பு "=== " + text + " ==="
+
+# Wrap in brackets - அடைப்புக்குறிக்குள்
+செயல் wrap_brackets(text):
+    திரும்பு "[" + text + "]"
+
+# Repeat text - மீண்டும் மீண்டும்
+செயல் repeat_text(text, times):
+    மாறி result = ""
+    ஒவ்வொரு i உள்ள வரம்பு(times):
+        result = result + text
+    திரும்பு result

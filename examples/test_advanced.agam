@@ -1,0 +1,64 @@
+# agam Advanced Features Test
+# அகம் மேம்பட்ட அம்சங்கள் சோதனை
+
+# Test 1: Struct Definition and Usage
+# சோதனை 1: கட்டமைப்பு வரையறை மற்றும் பயன்பாடு
+அச்சிடு("=== கட்டமைப்பு சோதனை ===")
+
+கட்டமைப்பு Person:
+    name
+    age
+
+# Note: StructInit uses call syntax for now
+# அச்சிடு(p.name, p.age)
+
+# Test 2: Enum Definition and Usage  
+# சோதனை 2: விருப்பம் வரையறை மற்றும் பயன்பாடு
+அச்சிடு("=== விருப்பம் சோதனை ===")
+
+விருப்பம் Color:
+    Red
+    Green
+    Blue
+
+மாறி c = Color.Red
+அச்சிடு("Color variant:", c)
+
+# Test 3: Pattern Matching
+# சோதனை 3: வடிவ பொருத்தம்
+அச்சிடு("=== பொருத்து சோதனை ===")
+
+மாறி x = 2
+பொருத்து x:
+    1 => அச்சிடு("ஒன்று")
+    2 => அச்சிடு("இரண்டு")
+    3 => அச்சிடு("மூன்று")
+    _ => அச்சிடு("மற்றவை")
+
+# Test 4: Pattern matching with enum
+# சோதனை 4: விருப்பத்துடன் வடிவ பொருத்தம்  
+அச்சிடு("=== விருப்பத்துடன் பொருத்து ===")
+
+விருப்பம் Status:
+    Active
+    Inactive
+    Pending
+
+மாறி s = Status.Active
+பொருத்து s:
+    Status.Active => அச்சிடு("செயலில்")
+    Status.Inactive => அச்சிடு("செயலற்றது")
+    Status.Pending => அச்சிடு("நிலுவையில்")
+    _ => அச்சிடு("தெரியாது")
+
+# Test 5: Pattern matching with strings
+# சோதனை 5: சரத்துடன் வடிவ பொருத்தம்
+அச்சிடு("=== சரத்துடன் பொருத்து ===")
+
+மாறி name = "தமிழ்"
+பொருத்து name:
+    "English" => அச்சிடு("English selected")
+    "தமிழ்" => அச்சிடு("தமிழ் தேர்ந்தெடுக்கப்பட்டது")
+    _ => அச்சிடு("Unknown language")
+
+அச்சிடு("=== அனைத்து சோதனைகளும் முடிந்தன! ===")

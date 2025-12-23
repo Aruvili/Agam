@@ -144,7 +144,7 @@ jobs:
           அச்சிடு("வணக்கம் உலகம்!")
           ```
           
-          See [README](https://github.com/agam/agam#readme) for more examples.
+          See [README](https://github.com/Aruvili/agam#readme) for more examples.
         files: |
           artifacts/**/*.tar.gz
           artifacts/**/*.zip

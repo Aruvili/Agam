@@ -120,7 +120,10 @@ jobs:
         
         # Determine version from tag or default
         VERSION="${GITHUB_REF_NAME#v}"
-        [ -z "$VERSION" ] && VERSION="0.1.0"
+        # If version doesn't start with a digit (e.g. 'master'), default to 0.1.0
+        if ! [[ "$VERSION" =~ ^[0-9] ]]; then
+          VERSION="0.1.0"
+        fi
         
         cat > dist/deb/DEBIAN/control << EOF
         Package: agam
@@ -156,7 +159,9 @@ jobs:
         chmod +x dist/macos/scripts/postinstall
         
         VERSION="${GITHUB_REF_NAME#v}"
-        [ -z "$VERSION" ] && VERSION="0.1.0"
+        if ! [[ "$VERSION" =~ ^[0-9] ]]; then
+          VERSION="0.1.0"
+        fi
         
         pkgbuild --root dist/macos/root \
                  --scripts dist/macos/scripts \

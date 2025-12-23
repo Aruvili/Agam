@@ -25,8 +25,7 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 ## ✨ Key Highlights
 
 * 🇮🇳 **Tamil-first language** — write programs fully in Tamil
-* 🌐 **Bilingual support** — Tamil keywords
-* 🐍 **Python-like syntax** — simple, readable, indentation-based
+* 🐍 **Python inspired syntax** — simple, readable, indentation-based
 * ⚡ **High performance** — powered by Rust
 * 🔒 **Memory safe & type secure**
 * 🖥️ **Interactive REPL**

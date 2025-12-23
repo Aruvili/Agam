@@ -20,6 +20,7 @@ jobs:
             target: x86_64-unknown-linux-gnu
             artifact_name: agam
             asset_name: agam-linux-x86_64
+            installer_ext: .deb
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             artifact_name: agam
@@ -28,10 +29,12 @@ jobs:
             target: x86_64-pc-windows-msvc
             artifact_name: agam.exe
             asset_name: agam-windows-x86_64
+            installer_ext: .exe
           - os: macos-latest
             target: x86_64-apple-darwin
             artifact_name: agam
             asset_name: agam-macos-x86_64
+            installer_ext: .pkg
           - os: macos-latest
             target: aarch64-apple-darwin
             artifact_name: agam
@@ -45,24 +48,29 @@ jobs:
       with:
         targets: ${{ matrix.target }}
 
+    # --- LINUX DEPENDENCIES ---
     - name: Install musl tools (Linux)
       if: matrix.target == 'x86_64-unknown-linux-musl'
       run: sudo apt-get update && sudo apt-get install -y musl-tools
 
-    - name: Install ImageMagick (Windows)
+    # --- WINDOWS DEPENDENCIES & ICON ---
+    - name: Install Installer Tools (Windows)
       if: runner.os == 'Windows'
       run: |
+        choco install innosetup -y
         choco install imagemagick -y
         New-Item -ItemType Directory -Path "assets" -Force | Out-Null
         magick convert "vscode-extension/images/icon.png" -define icon:auto-resize=256,128,64,48,32,16 "assets/icon.ico"
 
+    # --- BUILD BINARY ---
     - name: Build release binary
       run: cargo build --release --target ${{ matrix.target }}
 
+    # --- PACKAGE ARCHIVE (ZIP/TAR) ---
     - name: Create release directory
       run: mkdir -p release
 
-    - name: Package (Unix)
+    - name: Package Archive (Unix)
       if: runner.os != 'Windows'
       run: |
         cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release/
@@ -72,7 +80,7 @@ jobs:
         cp -r docs release/
         cd release && tar -czvf ../${{ matrix.asset_name }}.tar.gz *
 
-    - name: Package (Windows)
+    - name: Package Archive (Windows)
       if: runner.os == 'Windows'
       run: |
         Copy-Item "target/${{ matrix.target }}/release/${{ matrix.artifact_name }}" -Destination "release/"
@@ -83,80 +91,113 @@ jobs:
         Copy-Item "scripts/install.bat" -Destination "release/" -ErrorAction SilentlyContinue
         Compress-Archive -Path "release/*" -DestinationPath "${{ matrix.asset_name }}.zip"
 
-    - name: Upload artifact (Unix)
-      if: runner.os != 'Windows'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.asset_name }}
-        path: ${{ matrix.asset_name }}.tar.gz
-
-    - name: Upload artifact (Windows)
+    # --- BUILD INSTALLERS (OS SPECIFIC) ---
+    
+    # 1. Windows Installer (Inno Setup)
+    - name: Build Windows Installer
       if: runner.os == 'Windows'
+      run: |
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DSkipIcon scripts\installer.iss
+      shell: pwsh
+
+    # 2. Linux Deb Package (Only for gnu target)
+    - name: Build Linux Deb (Debian/Ubuntu)
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: |
+        mkdir -p dist/deb/DEBIAN
+        mkdir -p dist/deb/usr/local/bin
+        mkdir -p dist/deb/usr/share/agam/examples
+        mkdir -p dist/deb/usr/share/agam/docs
+        
+        cp target/${{ matrix.target }}/release/agam dist/deb/usr/local/bin/
+        cp -r examples/* dist/deb/usr/share/agam/examples/
+        cp -r docs/* dist/deb/usr/share/agam/docs/
+        
+        # Determine version from tag or default
+        VERSION="${GITHUB_REF_NAME#v}"
+        [ -z "$VERSION" ] && VERSION="0.1.0"
+        
+        cat > dist/deb/DEBIAN/control << EOF
+        Package: agam
+        Version: ${VERSION}
+        Section: devel
+        Priority: optional
+        Architecture: amd64
+        Maintainer: Aruvili
+        Description: Agam - Tamil Programming Language
+         A Tamil-first programming language with Python-like syntax.
+        EOF
+        
+        dpkg-deb --build dist/deb dist/agam_${VERSION}_amd64.deb
+
+    # 3. macOS Package (Pkg) - Only for Intel for now (Universal requires complex lipo in matrix)
+    # Simplified: Build separate .pkg for Intel and Apple Silicon
+    - name: Build macOS Pkg
+      if: runner.os == 'macOS'
+      run: |
+        mkdir -p dist/macos/scripts
+        mkdir -p dist/macos/root/usr/local/bin
+        mkdir -p dist/macos/root/usr/local/share/agam
+        
+        cp target/${{ matrix.target }}/release/agam dist/macos/root/usr/local/bin/
+        cp -r examples dist/macos/root/usr/local/share/agam/
+        
+        # Postinstall
+        cat > dist/macos/scripts/postinstall << 'EOF'
+        #!/bin/bash
+        chmod +x /usr/local/bin/agam
+        echo "Agam installed!"
+        EOF
+        chmod +x dist/macos/scripts/postinstall
+        
+        VERSION="${GITHUB_REF_NAME#v}"
+        [ -z "$VERSION" ] && VERSION="0.1.0"
+        
+        pkgbuild --root dist/macos/root \
+                 --scripts dist/macos/scripts \
+                 --identifier org.agam.agam \
+                 --version ${VERSION} \
+                 dist/agam-${VERSION}-${{ matrix.target }}.pkg
+
+    # --- UPLOAD ARTIFACTS ---
+    - name: Upload Archives
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.asset_name }}
-        path: ${{ matrix.asset_name }}.zip
+        name: archive-${{ matrix.asset_name }}
+        path: |
+          ${{ matrix.asset_name }}.tar.gz
+          ${{ matrix.asset_name }}.zip
+
+    - name: Upload Installers
+      uses: actions/upload-artifact@v4
+      if: matrix.installer_ext != ''
+      with:
+        name: installer-${{ matrix.asset_name }}
+        path: |
+          dist/installer/*.exe
+          dist/*.deb
+          dist/*.pkg
 
   create-release:
     name: Create GitHub Release
     needs: build-release
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
-
     steps:
     - uses: actions/checkout@v4
-
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v4
       with:
         path: artifacts
-
-    - name: Display structure
-      run: ls -R artifacts
-
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        name: அகம் (agam) ${{ github.ref_name }}
-        body: |
-          # அகம் (agam) ${{ github.ref_name }}
-          
-          🎉 **தமிழ் நிரலாக்க மொழி! (Tamil Programming Language!)**
-          
-          ## Downloads
-          
-          | Platform | Download |
-          |----------|----------|
-          | Windows (x64) | `agam-windows-x86_64.zip` |
-          | Linux (x64) | `agam-linux-x86_64.tar.gz` |
-          | Linux (musl) | `agam-linux-x86_64-musl.tar.gz` |
-          | macOS (Intel) | `agam-macos-x86_64.tar.gz` |
-          | macOS (Apple Silicon) | `agam-macos-aarch64.tar.gz` |
-          
-          ## Installation
-          
-          ### Windows
-          1. Download and extract `agam-windows-x86_64.zip`
-          2. Run `install.bat` as Administrator (optional - adds to PATH)
-          3. Or run `agam.exe` directly
-          
-          ### Linux / macOS
-          ```bash
-          tar -xzf agam-*.tar.gz
-          sudo mv agam /usr/local/bin/
-          ```
-          
-          ## Quick Start
-          ```
-          அச்சிடு("வணக்கம் உலகம்!")
-          ```
-          
-          See [README](https://github.com/Aruvili/agam#readme) for more examples.
         files: |
           artifacts/**/*.tar.gz
           artifacts/**/*.zip
-        draft: false
-        prerelease: false
+          artifacts/**/*.exe
+          artifacts/**/*.deb
+          artifacts/**/*.pkg
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

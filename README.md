@@ -24,8 +24,7 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 ## ✨ Key Highlights
 
 * 🇮🇳 **Tamil-first language** — write programs fully in Tamil
-* 🌐 **Bilingual support** — Tamil keywords
-* 🐍 **Python-like syntax** — simple, readable, indentation-based
+* 🐍 **Python inspired syntax** — simple, readable, indentation-based
 * ⚡ **High performance** — powered by Rust
 * 🔒 **Memory safe & type secure**
 * 🖥️ **Interactive REPL**
@@ -196,7 +195,7 @@ agam
 
 ### Using Prebuilt Binary (Recommended)
 
-> 🚧 **Coming Soon**
+> [ALL DOWNLOAD LINKS INCLUDED HERE](https://github.com/Aruvili/Agam/releases)
 
 Prebuilt binaries for **Windows, macOS, and Linux** will be available after the first GitHub release.
 

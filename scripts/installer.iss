@@ -3,7 +3,7 @@
 
 #define MyAppName "agam"
 #define MyAppNameTamil "அகம்"
-#define MyAppVersion "0.1.1"
+#define MyAppVersion "0.1.2"
 #define MyAppPublisher "agam Team"
 #define MyAppURL "https://github.com/Aruvili/agam"
 #define MyAppExeName "agam.exe"

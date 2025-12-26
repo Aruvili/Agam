@@ -7,6 +7,8 @@ use std::fmt;
 use std::rc::Rc;
 use std::cell::RefCell;
 
+use rustc_hash::FxHashMap;
+
 use crate::parser::Statement;
 
 /// Runtime values
@@ -24,10 +26,10 @@ pub enum Value {
     List(Rc<RefCell<Vec<Value>>>),
     /// Dictionary (அகராதி)
     Dict(Rc<RefCell<HashMap<String, Value>>>),
-    /// Function (செயல்)
-    Function(AgamFunction),
-    /// Native/built-in function
-    NativeFunction(NativeFunction),
+    /// Function (செயல்) - wrapped in Rc to avoid cloning body
+    Function(Rc<AgamFunction>),
+    /// Native/built-in function - wrapped in Rc for efficient sharing
+    NativeFunction(Rc<NativeFunction>),
     /// User-defined struct instance
     Struct {
         name: String,
@@ -258,23 +260,24 @@ impl NativeFunction {
 }
 
 /// Variable environment with scope chain
+/// Uses FxHashMap for faster string key lookups
 #[derive(Clone)]
 pub struct Environment {
-    values: HashMap<String, (Value, bool)>, // (value, is_const)
+    values: FxHashMap<String, (Value, bool)>, // (value, is_const)
     parent: Option<Rc<RefCell<Environment>>>,
 }
 
 impl Environment {
     pub fn new() -> Self {
         Environment {
-            values: HashMap::new(),
+            values: FxHashMap::default(),
             parent: None,
         }
     }
 
     pub fn with_parent(parent: Rc<RefCell<Environment>>) -> Self {
         Environment {
-            values: HashMap::new(),
+            values: FxHashMap::default(),
             parent: Some(parent),
         }
     }

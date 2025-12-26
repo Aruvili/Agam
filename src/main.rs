@@ -12,10 +12,10 @@ use std::process;
 use agam::{Lexer, Parser, Interpreter};
 use agam::error::{AgamError, format_error};
 
-const VERSION: &str = "0.1.2";
+const VERSION: &str = "0.1.3";
 const WELCOME_MESSAGE: &str = r#"
 ╔══════════════════════════════════════════════════════════════╗
-║     அகம் - Agam Programming Language v0.1.2                 ║
+║     அகம் - Agam Programming Language v0.1.3                 ║
 ║     தமிழில் நிரலாக்கம் செய்யுங்கள்!                           ║
 ║                                                              ║
 ║     உதவி: help() அல்லது உதவி()                              ║

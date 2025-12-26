@@ -8,7 +8,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$Version = "0.1.2"
+$Version = "0.1.3"
 
 # ASCII Art Header
 Write-Host ""

@@ -3,8 +3,8 @@
 
 #define MyAppName "agam"
 #define MyAppNameTamil "அகம்"
-#define MyAppVersion "0.1.2"
-#define MyAppPublisher "agam Team"
+#define MyAppVersion "0.1.3"
+#define MyAppPublisher "Aruvili Team"
 #define MyAppURL "https://github.com/Aruvili/agam"
 #define MyAppExeName "agam.exe"
 
@@ -49,7 +49,7 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 [Components]
 Name: "main"; Description: "agam Interpreter"; Types: full compact custom; Flags: fixed
 Name: "examples"; Description: "Example Programs"; Types: full
-Name: "docs"; Description: "Documentation (14-chapter learning book)"; Types: full
+Name: "docs"; Description: "Documentation (20-chapter learning book)"; Types: full
 Name: "vscode"; Description: "VS Code Extension"; Types: full
 
 [Tasks]

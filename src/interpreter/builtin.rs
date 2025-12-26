@@ -1,9 +1,9 @@
-//! Built-in functions for Agam
+﻿//! Built-in functions for Agam
 //! 
 //! Native functions available in all programs
 
 use crate::types::{Value, NativeFunction};
-use std::io::{self, Write, Read};
+use std::io::{self, Write};
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::sync::Mutex;
@@ -19,210 +19,211 @@ lazy_static::lazy_static! {
 }
 
 /// Create all built-in functions
-pub fn create_builtins() -> Vec<(String, NativeFunction)> {
+/// Returns Rc-wrapped functions for efficient sharing without cloning
+pub fn create_builtins() -> Vec<(String, Rc<NativeFunction>)> {
     vec![
         // === Input/Output ===
         // உள்ளீடு - input
-        ("உள்ளீடு".to_string(), NativeFunction::new("உள்ளீடு", Some(1), builtin_input)),
-        ("input".to_string(), NativeFunction::new("input", Some(1), builtin_input)),
+        ("உள்ளீடு".to_string(), Rc::new(NativeFunction::new("உள்ளீடு", Some(1), builtin_input))),
+        ("input".to_string(), Rc::new(NativeFunction::new("input", Some(1), builtin_input))),
         
         // === Type Functions ===
         // நீளம் - len
-        ("நீளம்".to_string(), NativeFunction::new("நீளம்", Some(1), builtin_len)),
-        ("len".to_string(), NativeFunction::new("len", Some(1), builtin_len)),
+        ("நீளம்".to_string(), Rc::new(NativeFunction::new("நீளம்", Some(1), builtin_len))),
+        ("len".to_string(), Rc::new(NativeFunction::new("len", Some(1), builtin_len))),
         
         // வகை - type
-        ("வகை".to_string(), NativeFunction::new("வகை", Some(1), builtin_type)),
-        ("type".to_string(), NativeFunction::new("type", Some(1), builtin_type)),
+        ("வகை".to_string(), Rc::new(NativeFunction::new("வகை", Some(1), builtin_type))),
+        ("type".to_string(), Rc::new(NativeFunction::new("type", Some(1), builtin_type))),
         
         // === Type Conversion ===
         // எண்ணாக - int
-        ("எண்ணாக".to_string(), NativeFunction::new("எண்ணாக", Some(1), builtin_int)),
-        ("int".to_string(), NativeFunction::new("int", Some(1), builtin_int)),
+        ("எண்ணாக".to_string(), Rc::new(NativeFunction::new("எண்ணாக", Some(1), builtin_int))),
+        ("int".to_string(), Rc::new(NativeFunction::new("int", Some(1), builtin_int))),
         
         // தசமாக - float
-        ("தசமாக".to_string(), NativeFunction::new("தசமாக", Some(1), builtin_float)),
-        ("float".to_string(), NativeFunction::new("float", Some(1), builtin_float)),
+        ("தசமாக".to_string(), Rc::new(NativeFunction::new("தசமாக", Some(1), builtin_float))),
+        ("float".to_string(), Rc::new(NativeFunction::new("float", Some(1), builtin_float))),
         
         // சரமாக - str
-        ("சரமாக".to_string(), NativeFunction::new("சரமாக", Some(1), builtin_str)),
-        ("str".to_string(), NativeFunction::new("str", Some(1), builtin_str)),
+        ("சரமாக".to_string(), Rc::new(NativeFunction::new("சரமாக", Some(1), builtin_str))),
+        ("str".to_string(), Rc::new(NativeFunction::new("str", Some(1), builtin_str))),
         
         // === Collection Functions ===
         // வரம்பு - range
-        ("வரம்பு".to_string(), NativeFunction::new("வரம்பு", None, builtin_range)),
-        ("range".to_string(), NativeFunction::new("range", None, builtin_range)),
+        ("வரம்பு".to_string(), Rc::new(NativeFunction::new("வரம்பு", None, builtin_range))),
+        ("range".to_string(), Rc::new(NativeFunction::new("range", None, builtin_range))),
         
         // சேர் - append
-        ("சேர்".to_string(), NativeFunction::new("சேர்", Some(2), builtin_append)),
-        ("append".to_string(), NativeFunction::new("append", Some(2), builtin_append)),
+        ("சேர்".to_string(), Rc::new(NativeFunction::new("சேர்", Some(2), builtin_append))),
+        ("append".to_string(), Rc::new(NativeFunction::new("append", Some(2), builtin_append))),
         
         // நீக்கு - pop
-        ("நீக்கு".to_string(), NativeFunction::new("நீக்கு", Some(1), builtin_pop)),
-        ("pop".to_string(), NativeFunction::new("pop", Some(1), builtin_pop)),
+        ("நீக்கு".to_string(), Rc::new(NativeFunction::new("நீக்கு", Some(1), builtin_pop))),
+        ("pop".to_string(), Rc::new(NativeFunction::new("pop", Some(1), builtin_pop))),
         
         // === Math Functions ===
         // வர்க்கம் - sqrt
-        ("வர்க்கம்".to_string(), NativeFunction::new("வர்க்கம்", Some(1), builtin_sqrt)),
-        ("sqrt".to_string(), NativeFunction::new("sqrt", Some(1), builtin_sqrt)),
+        ("வர்க்கம்".to_string(), Rc::new(NativeFunction::new("வர்க்கம்", Some(1), builtin_sqrt))),
+        ("sqrt".to_string(), Rc::new(NativeFunction::new("sqrt", Some(1), builtin_sqrt))),
         
         // அடி - pow
-        ("அடி".to_string(), NativeFunction::new("அடி", Some(2), builtin_pow)),
-        ("pow".to_string(), NativeFunction::new("pow", Some(2), builtin_pow)),
+        ("அடி".to_string(), Rc::new(NativeFunction::new("அடி", Some(2), builtin_pow))),
+        ("pow".to_string(), Rc::new(NativeFunction::new("pow", Some(2), builtin_pow))),
         
         // தளம் - floor
-        ("தளம்".to_string(), NativeFunction::new("தளம்", Some(1), builtin_floor)),
-        ("floor".to_string(), NativeFunction::new("floor", Some(1), builtin_floor)),
+        ("தளம்".to_string(), Rc::new(NativeFunction::new("தளம்", Some(1), builtin_floor))),
+        ("floor".to_string(), Rc::new(NativeFunction::new("floor", Some(1), builtin_floor))),
         
         // கூரை - ceil
-        ("கூரை".to_string(), NativeFunction::new("கூரை", Some(1), builtin_ceil)),
-        ("ceil".to_string(), NativeFunction::new("ceil", Some(1), builtin_ceil)),
+        ("கூரை".to_string(), Rc::new(NativeFunction::new("கூரை", Some(1), builtin_ceil))),
+        ("ceil".to_string(), Rc::new(NativeFunction::new("ceil", Some(1), builtin_ceil))),
         
         // முழுமை - abs
-        ("முழுமை".to_string(), NativeFunction::new("முழுமை", Some(1), builtin_abs)),
-        ("abs".to_string(), NativeFunction::new("abs", Some(1), builtin_abs)),
+        ("முழுமை".to_string(), Rc::new(NativeFunction::new("முழுமை", Some(1), builtin_abs))),
+        ("abs".to_string(), Rc::new(NativeFunction::new("abs", Some(1), builtin_abs))),
         
         // குறைந்தபட்சம் - min
-        ("குறைந்தபட்சம்".to_string(), NativeFunction::new("குறைந்தபட்சம்", None, builtin_min)),
-        ("min".to_string(), NativeFunction::new("min", None, builtin_min)),
+        ("குறைந்தபட்சம்".to_string(), Rc::new(NativeFunction::new("குறைந்தபட்சம்", None, builtin_min))),
+        ("min".to_string(), Rc::new(NativeFunction::new("min", None, builtin_min))),
         
         // அதிகபட்சம் - max
-        ("அதிகபட்சம்".to_string(), NativeFunction::new("அதிகபட்சம்", None, builtin_max)),
-        ("max".to_string(), NativeFunction::new("max", None, builtin_max)),
+        ("அதிகபட்சம்".to_string(), Rc::new(NativeFunction::new("அதிகபட்சம்", None, builtin_max))),
+        ("max".to_string(), Rc::new(NativeFunction::new("max", None, builtin_max))),
         
         // தற்செயல் - random
-        ("தற்செயல்".to_string(), NativeFunction::new("தற்செயல்", None, builtin_random)),
-        ("random".to_string(), NativeFunction::new("random", None, builtin_random)),
+        ("தற்செயல்".to_string(), Rc::new(NativeFunction::new("தற்செயல்", None, builtin_random))),
+        ("random".to_string(), Rc::new(NativeFunction::new("random", None, builtin_random))),
         
         // கூட்டு - sum
-        ("கூட்டு".to_string(), NativeFunction::new("கூட்டு", Some(1), builtin_sum)),
-        ("sum".to_string(), NativeFunction::new("sum", Some(1), builtin_sum)),
+        ("கூட்டு".to_string(), Rc::new(NativeFunction::new("கூட்டு", Some(1), builtin_sum))),
+        ("sum".to_string(), Rc::new(NativeFunction::new("sum", Some(1), builtin_sum))),
         
         // === String Functions ===
         // பிரி - split
-        ("பிரி".to_string(), NativeFunction::new("பிரி", Some(2), builtin_split)),
-        ("split".to_string(), NativeFunction::new("split", Some(2), builtin_split)),
+        ("பிரி".to_string(), Rc::new(NativeFunction::new("பிரி", Some(2), builtin_split))),
+        ("split".to_string(), Rc::new(NativeFunction::new("split", Some(2), builtin_split))),
         
         // இணை - join
-        ("இணை".to_string(), NativeFunction::new("இணை", Some(2), builtin_join)),
-        ("join".to_string(), NativeFunction::new("join", Some(2), builtin_join)),
+        ("இணை".to_string(), Rc::new(NativeFunction::new("இணை", Some(2), builtin_join))),
+        ("join".to_string(), Rc::new(NativeFunction::new("join", Some(2), builtin_join))),
         
         // மேல் - upper
-        ("மேல்".to_string(), NativeFunction::new("மேல்", Some(1), builtin_upper)),
-        ("upper".to_string(), NativeFunction::new("upper", Some(1), builtin_upper)),
+        ("மேல்".to_string(), Rc::new(NativeFunction::new("மேல்", Some(1), builtin_upper))),
+        ("upper".to_string(), Rc::new(NativeFunction::new("upper", Some(1), builtin_upper))),
         
         // கீழ் - lower
-        ("கீழ்".to_string(), NativeFunction::new("கீழ்", Some(1), builtin_lower)),
-        ("lower".to_string(), NativeFunction::new("lower", Some(1), builtin_lower)),
+        ("கீழ்".to_string(), Rc::new(NativeFunction::new("கீழ்", Some(1), builtin_lower))),
+        ("lower".to_string(), Rc::new(NativeFunction::new("lower", Some(1), builtin_lower))),
         
         // ஒழுங்கு - trim
-        ("ஒழுங்கு".to_string(), NativeFunction::new("ஒழுங்கு", Some(1), builtin_trim)),
-        ("trim".to_string(), NativeFunction::new("trim", Some(1), builtin_trim)),
+        ("ஒழுங்கு".to_string(), Rc::new(NativeFunction::new("ஒழுங்கு", Some(1), builtin_trim))),
+        ("trim".to_string(), Rc::new(NativeFunction::new("trim", Some(1), builtin_trim))),
         
         // மாற்று - replace
-        ("மாற்று".to_string(), NativeFunction::new("மாற்று", Some(3), builtin_replace)),
-        ("replace".to_string(), NativeFunction::new("replace", Some(3), builtin_replace)),
+        ("மாற்று".to_string(), Rc::new(NativeFunction::new("மாற்று", Some(3), builtin_replace))),
+        ("replace".to_string(), Rc::new(NativeFunction::new("replace", Some(3), builtin_replace))),
         
         // தொடங்கு - startswith
-        ("தொடங்கு".to_string(), NativeFunction::new("தொடங்கு", Some(2), builtin_startswith)),
-        ("startswith".to_string(), NativeFunction::new("startswith", Some(2), builtin_startswith)),
+        ("தொடங்கு".to_string(), Rc::new(NativeFunction::new("தொடங்கு", Some(2), builtin_startswith))),
+        ("startswith".to_string(), Rc::new(NativeFunction::new("startswith", Some(2), builtin_startswith))),
         
         // முடிவு - endswith
-        ("முடிவு".to_string(), NativeFunction::new("முடிவு", Some(2), builtin_endswith)),
-        ("endswith".to_string(), NativeFunction::new("endswith", Some(2), builtin_endswith)),
+        ("முடிவு".to_string(), Rc::new(NativeFunction::new("முடிவு", Some(2), builtin_endswith))),
+        ("endswith".to_string(), Rc::new(NativeFunction::new("endswith", Some(2), builtin_endswith))),
         
         // உள்ளதா - contains
-        ("உள்ளதா".to_string(), NativeFunction::new("உள்ளதா", Some(2), builtin_contains)),
-        ("contains".to_string(), NativeFunction::new("contains", Some(2), builtin_contains)),
+        ("உள்ளதா".to_string(), Rc::new(NativeFunction::new("உள்ளதா", Some(2), builtin_contains))),
+        ("contains".to_string(), Rc::new(NativeFunction::new("contains", Some(2), builtin_contains))),
         
         // === List Functions ===
         // வரிசை - sort
-        ("வரிசை".to_string(), NativeFunction::new("வரிசை", Some(1), builtin_sort)),
-        ("sort".to_string(), NativeFunction::new("sort", Some(1), builtin_sort)),
+        ("வரிசை".to_string(), Rc::new(NativeFunction::new("வரிசை", Some(1), builtin_sort))),
+        ("sort".to_string(), Rc::new(NativeFunction::new("sort", Some(1), builtin_sort))),
         
         // தலைகீழ் - reverse
-        ("தலைகீழ்".to_string(), NativeFunction::new("தலைகீழ்", Some(1), builtin_reverse)),
-        ("reverse".to_string(), NativeFunction::new("reverse", Some(1), builtin_reverse)),
+        ("தலைகீழ்".to_string(), Rc::new(NativeFunction::new("தலைகீழ்", Some(1), builtin_reverse))),
+        ("reverse".to_string(), Rc::new(NativeFunction::new("reverse", Some(1), builtin_reverse))),
         
         // === File I/O ===
         // படி - read_file
-        ("படி".to_string(), NativeFunction::new("படி", Some(1), builtin_read_file)),
-        ("read_file".to_string(), NativeFunction::new("read_file", Some(1), builtin_read_file)),
+        ("படி".to_string(), Rc::new(NativeFunction::new("படி", Some(1), builtin_read_file))),
+        ("read_file".to_string(), Rc::new(NativeFunction::new("read_file", Some(1), builtin_read_file))),
         
         // எழுது - write_file
-        ("எழுது".to_string(), NativeFunction::new("எழுது", Some(2), builtin_write_file)),
-        ("write_file".to_string(), NativeFunction::new("write_file", Some(2), builtin_write_file)),
+        ("எழுது".to_string(), Rc::new(NativeFunction::new("எழுது", Some(2), builtin_write_file))),
+        ("write_file".to_string(), Rc::new(NativeFunction::new("write_file", Some(2), builtin_write_file))),
         
         // உள்ளது - file_exists
-        ("உள்ளது".to_string(), NativeFunction::new("உள்ளது", Some(1), builtin_file_exists)),
-        ("file_exists".to_string(), NativeFunction::new("file_exists", Some(1), builtin_file_exists)),
+        ("உள்ளது".to_string(), Rc::new(NativeFunction::new("உள்ளது", Some(1), builtin_file_exists))),
+        ("file_exists".to_string(), Rc::new(NativeFunction::new("file_exists", Some(1), builtin_file_exists))),
         
         // வெளியேறு - exit
-        ("வெளியேறு".to_string(), NativeFunction::new("வெளியேறு", None, builtin_exit)),
-        ("exit".to_string(), NativeFunction::new("exit", None, builtin_exit)),
+        ("வெளியேறு".to_string(), Rc::new(NativeFunction::new("வெளியேறு", None, builtin_exit))),
+        ("exit".to_string(), Rc::new(NativeFunction::new("exit", None, builtin_exit))),
         
         // === Time Module ===
         // நேரம் - time (unix timestamp)
-        ("நேரம்".to_string(), NativeFunction::new("நேரம்", Some(0), builtin_time)),
-        ("time".to_string(), NativeFunction::new("time", Some(0), builtin_time)),
+        ("நேரம்".to_string(), Rc::new(NativeFunction::new("நேரம்", Some(0), builtin_time))),
+        ("time".to_string(), Rc::new(NativeFunction::new("time", Some(0), builtin_time))),
         
         // தூக்கம் - sleep (pause execution)
-        ("தூக்கம்".to_string(), NativeFunction::new("தூக்கம்", Some(1), builtin_sleep)),
-        ("sleep".to_string(), NativeFunction::new("sleep", Some(1), builtin_sleep)),
+        ("தூக்கம்".to_string(), Rc::new(NativeFunction::new("தூக்கம்", Some(1), builtin_sleep))),
+        ("sleep".to_string(), Rc::new(NativeFunction::new("sleep", Some(1), builtin_sleep))),
         
         // தேதி - date (formatted date string)
-        ("தேதி".to_string(), NativeFunction::new("தேதி", None, builtin_date)),
-        ("date".to_string(), NativeFunction::new("date", None, builtin_date)),
+        ("தேதி".to_string(), Rc::new(NativeFunction::new("தேதி", None, builtin_date))),
+        ("date".to_string(), Rc::new(NativeFunction::new("date", None, builtin_date))),
         
         // நாள் - now (current time components)
-        ("நாள்".to_string(), NativeFunction::new("நாள்", Some(0), builtin_now)),
-        ("now".to_string(), NativeFunction::new("now", Some(0), builtin_now)),
+        ("நாள்".to_string(), Rc::new(NativeFunction::new("நாள்", Some(0), builtin_now))),
+        ("now".to_string(), Rc::new(NativeFunction::new("now", Some(0), builtin_now))),
         
         // === HTTP Module ===
         // வலை_படி - http_get (GET request)
-        ("வலை_படி".to_string(), NativeFunction::new("வலை_படி", Some(1), builtin_http_get)),
-        ("http_get".to_string(), NativeFunction::new("http_get", Some(1), builtin_http_get)),
+        ("வலை_படி".to_string(), Rc::new(NativeFunction::new("வலை_படி", Some(1), builtin_http_get))),
+        ("http_get".to_string(), Rc::new(NativeFunction::new("http_get", Some(1), builtin_http_get))),
         
         // வலை_அனுப்பு - http_post (POST request)
-        ("வலை_அனுப்பு".to_string(), NativeFunction::new("வலை_அனுப்பு", Some(2), builtin_http_post)),
-        ("http_post".to_string(), NativeFunction::new("http_post", Some(2), builtin_http_post)),
+        ("வலை_அனுப்பு".to_string(), Rc::new(NativeFunction::new("வலை_அனுப்பு", Some(2), builtin_http_post))),
+        ("http_post".to_string(), Rc::new(NativeFunction::new("http_post", Some(2), builtin_http_post))),
         
         // வலை_புதுப்பி - http_put (PUT request)
-        ("வலை_புதுப்பி".to_string(), NativeFunction::new("வலை_புதுப்பி", Some(2), builtin_http_put)),
-        ("http_put".to_string(), NativeFunction::new("http_put", Some(2), builtin_http_put)),
+        ("வலை_புதுப்பி".to_string(), Rc::new(NativeFunction::new("வலை_புதுப்பி", Some(2), builtin_http_put))),
+        ("http_put".to_string(), Rc::new(NativeFunction::new("http_put", Some(2), builtin_http_put))),
         
         // வலை_நீக்கு - http_delete (DELETE request)
-        ("வலை_நீக்கு".to_string(), NativeFunction::new("வலை_நீக்கு", Some(1), builtin_http_delete)),
-        ("http_delete".to_string(), NativeFunction::new("http_delete", Some(1), builtin_http_delete)),
+        ("வலை_நீக்கு".to_string(), Rc::new(NativeFunction::new("வலை_நீக்கு", Some(1), builtin_http_delete))),
+        ("http_delete".to_string(), Rc::new(NativeFunction::new("http_delete", Some(1), builtin_http_delete))),
         
         // கோப்பு_பதிவேற்று - file_upload (upload file via HTTP)
-        ("கோப்பு_பதிவேற்று".to_string(), NativeFunction::new("கோப்பு_பதிவேற்று", Some(2), builtin_file_upload)),
-        ("file_upload".to_string(), NativeFunction::new("file_upload", Some(2), builtin_file_upload)),
+        ("கோப்பு_பதிவேற்று".to_string(), Rc::new(NativeFunction::new("கோப்பு_பதிவேற்று", Some(2), builtin_file_upload))),
+        ("file_upload".to_string(), Rc::new(NativeFunction::new("file_upload", Some(2), builtin_file_upload))),
         
         // வலை_கோரிக்கை - http_request (custom HTTP request with headers)
-        ("வலை_கோரிக்கை".to_string(), NativeFunction::new("வலை_கோரிக்கை", None, builtin_http_request)),
-        ("http_request".to_string(), NativeFunction::new("http_request", None, builtin_http_request)),
+        ("வலை_கோரிக்கை".to_string(), Rc::new(NativeFunction::new("வலை_கோரிக்கை", None, builtin_http_request))),
+        ("http_request".to_string(), Rc::new(NativeFunction::new("http_request", None, builtin_http_request))),
         
         // === WebSocket Module ===
         // சாக்கெட்_இணை - ws_connect (connect to WebSocket)
-        ("சாக்கெட்_இணை".to_string(), NativeFunction::new("சாக்கெட்_இணை", Some(1), builtin_ws_connect)),
-        ("ws_connect".to_string(), NativeFunction::new("ws_connect", Some(1), builtin_ws_connect)),
+        ("சாக்கெட்_இணை".to_string(), Rc::new(NativeFunction::new("சாக்கெட்_இணை", Some(1), builtin_ws_connect))),
+        ("ws_connect".to_string(), Rc::new(NativeFunction::new("ws_connect", Some(1), builtin_ws_connect))),
         
         // சாக்கெட்_அனுப்பு - ws_send (send message)
-        ("சாக்கெட்_அனுப்பு".to_string(), NativeFunction::new("சாக்கெட்_அனுப்பு", Some(2), builtin_ws_send)),
-        ("ws_send".to_string(), NativeFunction::new("ws_send", Some(2), builtin_ws_send)),
+        ("சாக்கெட்_அனுப்பு".to_string(), Rc::new(NativeFunction::new("சாக்கெட்_அனுப்பு", Some(2), builtin_ws_send))),
+        ("ws_send".to_string(), Rc::new(NativeFunction::new("ws_send", Some(2), builtin_ws_send))),
         
         // சாக்கெட்_படி - ws_receive (receive message)
-        ("சாக்கெட்_படி".to_string(), NativeFunction::new("சாக்கெட்_படி", Some(1), builtin_ws_receive)),
-        ("ws_receive".to_string(), NativeFunction::new("ws_receive", Some(1), builtin_ws_receive)),
+        ("சாக்கெட்_படி".to_string(), Rc::new(NativeFunction::new("சாக்கெட்_படி", Some(1), builtin_ws_receive))),
+        ("ws_receive".to_string(), Rc::new(NativeFunction::new("ws_receive", Some(1), builtin_ws_receive))),
         
         // சாக்கெட்_மூடு - ws_close (close connection)
-        ("சாக்கெட்_மூடு".to_string(), NativeFunction::new("சாக்கெட்_மூடு", Some(1), builtin_ws_close)),
-        ("ws_close".to_string(), NativeFunction::new("ws_close", Some(1), builtin_ws_close)),
+        ("சாக்கெட்_மூடு".to_string(), Rc::new(NativeFunction::new("சாக்கெட்_மூடு", Some(1), builtin_ws_close))),
+        ("ws_close".to_string(), Rc::new(NativeFunction::new("ws_close", Some(1), builtin_ws_close))),
         
         // JSON பகுப்பு - json_parse
-        ("json_படி".to_string(), NativeFunction::new("json_படி", Some(1), builtin_json_parse)),
-        ("json_parse".to_string(), NativeFunction::new("json_parse", Some(1), builtin_json_parse)),
+        ("json_படி".to_string(), Rc::new(NativeFunction::new("json_படி", Some(1), builtin_json_parse))),
+        ("json_parse".to_string(), Rc::new(NativeFunction::new("json_parse", Some(1), builtin_json_parse))),
     ]
 }
 

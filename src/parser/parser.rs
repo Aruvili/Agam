@@ -270,6 +270,7 @@ impl Parser {
     }
 
     // Selective import: இருந்து module இறக்குமதி func1, func2
+    #[allow(clippy::wrong_self_convention)]
     fn from_import_statement(&mut self) -> Result<Statement, AgamError> {
         self.advance(); // consume இருந்து
         
@@ -862,6 +863,7 @@ impl Parser {
     /// Parse f-string content into parts
     /// Content like "Hello {name}! You are {age} years old" becomes:
     /// [Literal("Hello "), Expression(name), Literal("! You are "), Expression(age), Literal(" years old")]
+    #[allow(clippy::while_let_on_iterator)]
     fn parse_fstring_parts(&mut self, content: &str) -> Result<Expression, AgamError> {
         let mut parts = Vec::new();
         let mut chars = content.chars().peekable();

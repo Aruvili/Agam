@@ -190,12 +190,12 @@ impl Evaluator {
             }
 
             Statement::Function { name, params, body } => {
-                let func = AgamFunction::new(
+                let func = Rc::new(AgamFunction::new(
                     name.clone(),
                     params.clone(),
                     body.clone(),
                     Rc::clone(&self.environment),
-                );
+                ));
                 self.environment.borrow_mut().define(
                     name.clone(),
                     Value::Function(func),
@@ -704,12 +704,12 @@ impl Evaluator {
                 // We wrap the body expression in a return statement
                 let body_stmt = vec![Statement::Return(Some((**body).clone()))];
                 
-                let func = AgamFunction::new(
+                let func = Rc::new(AgamFunction::new(
                     "<lambda>".to_string(),
                     params.clone(),
                     body_stmt,
                     Rc::clone(&self.environment),
-                );
+                ));
                 
                 Ok(Value::Function(func))
             }

@@ -7,61 +7,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2025-12-23
+## [0.1.3] - 2025-12-26
 
-### Added - சேர்க்கப்பட்டவை
+### Performance - செயல்திறன் மேம்பாடுகள்
+- Performance Optimized
 
-#### Core Language Features - மொழி அம்சங்கள்
-- **Variables** - மாறிகள்: `மாறி`, `மாறாத` (let, const)
-- **Data Types** - தரவு வகைகள்: Numbers, Strings, Booleans, Lists, Dictionaries
-- **Operators** - அளவீடுகள்: Arithmetic, Comparison, Logical
-- **Control Flow** - கட்டுப்பாடு: `என்றால்`/`இல்லையென்றால்`/`இல்லை` (if/elif/else)
-- **Loops** - வளையங்கள்: `வரை` (while), `ஒவ்வொரு` (for)
-- **Functions** - செயல்கள்: `செயல்` (fn) with recursion support
-- **Structs** - கட்டமைப்பு: User-defined data structures
-- **Enums** - விருப்பம்: Enumeration types
-- **Pattern Matching** - பொருத்து: Match expressions with wildcard support
-- **Error Handling** - பிழை கையாளுதல்: `முயற்சி`/`பிடி`/`வீசு` (try/catch/throw)
-- **Module System** - இறக்குமதி: Import external modules
-
-#### Built-in Functions - உள்ளமைந்த செயல்கள்
-- **Math** - கணிதம்: `வர்க்கம்`, `அடி`, `தளம்`, `கூரை`, `முழுமை`, `குறைந்தபட்சம்`, `அதிகபட்சம்`, `தற்செயல்`, `கூட்டு`
-- **String** - சரம்: `மேல்`, `கீழ்`, `ஒழுங்கு`, `பிரி`, `இணை`, `மாற்று`, `தொடங்கு`, `முடிவு`, `உள்ளதா`
-- **List** - பட்டியல்: `நீளம்`, `சேர்`, `நீக்கு`, `வரிசை`, `தலைகீழ்`
-- **Type** - வகை: `வகை`, `எண்ணாக`, `தசமாக`, `சரமாக`
-- **I/O** - உள்ளீடு/வெளியீடு: `அச்சிடு`, `உள்ளீடு`
-- **File** - கோப்பு: `படி`, `எழுது`, `உள்ளது`
-
-#### Security - பாதுகாப்பு
-- Recursion depth limit (1000 calls)
-- Loop iteration limit (10 million iterations)
-- File read size limit (10 MB)
-- Range size limit (1 million elements)
-
-#### Bilingual Support - இருமொழி ஆதரவு
-- Full Tamil and English keyword support
-- Tamil error messages with English translations
-
-#### Documentation - ஆவணங்கள்
-- 14-chapter learning book in `docs/`
-- Example programs in `examples/`
-- Marketing website in `website/`
-
-### Technical Details - தொழில்நுட்ப விவரங்கள்
-- **Runtime**: Tree-walking interpreter
-- **Parser**: Recursive descent parser
-- **Lexer**: Hand-written scanner with Unicode support
-- **Memory**: Reference-counted values with interior mutability
-
----
-
-## [0.1.1] - 2025-12-24
-
-### Fixed - மேற்கொண்டவை
-- List, Dictionary, import methods (issue #1)
-- Documentation (issue #2)
-- minor typos
-- minor bugs fixed
+### Dependencies - புதிய சார்புகள்
+- Added `rustc-hash` , `smallvec` , `once_cell` , `phf` 
 
 ---
 
@@ -122,6 +74,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `சாக்கெட்_அனுப்பு(conn, msg)` / `ws_send(conn, msg)` - Send message through WebSocket
 - `சாக்கெட்_படி(conn)` / `ws_receive(conn)` - Receive message (blocking)
 - `சாக்கெட்_மூடு(conn)` / `ws_close(conn)` - Close WebSocket connection
+
+---
+
+## [0.1.1] - 2025-12-24
+
+### Fixed - மேற்கொண்டவை
+- List, Dictionary, import methods (issue #1)
+- Documentation (issue #2)
+- minor typos
+- minor bugs fixed
+
+---
+
+## [0.1.0] - 2025-12-23
+
+### Added - சேர்க்கப்பட்டவை
+
+#### Core Language Features - மொழி அம்சங்கள்
+- **Variables** - மாறிகள்: `மாறி`, `மாறாத` (let, const)
+- **Data Types** - தரவு வகைகள்: Numbers, Strings, Booleans, Lists, Dictionaries
+- **Operators** - அளவீடுகள்: Arithmetic, Comparison, Logical
+- **Control Flow** - கட்டுப்பாடு: `என்றால்`/`இல்லையென்றால்`/`இல்லை` (if/elif/else)
+- **Loops** - வளையங்கள்: `வரை` (while), `ஒவ்வொரு` (for)
+- **Functions** - செயல்கள்: `செயல்` (fn) with recursion support
+- **Structs** - கட்டமைப்பு: User-defined data structures
+- **Enums** - விருப்பம்: Enumeration types
+- **Pattern Matching** - பொருத்து: Match expressions with wildcard support
+- **Error Handling** - பிழை கையாளுதல்: `முயற்சி`/`பிடி`/`வீசு` (try/catch/throw)
+- **Module System** - இறக்குமதி: Import external modules
+
+#### Built-in Functions - உள்ளமைந்த செயல்கள்
+- **Math** - கணிதம்: `வர்க்கம்`, `அடி`, `தளம்`, `கூரை`, `முழுமை`, `குறைந்தபட்சம்`, `அதிகபட்சம்`, `தற்செயல்`, `கூட்டு`
+- **String** - சரம்: `மேல்`, `கீழ்`, `ஒழுங்கு`, `பிரி`, `இணை`, `மாற்று`, `தொடங்கு`, `முடிவு`, `உள்ளதா`
+- **List** - பட்டியல்: `நீளம்`, `சேர்`, `நீக்கு`, `வரிசை`, `தலைகீழ்`
+- **Type** - வகை: `வகை`, `எண்ணாக`, `தசமாக`, `சரமாக`
+- **I/O** - உள்ளீடு/வெளியீடு: `அச்சிடு`, `உள்ளீடு`
+- **File** - கோப்பு: `படி`, `எழுது`, `உள்ளது`
+
+#### Security - பாதுகாப்பு
+- Recursion depth limit (1000 calls)
+- Loop iteration limit (10 million iterations)
+- File read size limit (10 MB)
+- Range size limit (1 million elements)
+
+#### Bilingual Support - இருமொழி ஆதரவு
+- Full Tamil and English keyword support
+- Tamil error messages with English translations
+
+#### Documentation - ஆவணங்கள்
+- 14-chapter learning book in `docs/`
+- Example programs in `examples/`
+- Marketing website in `website/`
+
+### Technical Details - தொழில்நுட்ப விவரங்கள்
+- **Runtime**: Tree-walking interpreter
+- **Parser**: Recursive descent parser
+- **Lexer**: Hand-written scanner with Unicode support
+- **Memory**: Reference-counted values with interior mutability
+
+---
 
 ## Future Plans - எதிர்கால திட்டங்கள்
 

@@ -35,6 +35,7 @@ jobs:
           sudo apt-get install -y cmake llvm-17-dev libllvm17 build-essential
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
+          echo "LLVM_DIR=$(llvm-config-17 --cmakedir)" >> $GITHUB_ENV
 
       - name: Install Dependencies (macOS)
         if: matrix.target == 'macos'

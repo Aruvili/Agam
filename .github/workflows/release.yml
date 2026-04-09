@@ -47,7 +47,7 @@ jobs:
       - name: Install Dependencies (Windows)
         if: matrix.target == 'windows'
         run: |
-          choco install llvm --version=17.0.6 -y
+          choco install llvm --version=17.0.6 -y --allow-downgrade
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF

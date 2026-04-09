@@ -475,7 +475,7 @@ int main(int argc, char *argv[]) {
     llvm::InitializeNativeTargetAsmParser();
 
     auto targetTriple = llvm::Triple(llvm::sys::getDefaultTargetTriple());
-    codegen.getModule()->setTargetTriple(targetTriple);
+    codegen.getModule()->setTargetTriple(targetTriple.getTriple());
 
     std::string error;
     auto target = llvm::TargetRegistry::lookupTarget(targetTriple.getTriple(), error);
@@ -488,7 +488,7 @@ int main(int argc, char *argv[]) {
     auto Features = "";
     llvm::TargetOptions opt;
     auto RM = std::optional<llvm::Reloc::Model>();
-    auto targetMachine = target->createTargetMachine(targetTriple, CPU, Features, opt, RM);
+    auto targetMachine = target->createTargetMachine(targetTriple.getTriple(), CPU, Features, opt, RM);
 
     codegen.getModule()->setDataLayout(targetMachine->createDataLayout());
 
@@ -509,7 +509,11 @@ int main(int argc, char *argv[]) {
     }
 
     llvm::legacy::PassManager pass;
+#if LLVM_VERSION_MAJOR >= 18
     auto FileType = llvm::CodeGenFileType::ObjectFile;
+#else
+    auto FileType = llvm::CGFT_ObjectFile;
+#endif
 
     if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
         std::cerr << "இந்த வகை கோப்பினை உருவாக்க முடியாது" << std::endl;

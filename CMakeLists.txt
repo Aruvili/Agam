@@ -18,6 +18,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # ── Find LLVM ─────────────────────────────────────────────────────────────────
+# Force CMake to prefer static libraries by avoiding the shared 'LLVM' component
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -27,6 +28,7 @@ separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
 # Map LLVM components to libraries
+# We use individual components to ensure static linking
 llvm_map_components_to_libnames(LLVM_LIBS
     Core
     IRReader
@@ -37,6 +39,23 @@ llvm_map_components_to_libnames(LLVM_LIBS
     native
     nativecodegen
 )
+
+# Extract system libraries required for static LLVM linking
+# (e.g., zlib, tinfo, shell32, etc.)
+if(NOT LLVM_SYSTEM_LIBS)
+    if(COMMAND llvm_map_components_to_system_libs)
+        llvm_map_components_to_system_libs(LLVM_SYSTEM_LIBS)
+    else()
+        # Fallback/Manual detection for common static LLVM dependencies
+        set(LLVM_SYSTEM_LIBS "")
+        if(UNIX)
+            list(APPEND LLVM_SYSTEM_LIBS z zstd tinfo dl pthread m)
+        elseif(WIN32)
+            list(APPEND LLVM_SYSTEM_LIBS psapi shell32 ole32 uuid advapi32)
+        endif()
+    endif()
+endif()
+message(STATUS "LLVM System Libs: ${LLVM_SYSTEM_LIBS}")
 
 # ── Agam compiler library (shared between compiler and tests) ────────────────
 add_library(agam_lib STATIC
@@ -64,6 +83,7 @@ target_include_directories(agam_lib PUBLIC
 
 target_link_libraries(agam_lib PUBLIC
     ${LLVM_LIBS}
+    ${LLVM_SYSTEM_LIBS}
 )
 
 # ── Agam compiler executable ────────────────────────────────────────────────

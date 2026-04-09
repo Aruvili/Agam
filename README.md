@@ -163,12 +163,12 @@
 
 **Linux/macOS**
 ```bash
-curl -sSL https://raw.githubusercontent.com/Aruvili/Agam/master/scripts/install.sh | bash
+curl -sSL https://dl.aruvili.com/install.sh | bash
 ```
 
 **Windows (PowerShell)**
 ```powershell
-irm https://raw.githubusercontent.com/Aruvili/Agam/master/scripts/install.ps1 | iex
+irm https://dl.aruvili.com/install.ps1 | iex
 ```
 
 ---

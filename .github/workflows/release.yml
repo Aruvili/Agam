@@ -49,9 +49,11 @@ jobs:
         run: |
           choco install llvm --version=17.0.6 -y --allow-downgrade
           echo "LLVM_DIR=C:/Program Files/LLVM/lib/cmake/llvm" >> $env:GITHUB_ENV
+          echo "C:/Program Files/LLVM/bin" >> $env:GITHUB_PATH
 
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DLLVM_DIR="C:/Program Files/LLVM/lib/cmake/llvm"
 
       - name: Build
         run: cmake --build build --config Release

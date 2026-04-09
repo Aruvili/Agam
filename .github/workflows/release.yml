@@ -76,7 +76,7 @@ jobs:
           Compress-Archive -Path release_pack\* -DestinationPath ${{ matrix.asset_name }}
 
       - name: Release
-        uses: softprops/action-gh-release@c062e08bd532815e2082a7e09ce9571a6e9db555 # v2.2.1
+        uses: softprops/action-gh-release@v2
         with:
           files: ${{ matrix.asset_name }}
           generate_release_notes: true

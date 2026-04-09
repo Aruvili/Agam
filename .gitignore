@@ -1,9 +1,37 @@
-# Rust compile output
-/target/
+# Build directories
+build/
+cmake-build-*/
+out/
+Docs/
+bin/
 
-# IDE/Editor
-.idea/
+# Dependencies
+*/node_modules/
+vendor/*/
+
+# Compiled objects
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+a.out
+
+# Caches
+.cache/
+.kiro/
+
+# IDE files
+.vs/
 .vscode/
+*.suo
+*.user
+*.sln
+*.vcxproj*
+.idea/
 *.swp
 *.swo
 *~
@@ -11,26 +39,26 @@
 # OS files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Test outputs
-*.txt
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
 
-# Build artifacts
-*.exe
-*.dll
-*.so
-*.dylib
+# Testing & Coverage
+Testing/
+*.gcno
+*.gcda
+*.gcov
+full_test_report*.txt
 
-# Distribution builds
-dist/installer/*.exe
-dist/**/*.zip
-dist/**/*.tar.gz
-dist/**/*.deb
-dist/**/*.pkg
-
-# Temporary files
-*.tmp
+# Temporary / Scratch & Logs
+scratch/
+install_test/
+release_pack/
 *.log
-
-*/node_modules
-node_modules
+*.tmp
+.tmp/

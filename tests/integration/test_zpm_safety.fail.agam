@@ -1,0 +1,26 @@
+அமைப்பு Node {
+    val: எண்32,
+    next: *Node
+}
+
+செயல் test_assignment_escape(): வெற்று {
+    மாறி நிலை p: *Node = இல்லை;
+    மண்டலம் A {
+        மாறி n: *Node ~A = ஒதுக்கீடு<Node ~A>(1);
+        // ERROR: n (~A) is shorter-lived than p (~global)
+        p = n; 
+    };
+}
+
+செயல் test_return_escape(): *Node {
+    மண்டலம் B {
+        மாறி n: *Node ~B = ஒதுக்கீடு<Node ~B>(1);
+        // ERROR: Cannot விடை pointer from local மண்டலம் ~B
+        விடை n;
+    };
+}
+
+செயல் மைய(): எண்32 {
+    test_assignment_escape();
+    விடை 0;
+}

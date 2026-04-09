@@ -1,0 +1,45 @@
+வெளி செயல் printf_int(n: எண்64): வெற்று;
+
+அமைப்பு Data {
+    x: எண்64,
+}
+
+செயல்படுத்து Data {
+    செயல் read(தன்னிலை: Data) : எண்64 {
+        விடை தன்னிலை.x;
+    }
+    
+    செயல் mutate(நிலை தன்னிலை: Data) : வெற்று {
+        தன்னிலை.x = தன்னிலை.x + 1;
+    }
+}
+
+செயல் test_multiple_shared() : வெற்று {
+    மாறி d: Data = Data { x: 10 };
+    மாறி b1: *Data = கடன் பகிர்வு(d);
+    மாறி b2: *Data = கடன் பகிர்வு(d);
+    மாறி x: எண்64 = b1.read() + b2.read();
+}
+
+செயல் test_lexical_scopes() : வெற்று {
+    மாறி நிலை d: Data = Data { x: 10 };
+    
+    // Use எனில்(உண்மை) ஆக a workaround சுற்று lexical blocks until raw blocks are supported ஆக statements
+    எனில் (உண்மை) {
+        மாறி b1: *Data = கடன் நிலை(d);
+        b1.mutate(); 
+    } // b1 released here
+    
+    எனில் (உண்மை) {
+        மாறி b2: *Data = கடன் பகிர்வு(d);
+        மாறி x: எண்64 = b2.read();
+    } // b2 released here
+    
+    d.mutate(); // OK
+}
+
+செயல் மைய() : வெற்று {
+    test_multiple_shared();
+    test_lexical_scopes();
+    printf_int(1); 
+}

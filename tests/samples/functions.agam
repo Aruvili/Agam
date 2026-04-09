@@ -1,0 +1,13 @@
+// Function declarations and calls
+செயல் add(a: எண், b: எண்): எண் {
+    விடை a + b;
+}
+
+செயல் multiply(x: எண், y: எண்): எண் {
+    விடை x * y;
+}
+
+செயல் மைய(): எண் {
+    மாறி result: எண் = add(3, multiply(2, 5));
+    விடை result;
+}

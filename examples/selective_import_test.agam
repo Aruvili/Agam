@@ -1,9 +1,0 @@
-# Test selective imports
-# இருந்து module இறக்குமதி func1, func2 syntax
-
-இருந்து math_module இறக்குமதி square, PI
-
-அச்சிடு("Testing selective import...")
-அச்சிடு("square(5) =", square(5))
-அச்சிடு("PI =", PI)
-அச்சிடு("Selective import works!")

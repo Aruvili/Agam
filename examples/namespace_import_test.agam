@@ -1,9 +1,0 @@
-# Test namespace imports
-# இறக்குமதி module then use module.function() syntax
-
-இறக்குமதி math_module
-
-அச்சிடு("Testing namespace import...")
-அச்சிடு("math_module.square(5) =", math_module.square(5))
-அச்சிடு("math_module.PI =", math_module.PI)
-அச்சிடு("Namespace import works!")

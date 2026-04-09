@@ -1,0 +1,30 @@
+அமைப்பு Data {
+    x: எண்64,
+}
+
+செயல்படுத்து Data {
+    செயல் mutate(நிலை தன்னிலை: Data) : வெற்று {
+        தன்னிலை.x = தன்னிலை.x + 1;
+    }
+    
+    செயல் read(தன்னிலை: Data) : எண்64 {
+        விடை தன்னிலை.x;
+    }
+    
+    செயல் conflict(நிலை தன்னிலை: Data, other: *Data) : வெற்று {
+        தன்னிலை.x = (*other).x;
+    }
+}
+
+செயல் மைய() : வெற்று {
+    மாறி நிலை d: Data = Data { x: 10 };
+    
+    // Test 1: Mutating method on பகிர்வு கடன்
+    மாறி b1: *Data = கடன் பகிர்வு(d);
+    // ERROR: b1 is பகிர்வு. mutate() requires mutable receiver.
+    b1.mutate(); 
+    
+    // Test 2: Receiver vs Argument conflict
+    // ERROR: Cannot கடன் 'd' வரை it is already borrowed
+    d.conflict(கடன் பகிர்வு(d));
+}

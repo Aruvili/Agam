@@ -1,0 +1,23 @@
+அமைப்பு Counter {
+    value: எண்32
+}
+
+செயல்படுத்து Counter {
+    செயல் get(தன்னிலை: *Counter): எண்32 {
+        விடை தன்னிலை.value;
+    }
+
+    செயல் increment(நிலை தன்னிலை: *Counter): வெற்று {
+        தன்னிலை.value = தன்னிலை.value + 1;
+    }
+}
+
+செயல் மைய(): எண்32 {
+    மாறி நிலை c: Counter = Counter { value: 0 };
+    மாறி b1: *Counter = கடன் பகிர்வு(c);
+    
+    மாறி val: எண்32 = (&c).get(); // OK: Shared கடன் allows read-only method
+    (&c).increment(); // ERROR: Cannot call mutating method வரை பகிர்வு கடன் exists
+    
+    விடை 0;
+}

@@ -1,0 +1,35 @@
+// Test Generic Structs and Functions உள் Agam
+
+அமைப்பு Point<T> {
+    x: T,
+    y: T
+}
+
+செயல் identity<T>(val: T): T {
+    விடை val;
+}
+
+செயல் add_points(p1: Point<எண்64>, p2: Point<எண்64>): Point<எண்64> {
+    விடை Point<எண்64> {
+        x: p1.x + p2.x,
+        y: p1.y + p2.y
+    };
+}
+
+செயல் மைய(): எண்64 {
+    // Test generic function
+    மாறி a: எண்64 = identity<எண்64>(42);
+    மாறி b: தசமம் = identity<தசமம்>(3.14);
+    
+    // Test generic அமைப்பு
+    மாறி p1: Point<எண்64> = Point<எண்64> { x: 10, y: 20 };
+    மாறி p2: Point<எண்64> = Point<எண்64> { x: 5, y: 5 };
+    
+    மாறி p3: Point<எண்64> = add_points(p1, p2);
+    
+    எனில் (p3.x == 15 && p3.y == 25 && a == 42) {
+        விடை 0; // Success
+    }
+    
+    விடை 1; // Failure
+}

@@ -1,0 +1,15 @@
+செயல் test_aliasing_violation(): வெற்று {
+    மாறி நிலை x: *எண்32 = ஒதுக்கீடு<எண்32>(1);
+    மாறி b1: *எண்32 = கடன் பகிர்வு(x);
+    மாறி m1: *எண்32 = கடன் நிலை(x); // ERROR: Cannot mutably கடன் 'x' வரை it is already borrowed
+}
+
+செயல் test_mutation_violation(): வெற்று {
+    மாறி நிலை y: *எண்32 = ஒதுக்கீடு<எண்32>(1);
+    மாறி b1: *எண்32 = கடன் பகிர்வு(y);
+    y = ஒதுக்கீடு<எண்32>(1); // ERROR: Cannot mutate borrowed variable 'y'
+}
+
+செயல் மைய(): எண்32 {
+    விடை 0;
+}

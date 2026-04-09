@@ -1,0 +1,11 @@
+அமைப்பு Point {
+    x: எண்64,
+    y: எண்64,
+}
+
+செயல் மைய(): எண்64 {
+    மாறி நிலை p: Point = Point { x: 10, y: 20 };
+    p.x = 30; // Should fail because field x is immutable
+    p.y = 40; // Should pass
+    விடை 0;
+}

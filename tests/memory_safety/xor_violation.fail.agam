@@ -1,0 +1,26 @@
+// ERROR: Cannot பகிர்வு கடன் 'v' வரை it is mutably borrowed
+செயல் test_mutable_shared_conflict() : வெற்று {
+    மாறி நிலை v: எண்64 = 10;
+    மாறி b1: *எண்64 = கடன் நிலை(v);
+    மாறி b2: *எண்64 = கடன் பகிர்வு(v);
+}
+
+// ERROR: Cannot mutably கடன் 'v' வரை it is already borrowed
+செயல் test_multiple_mutable_conflict() : வெற்று {
+    மாறி நிலை v: எண்64 = 10;
+    மாறி b1: *எண்64 = கடன் நிலை(v);
+    மாறி b2: *எண்64 = கடன் நிலை(v);
+}
+
+// ERROR: Cannot கடன் 'v' வரை it is already borrowed
+செயல் test_shared_mutable_conflict() : வெற்று {
+    மாறி நிலை v: எண்64 = 10;
+    மாறி b1: *எண்64 = கடன் பகிர்வு(v);
+    மாறி b2: *எண்64 = கடன் நிலை(v);
+}
+
+செயல் மைய() : வெற்று {
+    test_mutable_shared_conflict();
+    test_multiple_mutable_conflict();
+    test_shared_mutable_conflict();
+}

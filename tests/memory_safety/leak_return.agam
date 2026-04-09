@@ -1,0 +1,21 @@
+வெளி செயல் printf_int(n: எண்64): வெற்று;
+
+அமைப்பு Node {
+    val: எண்64
+}
+
+செயல் test_leak_return(): எண்64 {
+    மண்டலம் A {
+        மாறி நிலை n: *Node ~A = ஒதுக்கீடு<Node ~A>(1);
+        n.val = 42;
+        // This விடை should trigger agam_zone_destroy(A) before exiting
+        விடை n.val;
+    };
+    விடை 0;
+}
+
+செயல் மைய(): எண்64 {
+    மாறி result: எண்64 = test_leak_return();
+    printf_int(result);
+    விடை 0;
+}

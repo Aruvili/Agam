@@ -1,0 +1,33 @@
+அமைப்பு Node {
+    val: எண்32,
+    next: *Node~A
+}
+
+செயல் மைய(): எண்32 {
+    மாறி count: எண்32 = 10000000;
+    
+    மண்டலம் A {
+        மாறி நிலை head: *Node~A = ஒதுக்கீடு<Node>(1);
+        head.val = 0;
+        head.next = இல்லை;
+        
+        மாறி நிலை current: *Node~A = head;
+        மாறி நிலை i: எண்32 = 1;
+        
+        வரை (i < count) {
+            மாறி next_node: *Node~A = ஒதுக்கீடு<Node>(1);
+            next_node.val = i;
+            next_node.next = இல்லை;
+            
+            current.next = next_node;
+            current = next_node;
+            i = i + 1;
+        }
+        
+        print_int(current.val);
+    };
+    
+    விடை 0;
+}
+
+வெளி செயல் print_int(val: எண்32): வெற்று;

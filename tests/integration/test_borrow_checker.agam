@@ -1,0 +1,40 @@
+அமைப்பு Node {
+    val: எண்32
+}
+
+செயல் test_aliasing_rules(): வெற்று {
+    மாறி நிலை x: *Node = ஒதுக்கீடு<Node>(1);
+    
+    // Shared கடன்
+    மாறி b1: *Node = கடன் பகிர்வு(x);
+    மாறி b2: *Node = கடன் பகிர்வு(x); // OK: Multiple readers
+    
+    // ERROR: Cannot mutably கடன் வரை பகிர்வு borrows exist
+    // மாறி m1: *Node = கடன் நிலை(x); 
+}
+
+செயல் test_mutation_safety(): வெற்று {
+    மாறி நிலை x: *Node = ஒதுக்கீடு<Node>(1);
+    மாறி b1: *Node = கடன் பகிர்வு(x);
+    
+    // ERROR: Cannot mutate x வரை b1 exists
+    // x = ஒதுக்கீடு<Node>(1);
+}
+
+செயல் test_scope_release(): வெற்று {
+    மாறி நிலை x: *Node = ஒதுக்கீடு<Node>(1);
+    {
+        மாறி b1: *Node = கடன் பகிர்வு(x);
+    }; // b1 released here
+    
+    மாறி m1: *Node = கடன் நிலை(x); // OK: b1 is gone
+}
+
+செயல் மைய(): எண்32 {
+    மாறி நிலை x: *Node = ஒதுக்கீடு<Node>(1);
+    மாறி b1: *Node = கடன் பகிர்வு(x);
+    
+    // I'll uncomment these one by one to verify them manually or write separate files
+    // For now, மாறி's just check எனில் it compiles with valid code
+    விடை 0;
+}

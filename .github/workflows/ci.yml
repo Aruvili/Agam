@@ -2,73 +2,57 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
-
-env:
-  CARGO_TERM_COLOR: always
+    branches: [main]
 
 jobs:
-  build:
-    name: Build & Test
-    runs-on: ${{ matrix.os }}
+  build-linux:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        rust: [stable]
-
+        compiler: [gcc, clang]
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install Rust toolchain
-      uses: actions-rust-lang/setup-rust-toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        components: clippy, rustfmt
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake flex bison \
+            llvm-17-dev libllvm17 \
+            build-essential
 
-    - name: Cache cargo registry
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
+      - name: Configure (GCC)
+        if: matrix.compiler == 'gcc'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
 
-    - name: Check formatting
-      run: cargo fmt --all -- --check
+      - name: Configure (Clang)
+        if: matrix.compiler == 'clang'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 
-    - name: Run clippy
-      run: cargo clippy --all-targets -- -D warnings
+      - name: Build
+        run: cmake --build build -j$(nproc)
 
-    - name: Build
-      run: cargo build --release --verbose
+      - name: Test
+        run: cd build && ctest --output-on-failure
 
-    - name: Run tests
-      run: cargo test --verbose
-
-    - name: Run example tests
-      run: |
-        cargo run --release -- examples/hello.agam
-        cargo run --release -- examples/factorial.agam
-        cargo run --release -- examples/complete_test.agam
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install Rust toolchain
-      uses: actions-rust-lang/setup-rust-toolchain@v1
-      with:
-        components: clippy, rustfmt
+      - uses: actions/checkout@v4
 
-    - name: Check formatting
-      run: cargo fmt --all -- --check
+      - name: Install LLVM
+        run: choco install llvm --version=17.0.6 -y
 
-    - name: Clippy
-      run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Install Flex & Bison
+        run: choco install winflexbison3 -y
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: cmake --build build --config Debug
+
+      - name: Test
+        run: cd build && ctest -C Debug --output-on-failure

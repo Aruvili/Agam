@@ -1,0 +1,22 @@
+அமைப்பு Data {
+    x: எண்64
+}
+
+செயல்படுத்து Data {
+    செயல் mutate(நிலை தன்னிலை: *Data): வெற்று {
+        தன்னிலை.x = தன்னிலை.x + 1;
+    }
+}
+
+செயல் மைய(): எண்64 {
+    மாறி நிலை d: Data = Data { x: 10 };
+    மாறி நிலை b1: *Data = கடன் பகிர்வு(d);
+    
+    // This should fail because b1 is a பகிர்வு கடன், but currently it might pass!
+    b1.x = 20;
+    
+    // This should also fail because mutate() requires a mutable receiver.
+    b1.mutate();
+    
+    விடை 0;
+}

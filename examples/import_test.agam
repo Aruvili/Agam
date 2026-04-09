@@ -1,8 +1,0 @@
-# Simpler import test - just functions injected into current scope
-
-இறக்குமதி math_module
-
-அச்சிடு("Testing import...")
-# These should be available directly after import
-அச்சிடு("square(5) =", square(5))
-அச்சிடு("PI =", PI)

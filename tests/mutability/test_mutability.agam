@@ -1,0 +1,37 @@
+இறக்குமதி "../../std/io.agam";
+
+அமைப்பு Point {
+    நிலை x: எண்64,
+    நிலை y: எண்64,
+}
+
+செயல் test_local_mut(): வெற்று {
+    மாறி நிலை x: எண்64 = 10;
+    வரியிறக்கி_பதிப்பி("Testing local mutability...");
+    வரியிறக்கி_பதிப்பி(x);
+    x = 20;
+    வரியிறக்கி_பதிப்பி(x);
+}
+
+செயல் test_struct_mut(): வெற்று {
+    மாறி நிலை p: Point = Point { x: 10, y: 20 };
+    வரியிறக்கி_பதிப்பி("Testing அமைப்பு field mutability...");
+    வரியிறக்கி_பதிப்பி(p.x);
+    p.x = 30;
+    வரியிறக்கி_பதிப்பி(p.x);
+}
+
+செயல் test_param_mut(நிலை a: எண்64): வெற்று {
+    வரியிறக்கி_பதிப்பி("Testing parameter mutability...");
+    வரியிறக்கி_பதிப்பி(a);
+    a = a + 5;
+    வரியிறக்கி_பதிப்பி(a);
+}
+
+செயல் மைய(): எண்64 {
+    test_local_mut();
+    test_struct_mut();
+    test_param_mut(100);
+    வரியிறக்கி_பதிப்பி("All mutability tests passed (successfully compiled and ran)!");
+    விடை 0;
+}

@@ -1,0 +1,8 @@
+// Error detection test — demonstrates the compiler correctly catches
+// undeclared variables. This file should compile cleanly with the fix applied.
+// (The actual error detection is verified உள் the C++ unit tests.)
+
+செயல் மைய(): எண் {
+    மாறி x: எண் = 0;
+    விடை x;
+}

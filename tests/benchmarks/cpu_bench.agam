@@ -1,0 +1,18 @@
+இறக்குமதி "std/math";
+
+// External print_int function சுற்று the runtime
+வெளி செயல் printf_float(fmt: சரம், f: தசமம்64): எண்;
+
+செயல் மைய(): எண் {
+    மாறி n: எண் = 10000000;
+    மாறி நிலை total: தசமம்64 = 0.0;
+    மாறி நிலை i: எண் = 1;
+
+    வரை (i <= n) {
+        total = total + வர்க்கமூலம்(i ஆக தசமம்64) * சைன்(i ஆக தசமம்64);
+        i = i + 1;
+    }
+
+    printf_float("Result: %.4f\n", total);
+    விடை 0;
+}

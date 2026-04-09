@@ -1,0 +1,25 @@
+அமைப்பு Node {
+    next: *Node,
+}
+
+செயல் test_zpm_mismatch() : வெற்று {
+    மண்டலம் local {
+        மாறி நிலை p1: *Node = ஒதுக்கீடு<Node>; 
+        மண்டலம் inner {
+            மாறி நிலை p2: *Node = ஒதுக்கீடு<Node>; 
+            (*p1).next = p2; // ERROR: Memory safety violation
+        };
+    };
+}
+
+செயல் test_local_escape() : *Node {
+    மண்டலம் local {
+        மாறி p: *Node = ஒதுக்கீடு<Node>; 
+        விடை p; // ERROR: Memory safety violation
+    };
+}
+
+செயல் மைய() : வெற்று {
+    test_zpm_mismatch();
+    test_local_escape();
+}

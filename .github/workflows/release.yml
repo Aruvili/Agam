@@ -50,14 +50,16 @@ jobs:
         if: matrix.target == 'windows'
         run: |
           choco install llvm --version=18.1.8 -y --allow-downgrade
-          echo "LLVM_DIR=C:/Program Files/LLVM/lib/cmake/llvm" >> $env:GITHUB_ENV
-          echo "C:/Program Files/LLVM/bin" >> $env:GITHUB_PATH
-          dir "C:/Program Files/LLVM/lib/cmake/llvm" || echo "Not found in lib/cmake/llvm"
-          dir "C:/Program Files/LLVM/lib/cmake" || echo "Not found in lib/cmake"
+          $llvmBin = "C:/Program Files/LLVM/bin"
+          echo "$llvmBin" >> $env:GITHUB_PATH
+          # Wait a moment for PATH to update or use absolute path
+          $cmakeDir = & "$llvmBin/llvm-config.exe" --cmakedir
+          echo "LLVM_DIR=$cmakeDir" >> $env:GITHUB_ENV
+          echo "Detected LLVM CMake dir: $cmakeDir"
 
       - name: Configure CMake
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DCMAKE_PREFIX_PATH="C:/Program Files/LLVM" -DLLVM_DIR="C:/Program Files/LLVM/lib/cmake/llvm"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DLLVM_DIR="${{ env.LLVM_DIR }}"
 
       - name: Build
         run: cmake --build build --config Release

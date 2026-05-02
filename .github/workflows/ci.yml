@@ -45,14 +45,16 @@ jobs:
       - name: Install LLVM
         run: |
           choco install llvm --version=18.1.8 -y
-          echo "LLVM_DIR=C:/Program Files/LLVM/lib/cmake/llvm" >> $env:GITHUB_ENV
-          echo "C:/Program Files/LLVM/bin" >> $env:GITHUB_PATH
+          $llvmBin = "C:/Program Files/LLVM/bin"
+          echo "$llvmBin" >> $env:GITHUB_PATH
+          $cmakeDir = & "$llvmBin/llvm-config.exe" --cmakedir
+          echo "LLVM_DIR=$cmakeDir" >> $env:GITHUB_ENV
 
       - name: Install Flex & Bison
         run: choco install winflexbison3 -y
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="C:/Program Files/LLVM"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR="${{ env.LLVM_DIR }}"
 
       - name: Build
         run: cmake --build build --config Debug

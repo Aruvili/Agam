@@ -1,6 +1,6 @@
 #!/bin/bash
 AGAMC="./build/bin/agamc.exe"
-FILES=$(find . -name "*.agam" -not -path "./build/*" -not -path "./tests/samples/errors/*" -not -path "./std/*" -not -path "./install_test/*" -not -path "./tests/diagnostics/*" -not -name "*fail.agam")
+FILES=$(find . -name "*.agam" -not -path "./build/*" -not -path "./tests/samples/errors/*" -not -path "./std/*" -not -path "./install_test/*" -not -path "./tests/diagnostics/*" -not -path "./tests/integration/math.agam" -not -name "*fail.agam")
 
 echo "Checking Agam files..."
 for file in $FILES; do

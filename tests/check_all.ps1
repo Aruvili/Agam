@@ -1,5 +1,5 @@
-$AGAMC = "d:/Projects/Aram/build/bin/agamc.exe"
-$FILES = Get-ChildItem -Path "d:/Projects/Aram" -Recurse -Filter "*.agam" | Where-Object { 
+$AGAMC = "./build/bin/agamc.exe"
+$FILES = Get-ChildItem -Path "." -Recurse -Filter "*.agam" | Where-Object { 
     $_.FullName -notmatch "build" -and 
     $_.FullName -notmatch "tests\\samples\\errors" -and 
     $_.FullName -notmatch "std\\" -and
@@ -20,15 +20,15 @@ foreach ($file in $FILES) {
     Write-Host "Checking $($file.FullName)..."
     
     # Run agamc.exe and capture output
-    $process = Start-Process -FilePath $AGAMC -ArgumentList $file.FullName -NoNewWindow -PassThru -Wait -RedirectStandardError "d:/Projects/Aram/scratch/last_error.txt"
+    $process = Start-Process -FilePath $AGAMC -ArgumentList $file.FullName -NoNewWindow -PassThru -Wait -RedirectStandardError "./tests/last_error.txt"
     
     if ($process.ExitCode -eq 0) {
         Write-Host "PASS" -ForegroundColor Green
         $passCount++
     } else {
         $errorMsg = ""
-        if (Test-Path "d:/Projects/Aram/scratch/last_error.txt") {
-            $errorMsg = Get-Content "d:/Projects/Aram/scratch/last_error.txt" -Raw
+        if (Test-Path "./tests/last_error.txt") {
+            $errorMsg = Get-Content "./tests/last_error.txt" -Raw
         }
         
         if ($errorMsg -match "மைய") {

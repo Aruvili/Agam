@@ -328,8 +328,7 @@ int main(int argc, char *argv[]) {
             printUsage(argv[0]);
             return 0;
         } else if (arg == "--lib-path" && i + 1 < argc) {
-            // libPath = argv[++i]; // TODO: implement std search path
-            i++;
+            g_stdEnvPath = trim(argv[++i]);
         } else if (arg.substr(0, 2) == "-O" && arg.size() == 3) {
             optLevel = Optimizer::parseLevel(arg.substr(2));
         } else if (arg[0] != '-') {

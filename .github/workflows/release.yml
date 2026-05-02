@@ -40,11 +40,11 @@ jobs:
       - name: Install Dependencies (macOS)
         if: matrix.target == 'macos'
         run: |
-          brew install cmake llvm@18 zstd zlib
+          brew install cmake llvm@18 zstd zlib ncurses
           echo "/opt/homebrew/opt/llvm@18/bin" >> $GITHUB_PATH
           echo "LLVM_DIR=/opt/homebrew/opt/llvm@18/lib/cmake/llvm" >> $GITHUB_ENV
-          echo "LDFLAGS=-L/opt/homebrew/opt/zstd/lib -L/opt/homebrew/opt/zlib/lib" >> $GITHUB_ENV
-          echo "CPPFLAGS=-I/opt/homebrew/opt/zstd/include -I/opt/homebrew/opt/zlib/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/opt/homebrew/opt/zstd/lib -L/opt/homebrew/opt/zlib/lib -L/opt/homebrew/opt/ncurses/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I/opt/homebrew/opt/zstd/include -I/opt/homebrew/opt/zlib/include -I/opt/homebrew/opt/ncurses/include" >> $GITHUB_ENV
 
       - name: Install Dependencies (Windows)
         if: matrix.target == 'windows'
@@ -52,6 +52,8 @@ jobs:
           choco install llvm --version=18.1.8 -y --allow-downgrade
           echo "LLVM_DIR=C:/Program Files/LLVM/lib/cmake/llvm" >> $env:GITHUB_ENV
           echo "C:/Program Files/LLVM/bin" >> $env:GITHUB_PATH
+          dir "C:/Program Files/LLVM/lib/cmake/llvm" || echo "Not found in lib/cmake/llvm"
+          dir "C:/Program Files/LLVM/lib/cmake" || echo "Not found in lib/cmake"
 
       - name: Configure CMake
         run: |

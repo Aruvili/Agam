@@ -32,28 +32,28 @@ jobs:
         if: matrix.target == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake llvm-17-dev libllvm17 build-essential
+          sudo apt-get install -y cmake llvm-18-dev libllvm18 build-essential
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
-          echo "LLVM_DIR=$(llvm-config-17 --cmakedir)" >> $GITHUB_ENV
+          echo "LLVM_DIR=$(llvm-config-18 --cmakedir)" >> $GITHUB_ENV
 
       - name: Install Dependencies (macOS)
         if: matrix.target == 'macos'
         run: |
-          brew install cmake llvm@17
-          echo "/opt/homebrew/opt/llvm@17/bin" >> $GITHUB_PATH
-          echo "LLVM_DIR=/opt/homebrew/opt/llvm@17/lib/cmake/llvm" >> $GITHUB_ENV
+          brew install cmake llvm@18
+          echo "/opt/homebrew/opt/llvm@18/bin" >> $GITHUB_PATH
+          echo "LLVM_DIR=/opt/homebrew/opt/llvm@18/lib/cmake/llvm" >> $GITHUB_ENV
 
       - name: Install Dependencies (Windows)
         if: matrix.target == 'windows'
         run: |
-          choco install llvm --version=17.0.6 -y --allow-downgrade
+          choco install llvm --version=18.1.8 -y --allow-downgrade
           echo "LLVM_DIR=C:/Program Files/LLVM/lib/cmake/llvm" >> $env:GITHUB_ENV
           echo "C:/Program Files/LLVM/bin" >> $env:GITHUB_PATH
 
       - name: Configure CMake
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DLLVM_DIR="C:/Program Files/LLVM/lib/cmake/llvm"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF
 
       - name: Build
         run: cmake --build build --config Release

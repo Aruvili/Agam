@@ -44,11 +44,20 @@ jobs:
 
       - name: Install LLVM
         run: |
-          choco install llvm --version=18.1.8 -y
-          $llvmBin = "C:/Program Files/LLVM/bin"
-          echo "$llvmBin" >> $env:GITHUB_PATH
-          $cmakeDir = & "$llvmBin/llvm-config.exe" --cmakedir
-          echo "LLVM_DIR=$cmakeDir" >> $env:GITHUB_ENV
+          $llvmConfig = Get-Command llvm-config -ErrorAction SilentlyContinue
+          if (-not $llvmConfig) {
+             choco install llvm --version=18.1.8 -y
+             $llvmBin = "C:/Program Files/LLVM/bin"
+             if (Test-Path "$llvmBin/llvm-config.exe") {
+               $llvmConfig = "$llvmBin/llvm-config.exe"
+             }
+          }
+          if ($llvmConfig) {
+            $cmakeDir = & $llvmConfig --cmakedir
+            echo "LLVM_DIR=$cmakeDir" >> $env:GITHUB_ENV
+          } else {
+            throw "LLVM not found"
+          }
 
       - name: Install Flex & Bison
         run: choco install winflexbison3 -y

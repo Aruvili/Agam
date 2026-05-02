@@ -49,13 +49,23 @@ jobs:
       - name: Install Dependencies (Windows)
         if: matrix.target == 'windows'
         run: |
-          choco install llvm --version=18.1.8 -y --allow-downgrade
-          $llvmBin = "C:/Program Files/LLVM/bin"
-          echo "$llvmBin" >> $env:GITHUB_PATH
-          # Wait a moment for PATH to update or use absolute path
-          $cmakeDir = & "$llvmBin/llvm-config.exe" --cmakedir
-          echo "LLVM_DIR=$cmakeDir" >> $env:GITHUB_ENV
-          echo "Detected LLVM CMake dir: $cmakeDir"
+          # LLVM is often pre-installed on GitHub runners. Try to find it.
+          $llvmConfig = Get-Command llvm-config -ErrorAction SilentlyContinue
+          if (-not $llvmConfig) {
+             choco install llvm --version=18.1.8 -y --allow-downgrade
+             $llvmBin = "C:/Program Files/LLVM/bin"
+             if (Test-Path "$llvmBin/llvm-config.exe") {
+               $llvmConfig = "$llvmBin/llvm-config.exe"
+             }
+          }
+          
+          if ($llvmConfig) {
+            $cmakeDir = & $llvmConfig --cmakedir
+            echo "LLVM_DIR=$cmakeDir" >> $env:GITHUB_ENV
+            echo "Detected LLVM CMake dir: $cmakeDir"
+          } else {
+            throw "LLVM not found"
+          }
 
       - name: Configure CMake
         run: |

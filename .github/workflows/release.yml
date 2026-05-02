@@ -40,9 +40,11 @@ jobs:
       - name: Install Dependencies (macOS)
         if: matrix.target == 'macos'
         run: |
-          brew install cmake llvm@18
+          brew install cmake llvm@18 zstd zlib
           echo "/opt/homebrew/opt/llvm@18/bin" >> $GITHUB_PATH
           echo "LLVM_DIR=/opt/homebrew/opt/llvm@18/lib/cmake/llvm" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/opt/homebrew/opt/zstd/lib -L/opt/homebrew/opt/zlib/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I/opt/homebrew/opt/zstd/include -I/opt/homebrew/opt/zlib/include" >> $GITHUB_ENV
 
       - name: Install Dependencies (Windows)
         if: matrix.target == 'windows'
@@ -53,7 +55,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DCMAKE_PREFIX_PATH="C:/Program Files/LLVM" -DLLVM_DIR="C:/Program Files/LLVM/lib/cmake/llvm"
 
       - name: Build
         run: cmake --build build --config Release

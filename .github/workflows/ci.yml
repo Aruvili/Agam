@@ -52,7 +52,7 @@ jobs:
         run: choco install winflexbison3 -y
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="C:/Program Files/LLVM"
 
       - name: Build
         run: cmake --build build --config Debug

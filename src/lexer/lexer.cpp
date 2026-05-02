@@ -1,62 +1,63 @@
 #include "../include/agam/lexer/lexer.h"
+
 #include <unordered_map>
 
 namespace agam {
 
 // ── Keyword map ──────────────────────────────────────────────────────────────
 static const std::unordered_map<std::string, TokenType> keywords = {
-    {"செயல்",    TokenType::KW_FUNC},
-    {"மாறி",     TokenType::KW_LET},
-    {"எனில்",    TokenType::KW_IF},
+    {"செயல்", TokenType::KW_FUNC},
+    {"மாறி", TokenType::KW_LET},
+    {"எனில்", TokenType::KW_IF},
     {"இல்லையெனில்", TokenType::KW_ELSE},
-    {"வரை",     TokenType::KW_WHILE},
-    {"விடை",    TokenType::KW_RETURN},
-    {"எண்",      TokenType::KW_INT},
-    {"தசமம்",    TokenType::KW_FLOAT},
-    {"சரம்",     TokenType::KW_STRING},
-    {"வெற்று",   TokenType::KW_VOID},
-    {"உண்மை",    TokenType::KW_TRUE},
-    {"பொய்",     TokenType::KW_FALSE},
-    {"மெய்மை",   TokenType::KW_BOOL},
+    {"வரை", TokenType::KW_WHILE},
+    {"விடை", TokenType::KW_RETURN},
+    {"எண்", TokenType::KW_INT},
+    {"தசமம்", TokenType::KW_FLOAT},
+    {"சரம்", TokenType::KW_STRING},
+    {"வெற்று", TokenType::KW_VOID},
+    {"உண்மை", TokenType::KW_TRUE},
+    {"பொய்", TokenType::KW_FALSE},
+    {"மெய்மை", TokenType::KW_BOOL},
     // Sized integer types
-    {"எண்8",     TokenType::KW_INT8},
-    {"எண்16",    TokenType::KW_INT16},
-    {"எண்32",    TokenType::KW_INT32},
-    {"எண்64",    TokenType::KW_INT64},
-    {"எண்128",   TokenType::KW_INT128},
-    {"மிஎண்8",   TokenType::KW_UINT8},
-    {"மிஎண்16",  TokenType::KW_UINT16},
-    {"மிஎண்32",  TokenType::KW_UINT32},
-    {"மிஎண்64",  TokenType::KW_UINT64},
+    {"எண்8", TokenType::KW_INT8},
+    {"எண்16", TokenType::KW_INT16},
+    {"எண்32", TokenType::KW_INT32},
+    {"எண்64", TokenType::KW_INT64},
+    {"எண்128", TokenType::KW_INT128},
+    {"மிஎண்8", TokenType::KW_UINT8},
+    {"மிஎண்16", TokenType::KW_UINT16},
+    {"மிஎண்32", TokenType::KW_UINT32},
+    {"மிஎண்64", TokenType::KW_UINT64},
     {"மிஎண்128", TokenType::KW_UINT128},
     // Sized float types
-    {"தசமம்32",  TokenType::KW_FLOAT32},
-    {"தசமம்64",  TokenType::KW_FLOAT64},
-    {"அமைப்பு",  TokenType::KW_STRUCT},
-    {"பட்டியல்",  TokenType::KW_ENUM},
-    {"பொருத்து",  TokenType::KW_MATCH},
-    {"புதிய",    TokenType::KW_NEW},
-    {"நீக்கு",    TokenType::KW_DELETE},
-    {"சுற்று",    TokenType::KW_FOR},
-    {"உள்",      TokenType::KW_IN},
+    {"தசமம்32", TokenType::KW_FLOAT32},
+    {"தசமம்64", TokenType::KW_FLOAT64},
+    {"அமைப்பு", TokenType::KW_STRUCT},
+    {"பட்டியல்", TokenType::KW_ENUM},
+    {"பொருத்து", TokenType::KW_MATCH},
+    {"புதிய", TokenType::KW_NEW},
+    {"நீக்கு", TokenType::KW_DELETE},
+    {"சுற்று", TokenType::KW_FOR},
+    {"உள்", TokenType::KW_IN},
     {"இறக்குமதி", TokenType::KW_IMPORT},
-    {"வெளி",     TokenType::KW_EXTERN},
-    {"பண்பு",    TokenType::KW_TRAIT},
+    {"வெளி", TokenType::KW_EXTERN},
+    {"பண்பு", TokenType::KW_TRAIT},
     {"செயல்படுத்து", TokenType::KW_IMPL},
-    {"நிலை",     TokenType::KW_MUT},
-    {"மண்டலம்",  TokenType::KW_ZONE},
-    {"ஒதுக்கீடு",  TokenType::KW_ALLOC},
-    {"கடன்",     TokenType::KW_BORROW},
-    {"பகிர்வு",  TokenType::KW_SHARED},
-    {"தப்பித்தல்",  TokenType::KW_ESCAPE},
-    {"இல்லை",    TokenType::KW_NIL},
-    {"ஆக",      TokenType::KW_AS},
+    {"நிலை", TokenType::KW_MUT},
+    {"மண்டலம்", TokenType::KW_ZONE},
+    {"ஒதுக்கீடு", TokenType::KW_ALLOC},
+    {"கடன்", TokenType::KW_BORROW},
+    {"பகிர்வு", TokenType::KW_SHARED},
+    {"தப்பித்தல்", TokenType::KW_ESCAPE},
+    {"இல்லை", TokenType::KW_NIL},
+    {"ஆக", TokenType::KW_AS},
     {"நிலைமாறிலி", TokenType::KW_CONST},
 };
 
 // ── Constructor & Reset ──────────────────────────────────────────────────────
 
-Lexer::Lexer(const std::string &source, const std::string &filename, DiagnosticEngine &diag) 
+Lexer::Lexer(const std::string &source, const std::string &filename, DiagnosticEngine &diag)
     : source_(source), filename_(filename), diag_(diag) {}
 
 void Lexer::reset() {
@@ -67,15 +68,19 @@ void Lexer::reset() {
 
 // ── Character helpers ────────────────────────────────────────────────────────
 
-bool Lexer::isAtEnd() const { return pos_ >= source_.size(); }
+bool Lexer::isAtEnd() const {
+    return pos_ >= source_.size();
+}
 
 char Lexer::current() const {
-    if (isAtEnd()) return '\0';
+    if (isAtEnd())
+        return '\0';
     return source_[pos_];
 }
 
 char Lexer::peekChar() const {
-    if (pos_ + 1 >= source_.size()) return '\0';
+    if (pos_ + 1 >= source_.size())
+        return '\0';
     return source_[pos_ + 1];
 }
 
@@ -97,27 +102,34 @@ char Lexer::advance() {
 }
 
 bool Lexer::match(char expected) {
-    if (isAtEnd() || source_[pos_] != expected) return false;
+    if (isAtEnd() || source_[pos_] != expected)
+        return false;
     advance();
     return true;
 }
 
-bool Lexer::isDigit(char c) { return c >= '0' && c <= '9'; }
+bool Lexer::isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
 
 bool Lexer::isAlpha(char c) {
     unsigned char uc = static_cast<unsigned char>(c);
     // ASCII alpha or underscore
-    if ((uc >= 'a' && uc <= 'z') || (uc >= 'A' && uc <= 'Z') || uc == '_') return true;
+    if ((uc >= 'a' && uc <= 'z') || (uc >= 'A' && uc <= 'Z') || uc == '_')
+        return true;
     // Multi-byte UTF-8 character (lead byte)
-    if (uc >= 0xC0) return true;
+    if (uc >= 0xC0)
+        return true;
     return false;
 }
 
 bool Lexer::isAlphaNumeric(char c) {
-    if (isAlpha(c) || isDigit(c)) return true;
+    if (isAlpha(c) || isDigit(c))
+        return true;
     unsigned char uc = static_cast<unsigned char>(c);
     // UTF-8 trailing byte
-    if ((uc & 0xC0) == 0x80) return true;
+    if ((uc & 0xC0) == 0x80)
+        return true;
     return false;
 }
 
@@ -131,7 +143,8 @@ void Lexer::skipWhitespace() {
         } else if (c == '/' && peekChar() == '/') {
             skipSingleLineComment();
         } else if (c == '/' && peekChar() == '*') {
-            if (!skipMultiLineComment()) return;
+            if (!skipMultiLineComment())
+                return;
         } else {
             break;
         }
@@ -195,9 +208,10 @@ Token Lexer::readNumber() {
     // Remove underscores
     std::string cleanValue;
     for (char c : value) {
-        if (c != '_') cleanValue += c;
+        if (c != '_')
+            cleanValue += c;
     }
-    
+
     TokenType type = isFloat ? TokenType::FLOAT_LITERAL : TokenType::INT_LITERAL;
     return {type, cleanValue, filename_, startLine, startCol};
 }
@@ -211,14 +225,25 @@ Token Lexer::readString() {
     while (!isAtEnd() && current() != '"') {
         if (current() == '\\') {
             advance(); // consume backslash
-            if (isAtEnd()) break;
+            if (isAtEnd())
+                break;
             char escaped = current();
             switch (escaped) {
-            case 'n':  value += '\n'; break;
-            case 't':  value += '\t'; break;
-            case '\\': value += '\\'; break;
-            case '"':  value += '"';  break;
-            default:   value += escaped; break;
+            case 'n':
+                value += '\n';
+                break;
+            case 't':
+                value += '\t';
+                break;
+            case '\\':
+                value += '\\';
+                break;
+            case '"':
+                value += '"';
+                break;
+            default:
+                value += escaped;
+                break;
             }
         } else {
             value += current();
@@ -227,7 +252,8 @@ Token Lexer::readString() {
     }
 
     if (isAtEnd()) {
-        return errorToken("முடிவுறாத சரம் (Unterminated string) - வரி: " + std::to_string(startLine));
+        return errorToken("முடிவுறாத சரம் (Unterminated string) - வரி: " +
+                          std::to_string(startLine));
     }
 
     advance(); // consume closing '"'
@@ -268,60 +294,86 @@ Token Lexer::nextToken() {
     char c = current();
 
     // Numbers
-    if (isDigit(c)) return readNumber();
+    if (isDigit(c))
+        return readNumber();
 
     // Strings
-    if (c == '"') return readString();
+    if (c == '"')
+        return readString();
 
     // Identifiers and keywords
-    if (isAlpha(c)) return readIdentifierOrKeyword();
+    if (isAlpha(c))
+        return readIdentifierOrKeyword();
 
     // Operators and delimiters
     advance(); // consume the character
     switch (c) {
-    case '+': return {TokenType::PLUS, "+", filename_, startLine, startCol};
+    case '+':
+        return {TokenType::PLUS, "+", filename_, startLine, startCol};
     case '-':
-        if (match('>')) return {TokenType::ARROW, "->", filename_, startLine, startCol};
+        if (match('>'))
+            return {TokenType::ARROW, "->", filename_, startLine, startCol};
         return {TokenType::MINUS, "-", filename_, startLine, startCol};
-    case '*': return {TokenType::STAR, "*", filename_, startLine, startCol};
-    case '/': return {TokenType::SLASH, "/", filename_, startLine, startCol};
+    case '*':
+        return {TokenType::STAR, "*", filename_, startLine, startCol};
+    case '/':
+        return {TokenType::SLASH, "/", filename_, startLine, startCol};
     case '=':
-        if (match('=')) return {TokenType::EQ, "==", filename_, startLine, startCol};
-        if (match('>')) return {TokenType::FAT_ARROW, "=>", filename_, startLine, startCol};
+        if (match('='))
+            return {TokenType::EQ, "==", filename_, startLine, startCol};
+        if (match('>'))
+            return {TokenType::FAT_ARROW, "=>", filename_, startLine, startCol};
         return {TokenType::ASSIGN, "=", filename_, startLine, startCol};
     case '!':
-        if (match('=')) return {TokenType::NEQ, "!=", filename_, startLine, startCol};
+        if (match('='))
+            return {TokenType::NEQ, "!=", filename_, startLine, startCol};
         return {TokenType::NOT, "!", filename_, startLine, startCol};
     case '<':
-        if (match('=')) return {TokenType::LTE, "<=", filename_, startLine, startCol};
+        if (match('='))
+            return {TokenType::LTE, "<=", filename_, startLine, startCol};
         return {TokenType::LT, "<", filename_, startLine, startCol};
     case '>':
-        if (match('=')) return {TokenType::GTE, ">=", filename_, startLine, startCol};
+        if (match('='))
+            return {TokenType::GTE, ">=", filename_, startLine, startCol};
         return {TokenType::GT, ">", filename_, startLine, startCol};
     case '&':
-        if (match('&')) return {TokenType::AND, "&&", filename_, startLine, startCol};
+        if (match('&'))
+            return {TokenType::AND, "&&", filename_, startLine, startCol};
         return {TokenType::AMPERSAND, "&", filename_, startLine, startCol};
     case '|':
-        if (match('|')) return {TokenType::OR, "||", filename_, startLine, startCol};
+        if (match('|'))
+            return {TokenType::OR, "||", filename_, startLine, startCol};
         return errorToken("எதிர்பாராத எழுத்து '|' (Unexpected character) - வரி: " +
                           std::to_string(startLine) + ", நிரல்: " + std::to_string(startCol));
 
-    case '(': return {TokenType::LPAREN, "(", filename_, startLine, startCol};
-    case ')': return {TokenType::RPAREN, ")", filename_, startLine, startCol};
-    case '{': return {TokenType::LBRACE, "{", filename_, startLine, startCol};
-    case '}': return {TokenType::RBRACE, "}", filename_, startLine, startCol};
-    case '[': return {TokenType::LBRACKET, "[", filename_, startLine, startCol};
-    case ']': return {TokenType::RBRACKET, "]", filename_, startLine, startCol};
-    case ';': return {TokenType::SEMICOLON, ";", filename_, startLine, startCol};
-    case ',': return {TokenType::COMMA, ",", filename_, startLine, startCol};
+    case '(':
+        return {TokenType::LPAREN, "(", filename_, startLine, startCol};
+    case ')':
+        return {TokenType::RPAREN, ")", filename_, startLine, startCol};
+    case '{':
+        return {TokenType::LBRACE, "{", filename_, startLine, startCol};
+    case '}':
+        return {TokenType::RBRACE, "}", filename_, startLine, startCol};
+    case '[':
+        return {TokenType::LBRACKET, "[", filename_, startLine, startCol};
+    case ']':
+        return {TokenType::RBRACKET, "]", filename_, startLine, startCol};
+    case ';':
+        return {TokenType::SEMICOLON, ";", filename_, startLine, startCol};
+    case ',':
+        return {TokenType::COMMA, ",", filename_, startLine, startCol};
     case ':':
-        if (match(':')) return {TokenType::DOUBLE_COLON, "::", filename_, startLine, startCol};
+        if (match(':'))
+            return {TokenType::DOUBLE_COLON, "::", filename_, startLine, startCol};
         return {TokenType::COLON, ":", filename_, startLine, startCol};
     case '.':
-        if (match('.')) return {TokenType::DOTDOT, "..", filename_, startLine, startCol};
+        if (match('.'))
+            return {TokenType::DOTDOT, "..", filename_, startLine, startCol};
         return {TokenType::DOT, ".", filename_, startLine, startCol};
-    case '~': return {TokenType::TILDE, "~", filename_, startLine, startCol};
-    case '%': return {TokenType::PERCENT, "%", filename_, startLine, startCol};
+    case '~':
+        return {TokenType::TILDE, "~", filename_, startLine, startCol};
+    case '%':
+        return {TokenType::PERCENT, "%", filename_, startLine, startCol};
 
     default:
         return errorToken("எதிர்பாராத எழுத்து '" + std::string(1, c) +

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(Agam
-    VERSION 1.0.0
+    VERSION 1.0.1
     DESCRIPTION "Agam Programming Language Compiler (Production)"
     LANGUAGES C CXX
 )
@@ -12,10 +12,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+
+# ── AddressSanitizer (optional, for memory safety testing) ────────────────────
+option(AGAM_ENABLE_ASAN "Enable AddressSanitizer for memory safety checks" OFF)
+if(AGAM_ENABLE_ASAN)
+    message(STATUS "AddressSanitizer ENABLED")
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+    # Disable container annotations to avoid mismatch with non-ASan LLVM
+    add_definitions(-D_DISABLE_VECTOR_ANNOTATION -D_DISABLE_STRING_ANNOTATION)
+endif()
+
 # ── Output directories ───────────────────────────────────────────────────────
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib) 
 
 # ── Find LLVM ─────────────────────────────────────────────────────────────────
 # Force CMake to prefer static libraries by avoiding the shared 'LLVM' component
@@ -23,7 +34,7 @@ find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-include_directories(${LLVM_INCLUDE_DIRS})
+# LLVM includes are added per-target as SYSTEM to suppress their warnings
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
@@ -81,6 +92,18 @@ target_include_directories(agam_lib PUBLIC
     ${CMAKE_SOURCE_DIR}/include
 )
 
+# Mark LLVM includes as SYSTEM to suppress their warnings
+target_include_directories(agam_lib SYSTEM PUBLIC
+    ${LLVM_INCLUDE_DIRS}
+)
+
+# ── Strict warnings for our own code only ────────────────────────────────────
+if(MSVC)
+    target_compile_options(agam_lib PRIVATE /W4 /WX)
+else()
+    target_compile_options(agam_lib PRIVATE -Wall -Wextra -Werror -Wno-unused-parameter)
+endif()
+
 target_link_libraries(agam_lib PUBLIC
     ${LLVM_LIBS}
     ${LLVM_SYSTEM_LIBS}
@@ -94,6 +117,12 @@ add_executable(agamc
 target_link_libraries(agamc PRIVATE
     agam_lib
 )
+
+if(MSVC)
+    target_compile_options(agamc PRIVATE /W4 /WX)
+else()
+    target_compile_options(agamc PRIVATE -Wall -Wextra -Werror -Wno-unused-parameter)
+endif()
 
 # ── Testing ──────────────────────────────────────────────────────────────────
 option(AGAM_BUILD_TESTS "Build the Agam test suite" ON)

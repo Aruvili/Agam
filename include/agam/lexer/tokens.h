@@ -180,10 +180,14 @@ inline const char *tokenTypeToString(TokenType t) {
         return "KW_MUT";
     case TokenType::KW_ZONE:
         return "KW_ZONE";
-    case TokenType::KW_ALLOC: return "alloc";
-    case TokenType::KW_BORROW: return "borrow";
-    case TokenType::KW_SHARED: return "shared";
-    case TokenType::KW_ESCAPE: return "escape";
+    case TokenType::KW_ALLOC:
+        return "alloc";
+    case TokenType::KW_BORROW:
+        return "borrow";
+    case TokenType::KW_SHARED:
+        return "shared";
+    case TokenType::KW_ESCAPE:
+        return "escape";
     case TokenType::KW_NIL:
         return "KW_NIL";
     case TokenType::KW_AS:

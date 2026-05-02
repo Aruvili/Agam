@@ -3,6 +3,7 @@
 #include "agam/ast/ast.h"
 #include "agam/hir/hir.h"
 #include "agam/semantic/symbol_table.h"
+
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -11,13 +12,13 @@ namespace agam {
 
 /// Builds HIR from a semantically-analyzed AST.
 class HirBuilder {
-public:
+  public:
     std::unique_ptr<HirProgram> build(Program &program);
 
     bool hasErrors() const { return !errors_.empty(); }
     const std::vector<std::string> &errors() const { return errors_; }
 
-private:
+  private:
     HirId nextId_ = 1;
 
     struct Scope {
@@ -38,7 +39,8 @@ private:
     void visit(DerefAssignExpr &node);
 
     std::unique_ptr<HirFuncDecl> lowerFunc(FunctionDecl &node);
-    std::unique_ptr<HirFuncDecl> lowerImplMethod(FunctionDecl &node, const std::string &mangledName, HirId funcId, const TypeInfo &targetType);
+    std::unique_ptr<HirFuncDecl> lowerImplMethod(FunctionDecl &node, const std::string &mangledName,
+                                                 HirId funcId, const TypeInfo &targetType);
     std::unique_ptr<HirBlock> lowerBlock(BlockStmt &node);
     std::unique_ptr<HirStmt> lowerStmt(Stmt &node);
     std::unique_ptr<HirExpr> lowerExpr(Expr &node);

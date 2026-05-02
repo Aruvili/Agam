@@ -1,20 +1,16 @@
 #pragma once
 
 #include "agam/ast/ast.h"
-#include <string>
-#include <vector>
-#include <unordered_map>
+
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace agam {
 
 /// Level of a single diagnostic.
-enum class DiagnosticLevel {
-    Note,
-    Warning,
-    Error,
-    Fatal
-};
+enum class DiagnosticLevel { Note, Warning, Error, Fatal };
 
 /// A single structured diagnostic.
 struct Diagnostic {
@@ -26,7 +22,7 @@ struct Diagnostic {
 
 /// Manages source code content for snippet recovery in diagnostics.
 class SourceManager {
-public:
+  public:
     /// Add a source file to the manager and split it into lines.
     void addSource(const std::string &filename, const std::string &content) {
         std::vector<std::string> lines;
@@ -59,16 +55,17 @@ public:
         return sources_.find(filename) != sources_.end();
     }
 
-private:
+  private:
     std::unordered_map<std::string, std::vector<std::string>> sources_;
 };
 
 /// Collects and manages diagnostics during compilation phases.
 class DiagnosticEngine {
-public:
+  public:
     explicit DiagnosticEngine(SourceManager &sm) : sm_(sm) {}
 
-    void report(DiagnosticLevel level, const SourceLocation &loc, const std::string &msg, const std::string &hint = "") {
+    void report(DiagnosticLevel level, const SourceLocation &loc, const std::string &msg,
+                const std::string &hint = "") {
         diagnostics_.push_back({level, loc, msg, hint});
         if (level == DiagnosticLevel::Error || level == DiagnosticLevel::Fatal) {
             hasErrors_ = true;
@@ -97,7 +94,7 @@ public:
         hasErrors_ = false;
     }
 
-private:
+  private:
     SourceManager &sm_;
     std::vector<Diagnostic> diagnostics_;
     bool hasErrors_ = false;

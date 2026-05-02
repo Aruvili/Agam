@@ -1,18 +1,18 @@
 #include "agam/codegen/executor.h"
+
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
-#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 #include "llvm/ExecutionEngine/Orc/Shared/ExecutorAddress.h"
 #include "llvm/ExecutionEngine/Orc/Shared/ExecutorSymbolDef.h"
+#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <vector>
-#include <cmath>
-
 
 extern "C" int agam_printf(const char *fmt, const char *s) {
     return printf(fmt, s);
@@ -253,54 +253,70 @@ int Executor::run(llvm::Module &module, const std::string &entryPoint) {
     // Register math helpers
     {
         llvm::orc::SymbolMap symbols;
-        symbols[jit->mangleAndIntern("sqrt")] = symbols[jit->mangleAndIntern("வர்க்கமூலம்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(sqrt)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("sin")] = symbols[jit->mangleAndIntern("சைன்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(sin)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("cos")] = symbols[jit->mangleAndIntern("கொசைன்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(cos)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("tan")] = symbols[jit->mangleAndIntern("டேன்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(tan)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("asin")] = symbols[jit->mangleAndIntern("தலைகீழ்_சைன்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(asin)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("acos")] = symbols[jit->mangleAndIntern("தலைகீழ்_கொசைன்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(acos)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("atan")] = symbols[jit->mangleAndIntern("தலைகீழ்_டேன்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(atan)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("atan2")] = symbols[jit->mangleAndIntern("தலைகீழ்_டேன்2")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double, double)>(atan2)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("exp")] = symbols[jit->mangleAndIntern("அடுக்கு_இ")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(exp)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("log")] = symbols[jit->mangleAndIntern("இயற்கை_மடக்கை")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(log)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("log10")] = symbols[jit->mangleAndIntern("மடக்கை10")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(log10)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("pow")] = symbols[jit->mangleAndIntern("அடுக்கு")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double, double)>(pow)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("fabs")] = symbols[jit->mangleAndIntern("மட்டு_மதிப்பு")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(fabs)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("ceil")] = symbols[jit->mangleAndIntern("மேல்_எண்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(ceil)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("floor")] = symbols[jit->mangleAndIntern("கீழ்_எண்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(floor)),
-            llvm::JITSymbolFlags::Exported);
-        symbols[jit->mangleAndIntern("round")] = symbols[jit->mangleAndIntern("முழு_எண்")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(round)),
-            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("sqrt")] = symbols[jit->mangleAndIntern("வர்க்கமூலம்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(sqrt)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("sin")] = symbols[jit->mangleAndIntern("சைன்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(sin)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("cos")] = symbols[jit->mangleAndIntern("கொசைன்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(cos)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("tan")] = symbols[jit->mangleAndIntern("டேன்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(tan)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("asin")] = symbols[jit->mangleAndIntern("தலைகீழ்_சைன்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(asin)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("acos")] = symbols[jit->mangleAndIntern("தலைகீழ்_கொசைன்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(acos)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("atan")] = symbols[jit->mangleAndIntern("தலைகீழ்_டேன்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(atan)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("atan2")] = symbols[jit->mangleAndIntern("தலைகீழ்_டேன்2")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double, double)>(atan2)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("exp")] = symbols[jit->mangleAndIntern("அடுக்கு_இ")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(exp)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("log")] = symbols[jit->mangleAndIntern("இயற்கை_மடக்கை")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(log)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("log10")] = symbols[jit->mangleAndIntern("மடக்கை10")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(log10)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("pow")] = symbols[jit->mangleAndIntern("அடுக்கு")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double, double)>(pow)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("fabs")] = symbols[jit->mangleAndIntern("மட்டு_மதிப்பு")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(fabs)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("ceil")] = symbols[jit->mangleAndIntern("மேல்_எண்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(ceil)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("floor")] = symbols[jit->mangleAndIntern("கீழ்_எண்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(floor)),
+                llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("round")] = symbols[jit->mangleAndIntern("முழு_எண்")] =
+            llvm::orc::ExecutorSymbolDef(
+                llvm::orc::ExecutorAddr::fromPtr(static_cast<double (*)(double)>(round)),
+                llvm::JITSymbolFlags::Exported);
         if (auto err =
                 jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
             std::cerr << "Warning: failed to define math helpers: "

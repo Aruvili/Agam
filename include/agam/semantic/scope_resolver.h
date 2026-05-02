@@ -4,15 +4,16 @@
 #include "agam/semantic/symbol_table.h"
 #include "agam/semantic/type_checker.h"
 #include "agam/utils/diagnostic.h"
-#include <vector>
+
 #include <string>
+#include <vector>
 
 namespace agam {
 
 /// Resolves variable and function references to their declarations.
 /// Reports undeclared identifiers.
 class ScopeResolver : public ASTVisitor {
-public:
+  public:
     /// Run scope resolution on the given program.
     /// Returns true if no errors were found.
     bool resolve(Program &program, DiagnosticEngine &diag);
@@ -66,7 +67,7 @@ public:
     void visit(ImplDecl &node) override;
     void visit(Program &node) override;
 
-private:
+  private:
     SymbolTable symbols_;
     DiagnosticEngine *diag_ = nullptr;
 

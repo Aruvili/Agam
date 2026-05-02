@@ -1,4 +1,5 @@
 #include "agam/mir/mir_builder.h"
+
 #include <cassert>
 
 namespace agam {
@@ -45,7 +46,7 @@ std::unique_ptr<MirProgram> MirBuilder::build(ThirProgram &program) {
         MirConstDef mcn;
         mcn.name = cn->name;
         mcn.typeInfo = cn->typeInfo;
-        
+
         ThirExpr *expr = cn->value.get();
         // Unwrap casts for constants
         while (auto *cast = dynamic_cast<ThirCastExpr *>(expr)) {
@@ -63,7 +64,7 @@ std::unique_ptr<MirProgram> MirBuilder::build(ThirProgram &program) {
         } else {
             mcn.value = MirConstInt{0};
         }
-        
+
         constantMap_[cn->id] = mcn.value;
         mirProg->constants.push_back(std::move(mcn));
     }
@@ -120,7 +121,8 @@ void MirBuilder::lowerFunc(ThirFuncDecl &fn) {
 //  Block / Statement Lowering
 // ═══════════════════════════════════════════════════════════════════════════════
 
-void MirBuilder::lowerBlock(ThirBlock &thirBlock, MirBlockId &currentBlock, MirBlockId *continueBlockId) {
+void MirBuilder::lowerBlock(ThirBlock &thirBlock, MirBlockId &currentBlock,
+                            MirBlockId *continueBlockId) {
     for (auto &stmt : thirBlock.stmts) {
         lowerStmt(*stmt, currentBlock, continueBlockId);
     }
@@ -133,8 +135,7 @@ void MirBuilder::lowerStmt(ThirStmt &stmt, MirBlockId &currentBlock, MirBlockId 
         varMap_[vd->id] = localId;
         if (vd->initializer) {
             MirOperand val = lowerExpr(*vd->initializer, currentBlock);
-            block(currentBlock).statements.push_back(
-                MirAssign{{localId}, MirRvalueUse{val}});
+            block(currentBlock).statements.push_back(MirAssign{{localId}, MirRvalueUse{val}});
         }
         return;
     }
@@ -143,12 +144,12 @@ void MirBuilder::lowerStmt(ThirStmt &stmt, MirBlockId &currentBlock, MirBlockId 
     if (auto *ret = dynamic_cast<ThirReturn *>(&stmt)) {
         if (ret->value) {
             MirOperand val = lowerExpr(*ret->value, currentBlock);
-            
+
             // Cleanup active zones before return
             for (auto it = activeZones_.rbegin(); it != activeZones_.rend(); ++it) {
                 block(currentBlock).statements.push_back(MirZoneEnd{*it});
             }
-            
+
             setTerminator(currentBlock, MirReturn{val, true});
         } else {
             // Cleanup active zones before return void
@@ -230,47 +231,53 @@ void MirBuilder::lowerStmt(ThirStmt &stmt, MirBlockId &currentBlock, MirBlockId 
 
         // 2. Create index local
         MirLocalId indexLocal = newTemp(TypeInfo::scalar(TypeKind::Int64));
-        block(currentBlock).statements.push_back(
-            MirAssign{{indexLocal}, MirRvalueUse{MirOperand::makeConstInt64(0)}});
+        block(currentBlock)
+            .statements.push_back(
+                MirAssign{{indexLocal}, MirRvalueUse{MirOperand::makeConstInt64(0)}});
 
         // 3. Get length
         MirLocalId lenLocal = newTemp(TypeInfo::scalar(TypeKind::Int64));
         if (iterable.typeInfo.isArray) {
-            block(currentBlock).statements.push_back(
-                MirAssign{{lenLocal}, MirRvalueUse{MirOperand::makeConstInt64(iterable.typeInfo.arraySize)}});
+            block(currentBlock)
+                .statements.push_back(MirAssign{
+                    {lenLocal},
+                    MirRvalueUse{MirOperand::makeConstInt64(iterable.typeInfo.arraySize)}});
         } else if (iterable.typeInfo.isSlice) {
-            block(currentBlock).statements.push_back(
-                MirAssign{{lenLocal}, MirRvalueSliceLen{iterable}});
+            block(currentBlock)
+                .statements.push_back(MirAssign{{lenLocal}, MirRvalueSliceLen{iterable}});
         } else {
             // Integer range: len = iterable
-            block(currentBlock).statements.push_back(
-                MirAssign{{lenLocal}, MirRvalueUse{iterable}});
+            block(currentBlock).statements.push_back(MirAssign{{lenLocal}, MirRvalueUse{iterable}});
         }
 
         setTerminator(currentBlock, MirGoto{condBlock});
 
         // 4. Condition: index < len
         MirLocalId condLocal = newTemp(TypeInfo::scalar(TypeKind::Bool));
-        block(condBlock).statements.push_back(
-            MirAssign{{condLocal}, MirRvalueBinaryOp{BinaryOp::Lt,
-                MirOperand::makeCopy(indexLocal, TypeInfo::scalar(TypeKind::Int64)),
-                MirOperand::makeCopy(lenLocal, TypeInfo::scalar(TypeKind::Int64))}});
-        setTerminator(condBlock, MirSwitchInt{MirOperand::makeCopy(condLocal, TypeInfo::scalar(TypeKind::Bool)), bodyBlock, endBlock});
+        block(condBlock).statements.push_back(MirAssign{
+            {condLocal},
+            MirRvalueBinaryOp{BinaryOp::Lt,
+                              MirOperand::makeCopy(indexLocal, TypeInfo::scalar(TypeKind::Int64)),
+                              MirOperand::makeCopy(lenLocal, TypeInfo::scalar(TypeKind::Int64))}});
+        setTerminator(condBlock, MirSwitchInt{MirOperand::makeCopy(
+                                                  condLocal, TypeInfo::scalar(TypeKind::Bool)),
+                                              bodyBlock, endBlock});
 
         // 5. Body: x = iterable[index] (or x = index for ranges)
         MirLocalId loopVarLocal = newLocal(forS->varType, forS->varName, false);
         varMap_[forS->varId] = loopVarLocal;
 
         if (iterable.typeInfo.isArray || iterable.typeInfo.isSlice) {
-            block(bodyBlock).statements.push_back(
-                MirAssign{{loopVarLocal}, MirRvalueIndex{iterable,
-                    MirOperand::makeCopy(indexLocal, TypeInfo::scalar(TypeKind::Int64)),
-                    TypeInfo::scalar(iterable.typeInfo.elementType)}});
+            block(bodyBlock).statements.push_back(MirAssign{
+                {loopVarLocal},
+                MirRvalueIndex{iterable,
+                               MirOperand::makeCopy(indexLocal, TypeInfo::scalar(TypeKind::Int64)),
+                               TypeInfo::scalar(iterable.typeInfo.elementType)}});
         } else {
             // Integer range: x = index
-            block(bodyBlock).statements.push_back(
-                MirAssign{{loopVarLocal}, MirRvalueUse{
-                    MirOperand::makeCopy(indexLocal, TypeInfo::scalar(TypeKind::Int64))}});
+            block(bodyBlock).statements.push_back(MirAssign{
+                {loopVarLocal},
+                MirRvalueUse{MirOperand::makeCopy(indexLocal, TypeInfo::scalar(TypeKind::Int64))}});
         }
 
         lowerBlock(*forS->body, bodyBlock, &incrBlock);
@@ -279,10 +286,11 @@ void MirBuilder::lowerStmt(ThirStmt &stmt, MirBlockId &currentBlock, MirBlockId 
         }
 
         // 6. Increment: index = index + 1
-        block(incrBlock).statements.push_back(
-            MirAssign{{indexLocal}, MirRvalueBinaryOp{BinaryOp::Add,
-                MirOperand::makeCopy(indexLocal, TypeInfo::scalar(TypeKind::Int64)),
-                MirOperand::makeConstInt64(1)}});
+        block(incrBlock).statements.push_back(MirAssign{
+            {indexLocal},
+            MirRvalueBinaryOp{BinaryOp::Add,
+                              MirOperand::makeCopy(indexLocal, TypeInfo::scalar(TypeKind::Int64)),
+                              MirOperand::makeConstInt64(1)}});
         setTerminator(incrBlock, MirGoto{condBlock});
 
         currentBlock = endBlock;
@@ -345,7 +353,7 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
         if (itLocal != varMap_.end()) {
             return MirOperand::makeCopy(itLocal->second, var->typeInfo);
         }
-        
+
         auto itConst = constantMap_.find(var->defId);
         if (itConst != constantMap_.end()) {
             MirOperand op;
@@ -362,28 +370,28 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *bin = dynamic_cast<ThirBinaryExpr *>(&expr)) {
         MirOperand lhs = lowerExpr(*bin->lhs, currentBlock);
         MirOperand rhs = lowerExpr(*bin->rhs, currentBlock);
-        
+
         if (auto folded = foldBinaryOp(bin->op, lhs, rhs)) {
             return *folded;
         }
 
         MirLocalId tmp = newTemp(bin->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueBinaryOp{bin->op, lhs, rhs}});
+        block(currentBlock)
+            .statements.push_back(MirAssign{{tmp}, MirRvalueBinaryOp{bin->op, lhs, rhs}});
         return MirOperand::makeCopy(tmp, bin->typeInfo);
     }
 
     // Unary expression
     if (auto *un = dynamic_cast<ThirUnaryExpr *>(&expr)) {
         MirOperand operand = lowerExpr(*un->operand, currentBlock);
-        
+
         if (auto folded = foldUnaryOp(un->op, operand)) {
             return *folded;
         }
 
         MirLocalId tmp = newTemp(un->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueUnaryOp{un->op, operand}});
+        block(currentBlock)
+            .statements.push_back(MirAssign{{tmp}, MirRvalueUnaryOp{un->op, operand}});
         return MirOperand::makeCopy(tmp, un->typeInfo);
     }
 
@@ -391,8 +399,9 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *cast = dynamic_cast<ThirCastExpr *>(&expr)) {
         MirOperand operand = lowerExpr(*cast->operand, currentBlock);
         MirLocalId tmp = newTemp(cast->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueCast{operand, cast->fromTypeInfo, cast->typeInfo}});
+        block(currentBlock)
+            .statements.push_back(
+                MirAssign{{tmp}, MirRvalueCast{operand, cast->fromTypeInfo, cast->typeInfo}});
         return MirOperand::makeCopy(tmp, cast->typeInfo);
     }
 
@@ -403,8 +412,9 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
             args.push_back(lowerExpr(*arg, currentBlock));
         }
         MirLocalId tmp = newTemp(call->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueCall{call->calleeName, std::move(args), call->typeInfo}});
+        block(currentBlock)
+            .statements.push_back(
+                MirAssign{{tmp}, MirRvalueCall{call->calleeName, std::move(args), call->typeInfo}});
         return MirOperand::makeCopy(tmp, call->typeInfo);
     }
 
@@ -413,8 +423,7 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
         MirOperand val = lowerExpr(*assign->value, currentBlock);
         auto it = varMap_.find(assign->targetId);
         if (it != varMap_.end()) {
-            block(currentBlock).statements.push_back(
-                MirAssign{{it->second}, MirRvalueUse{val}});
+            block(currentBlock).statements.push_back(MirAssign{{it->second}, MirRvalueUse{val}});
         }
         return val;
     }
@@ -426,8 +435,9 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
             elems.push_back(lowerExpr(*e, currentBlock));
         }
         MirLocalId tmp = newTemp(arr->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueArrayInit{std::move(elems), arr->typeInfo}});
+        block(currentBlock)
+            .statements.push_back(
+                MirAssign{{tmp}, MirRvalueArrayInit{std::move(elems), arr->typeInfo}});
         return MirOperand::makeCopy(tmp, arr->typeInfo);
     }
 
@@ -435,17 +445,19 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *idx = dynamic_cast<ThirIndexExpr *>(&expr)) {
         MirOperand baseOp = lowerExpr(*idx->base, currentBlock);
         MirOperand indexOp = lowerExpr(*idx->index, currentBlock);
-        
+
         if (idx->isRange) {
-            MirOperand endOp = idx->endIndex ? lowerExpr(*idx->endIndex, currentBlock) : MirOperand::makeConstInt(0);
+            MirOperand endOp = idx->endIndex ? lowerExpr(*idx->endIndex, currentBlock)
+                                             : MirOperand::makeConstInt(0);
             MirLocalId tmp = newTemp(idx->typeInfo);
-            block(currentBlock).statements.push_back(
-                MirAssign{{tmp}, MirRvalueSlice{baseOp, indexOp, endOp}});
+            block(currentBlock)
+                .statements.push_back(MirAssign{{tmp}, MirRvalueSlice{baseOp, indexOp, endOp}});
             return MirOperand::makeCopy(tmp, idx->typeInfo);
         } else {
             MirLocalId tmp = newTemp(idx->typeInfo);
-            block(currentBlock).statements.push_back(
-                MirAssign{{tmp}, MirRvalueIndex{baseOp, indexOp, idx->typeInfo}});
+            block(currentBlock)
+                .statements.push_back(
+                    MirAssign{{tmp}, MirRvalueIndex{baseOp, indexOp, idx->typeInfo}});
             return MirOperand::makeCopy(tmp, idx->typeInfo);
         }
     }
@@ -453,24 +465,21 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *slen = dynamic_cast<ThirSliceLen *>(&expr)) {
         MirOperand sliceOp = lowerExpr(*slen->slice, currentBlock);
         MirLocalId tmp = newTemp(slen->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueSliceLen{sliceOp}});
+        block(currentBlock).statements.push_back(MirAssign{{tmp}, MirRvalueSliceLen{sliceOp}});
         return MirOperand::makeCopy(tmp, slen->typeInfo);
     }
 
     if (auto *sptr = dynamic_cast<ThirSlicePtr *>(&expr)) {
         MirOperand sliceOp = lowerExpr(*sptr->slice, currentBlock);
         MirLocalId tmp = newTemp(sptr->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueSlicePtr{sliceOp}});
+        block(currentBlock).statements.push_back(MirAssign{{tmp}, MirRvalueSlicePtr{sliceOp}});
         return MirOperand::makeCopy(tmp, sptr->typeInfo);
     }
 
     if (auto *strlen = dynamic_cast<ThirStringLen *>(&expr)) {
         MirOperand op = lowerExpr(*strlen->operand, currentBlock);
         MirLocalId tmp = newTemp(strlen->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueStringLen{op}});
+        block(currentBlock).statements.push_back(MirAssign{{tmp}, MirRvalueStringLen{op}});
         return MirOperand::makeCopy(tmp, strlen->typeInfo);
     }
 
@@ -479,8 +488,8 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
         MirOperand baseOp = lowerExpr(*idxAssign->base, currentBlock);
         MirOperand indexOp = lowerExpr(*idxAssign->index, currentBlock);
         MirOperand valOp = lowerExpr(*idxAssign->value, currentBlock);
-        block(currentBlock).statements.push_back(
-            MirIndexAssign{baseOp, indexOp, valOp, idxAssign->typeInfo});
+        block(currentBlock)
+            .statements.push_back(MirIndexAssign{baseOp, indexOp, valOp, idxAssign->typeInfo});
         return valOp;
     }
 
@@ -492,29 +501,31 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
             fields.push_back({f.name, f.fieldIndex, val});
         }
         MirLocalId tmp = newTemp(slit->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueStructInit{slit->structName, std::move(fields), slit->typeInfo}});
+        block(currentBlock)
+            .statements.push_back(MirAssign{
+                {tmp}, MirRvalueStructInit{slit->structName, std::move(fields), slit->typeInfo}});
         return MirOperand::makeCopy(tmp, slit->typeInfo);
     }
 
     // Field access -> emit MirRvalueFieldAccess or .len special handling
     if (auto *fa = dynamic_cast<ThirFieldAccess *>(&expr)) {
         MirOperand baseOp = lowerExpr(*fa->base, currentBlock);
-        
+
         if (fa->fieldIndex == -1 && fa->field == "len") {
             if (fa->base->typeInfo.isArray) {
                 return MirOperand::makeConstInt64(fa->base->typeInfo.arraySize);
             } else if (fa->base->typeInfo.isSlice) {
                 MirLocalId tmp = newTemp(fa->typeInfo);
-                block(currentBlock).statements.push_back(
-                    MirAssign{{tmp}, MirRvalueSliceLen{baseOp}});
+                block(currentBlock)
+                    .statements.push_back(MirAssign{{tmp}, MirRvalueSliceLen{baseOp}});
                 return MirOperand::makeCopy(tmp, fa->typeInfo);
             }
         }
 
         MirLocalId tmp = newTemp(fa->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueFieldAccess{baseOp, fa->field, fa->fieldIndex, fa->typeInfo}});
+        block(currentBlock)
+            .statements.push_back(MirAssign{
+                {tmp}, MirRvalueFieldAccess{baseOp, fa->field, fa->fieldIndex, fa->typeInfo}});
         return MirOperand::makeCopy(tmp, fa->typeInfo);
     }
 
@@ -522,8 +533,9 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *fassign = dynamic_cast<ThirFieldAssign *>(&expr)) {
         MirOperand baseOp = lowerExpr(*fassign->base, currentBlock);
         MirOperand valOp = lowerExpr(*fassign->value, currentBlock);
-        block(currentBlock).statements.push_back(
-            MirFieldAssign{baseOp, fassign->field, fassign->fieldIndex, valOp});
+        block(currentBlock)
+            .statements.push_back(
+                MirFieldAssign{baseOp, fassign->field, fassign->fieldIndex, valOp});
         return valOp;
     }
 
@@ -531,8 +543,7 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *derefAssign = dynamic_cast<ThirDerefAssign *>(&expr)) {
         MirOperand ptrOp = lowerExpr(*derefAssign->pointer, currentBlock);
         MirOperand valOp = lowerExpr(*derefAssign->value, currentBlock);
-        block(currentBlock).statements.push_back(
-            MirDerefAssign{ptrOp, valOp});
+        block(currentBlock).statements.push_back(MirDerefAssign{ptrOp, valOp});
         return valOp;
     }
 
@@ -545,8 +556,11 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
             payloadOp = lowerExpr(*eve->payload, currentBlock);
         }
         MirLocalId tmp = newTemp(eve->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueEnumInit{eve->enumName, eve->variantIndex, hasPayload, payloadOp, eve->typeInfo}});
+        block(currentBlock)
+            .statements.push_back(
+                MirAssign{{tmp},
+                          MirRvalueEnumInit{eve->enumName, eve->variantIndex, hasPayload, payloadOp,
+                                            eve->typeInfo}});
         return MirOperand::makeCopy(tmp, eve->typeInfo);
     }
 
@@ -554,52 +568,55 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *me = dynamic_cast<ThirMatchExpr *>(&expr)) {
         // Evaluate the discriminant (the enum value)
         MirOperand valOp = lowerExpr(*me->value, currentBlock);
-        
+
         // We need a temp to store the result of the match expression (if not void)
         MirLocalId resultTmp = 0;
-        bool hasResult = (me->typeInfo.kind != TypeKind::Void && me->typeInfo.kind != TypeKind::Unknown);
+        bool hasResult =
+            (me->typeInfo.kind != TypeKind::Void && me->typeInfo.kind != TypeKind::Unknown);
         if (hasResult) {
             resultTmp = newTemp(me->typeInfo);
         }
-        
+
         // Block to jump to after the match
         MirBlockId endBlock = newBlock("matchend");
-        
+
         // Extract the tag using MirRvalueEnumTag
         MirLocalId tagTmp = newTemp(TypeInfo::scalar(TypeKind::Int32));
-        block(currentBlock).statements.push_back(
-            MirAssign{{tagTmp}, MirRvalueEnumTag{valOp, TypeInfo::scalar(TypeKind::Int32)}});
+        block(currentBlock)
+            .statements.push_back(
+                MirAssign{{tagTmp}, MirRvalueEnumTag{valOp, TypeInfo::scalar(TypeKind::Int32)}});
         MirOperand tagOp = MirOperand::makeCopy(tagTmp, TypeInfo::scalar(TypeKind::Int32));
-        
+
         // Prepare MirSwitchValue
         MirSwitchValue switchVal;
         switchVal.discriminant = tagOp;
-        
+
         // Default block: unreachable panics
         MirBlockId defaultBlock = newBlock("matchdefault");
         setTerminator(defaultBlock, MirUnreachable{});
         switchVal.defaultBlock = defaultBlock;
-        
+
         // We must preserve the current block ID to assign the switch terminator
         MirBlockId switchBlock = currentBlock;
-        
+
         for (auto &arm : me->arms) {
             MirBlockId armBlock = newBlock("matcharm_" + arm.variantName);
             switchVal.targets.push_back({arm.variantIndex, armBlock});
-            
+
             // Generate code for the arm
             currentBlock = armBlock;
-            
+
             // If the arm has a binding, extract the payload
             if (arm.hasBinding) {
                 // New local for the binding
                 MirLocalId bindingLocal = newLocal(arm.bindingType, arm.bindingName, false);
                 varMap_[arm.bindingId] = bindingLocal;
-                
-                block(currentBlock).statements.push_back(
-                    MirAssign{{bindingLocal}, MirRvalueEnumPayload{valOp, arm.bindingType}});
+
+                block(currentBlock)
+                    .statements.push_back(
+                        MirAssign{{bindingLocal}, MirRvalueEnumPayload{valOp, arm.bindingType}});
             }
-            
+
             // Evaluate body
             MirOperand armResultOp;
             if (arm.exprBody) {
@@ -610,23 +627,23 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
                     armResultOp = MirOperand::makeConstInt(0); // Dummy for blocks
                 }
             }
-            
+
             // If the arm evaluates to a value, assign it to resultTmp
             if (hasResult && arm.exprBody) {
-                block(currentBlock).statements.push_back(
-                    MirAssign{{resultTmp}, MirRvalueUse{armResultOp}});
+                block(currentBlock)
+                    .statements.push_back(MirAssign{{resultTmp}, MirRvalueUse{armResultOp}});
             }
-            
+
             // Terminate arm block by jumping to endBlock
             setTerminator(currentBlock, MirGoto{endBlock});
         }
-        
+
         // Terminate the block containing the switch
         setTerminator(switchBlock, switchVal);
-        
+
         // Continue from endBlock
         currentBlock = endBlock;
-        
+
         if (hasResult) {
             return MirOperand::makeCopy(resultTmp, me->typeInfo);
         } else {
@@ -643,8 +660,9 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
             sizeOp = lowerExpr(*newE->sizeExpr, currentBlock);
             isDynamic = true;
         }
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueHeapAlloc{newE->allocatedType, sizeOp, isDynamic}});
+        block(currentBlock)
+            .statements.push_back(
+                MirAssign{{tmp}, MirRvalueHeapAlloc{newE->allocatedType, sizeOp, isDynamic}});
         return MirOperand::makeCopy(tmp, newE->typeInfo);
     }
 
@@ -652,15 +670,15 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *zoneE = dynamic_cast<ThirZoneExpr *>(&expr)) {
         block(currentBlock).statements.push_back(MirZoneBegin{zoneE->zoneName});
         activeZones_.push_back(zoneE->zoneName);
-        
+
         lowerBlock(*zoneE->body, currentBlock, nullptr);
-        
+
         // Only pop and emit End if the block wasn't terminated (e.g. by return)
         if (!activeZones_.empty() && activeZones_.back() == zoneE->zoneName) {
             block(currentBlock).statements.push_back(MirZoneEnd{zoneE->zoneName});
             activeZones_.pop_back();
         }
-        
+
         // Zone returns Void
         return MirOperand::makeConstInt(0, TypeInfo::scalar(TypeKind::Void));
     }
@@ -668,11 +686,13 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     // AllocExpr
     if (auto *allocE = dynamic_cast<ThirAllocExpr *>(&expr)) {
         MirOperand countOp = MirOperand::makeConstInt64(1);
-        if (allocE->count) countOp = lowerExpr(*allocE->count, currentBlock);
-        
+        if (allocE->count)
+            countOp = lowerExpr(*allocE->count, currentBlock);
+
         MirLocalId tmp = newTemp(allocE->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueZoneAlloc{allocE->allocatedType, countOp, allocE->zoneName}});
+        block(currentBlock)
+            .statements.push_back(MirAssign{
+                {tmp}, MirRvalueZoneAlloc{allocE->allocatedType, countOp, allocE->zoneName}});
         return MirOperand::makeCopy(tmp, allocE->typeInfo);
     }
 
@@ -680,8 +700,8 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *borrowE = dynamic_cast<ThirBorrowExpr *>(&expr)) {
         MirOperand targetOp = lowerExpr(*borrowE->target, currentBlock);
         MirLocalId tmp = newTemp(borrowE->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueBorrow{borrowE->isMutable, targetOp}});
+        block(currentBlock)
+            .statements.push_back(MirAssign{{tmp}, MirRvalueBorrow{borrowE->isMutable, targetOp}});
         return MirOperand::makeCopy(tmp, borrowE->typeInfo);
     }
 
@@ -689,8 +709,9 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     if (auto *escapeE = dynamic_cast<ThirEscapeExpr *>(&expr)) {
         MirOperand targetOp = lowerExpr(*escapeE->target, currentBlock);
         MirLocalId tmp = newTemp(escapeE->typeInfo);
-        block(currentBlock).statements.push_back(
-            MirAssign{{tmp}, MirRvalueEscape{targetOp, escapeE->destinationZone}});
+        block(currentBlock)
+            .statements.push_back(
+                MirAssign{{tmp}, MirRvalueEscape{targetOp, escapeE->destinationZone}});
         return MirOperand::makeCopy(tmp, escapeE->typeInfo);
     }
 
@@ -699,88 +720,129 @@ MirOperand MirBuilder::lowerExpr(ThirExpr &expr, MirBlockId &currentBlock) {
     return MirOperand::makeConstInt(0);
 }
 
-std::optional<MirOperand> MirBuilder::foldBinaryOp(BinaryOp op, const MirOperand& lhs, const MirOperand& rhs) {
+std::optional<MirOperand> MirBuilder::foldBinaryOp(BinaryOp op, const MirOperand &lhs,
+                                                   const MirOperand &rhs) {
     if (lhs.kind != MirOperand::Kind::Constant || rhs.kind != MirOperand::Kind::Constant) {
         return std::nullopt;
     }
 
     // Integer folding
-    if (std::holds_alternative<MirConstInt>(lhs.constant) && std::holds_alternative<MirConstInt>(rhs.constant)) {
+    if (std::holds_alternative<MirConstInt>(lhs.constant) &&
+        std::holds_alternative<MirConstInt>(rhs.constant)) {
         int64_t l = std::get<MirConstInt>(lhs.constant).value;
         int64_t r = std::get<MirConstInt>(rhs.constant).value;
         TypeInfo resType = lhs.typeInfo;
 
         switch (op) {
-            case BinaryOp::Add: return MirOperand::makeConstInt(l + r, resType);
-            case BinaryOp::Sub: return MirOperand::makeConstInt(l - r, resType);
-            case BinaryOp::Mul: return MirOperand::makeConstInt(l * r, resType);
-            case BinaryOp::Div: if (r != 0) return MirOperand::makeConstInt(l / r, resType); break;
-            case BinaryOp::Mod: if (r != 0) return MirOperand::makeConstInt(l % r, resType); break;
-            case BinaryOp::Eq:  return MirOperand::makeConstBool(l == r);
-            case BinaryOp::Neq: return MirOperand::makeConstBool(l != r);
-            case BinaryOp::Lt:  return MirOperand::makeConstBool(l < r);
-            case BinaryOp::Gt:  return MirOperand::makeConstBool(l > r);
-            case BinaryOp::Lte: return MirOperand::makeConstBool(l <= r);
-            case BinaryOp::Gte: return MirOperand::makeConstBool(l >= r);
-            default: break;
+        case BinaryOp::Add:
+            return MirOperand::makeConstInt(l + r, resType);
+        case BinaryOp::Sub:
+            return MirOperand::makeConstInt(l - r, resType);
+        case BinaryOp::Mul:
+            return MirOperand::makeConstInt(l * r, resType);
+        case BinaryOp::Div:
+            if (r != 0)
+                return MirOperand::makeConstInt(l / r, resType);
+            break;
+        case BinaryOp::Mod:
+            if (r != 0)
+                return MirOperand::makeConstInt(l % r, resType);
+            break;
+        case BinaryOp::Eq:
+            return MirOperand::makeConstBool(l == r);
+        case BinaryOp::Neq:
+            return MirOperand::makeConstBool(l != r);
+        case BinaryOp::Lt:
+            return MirOperand::makeConstBool(l < r);
+        case BinaryOp::Gt:
+            return MirOperand::makeConstBool(l > r);
+        case BinaryOp::Lte:
+            return MirOperand::makeConstBool(l <= r);
+        case BinaryOp::Gte:
+            return MirOperand::makeConstBool(l >= r);
+        default:
+            break;
         }
     }
 
     // Float folding
-    if (std::holds_alternative<MirConstFloat>(lhs.constant) && std::holds_alternative<MirConstFloat>(rhs.constant)) {
+    if (std::holds_alternative<MirConstFloat>(lhs.constant) &&
+        std::holds_alternative<MirConstFloat>(rhs.constant)) {
         double l = std::get<MirConstFloat>(lhs.constant).value;
         double r = std::get<MirConstFloat>(rhs.constant).value;
 
         switch (op) {
-            case BinaryOp::Add: return MirOperand::makeConstFloat(l + r);
-            case BinaryOp::Sub: return MirOperand::makeConstFloat(l - r);
-            case BinaryOp::Mul: return MirOperand::makeConstFloat(l * r);
-            case BinaryOp::Div: if (r != 0.0) return MirOperand::makeConstFloat(l / r); break;
-            case BinaryOp::Eq:  return MirOperand::makeConstBool(l == r);
-            case BinaryOp::Neq: return MirOperand::makeConstBool(l != r);
-            case BinaryOp::Lt:  return MirOperand::makeConstBool(l < r);
-            case BinaryOp::Gt:  return MirOperand::makeConstBool(l > r);
-            case BinaryOp::Lte: return MirOperand::makeConstBool(l <= r);
-            case BinaryOp::Gte: return MirOperand::makeConstBool(l >= r);
-            default: break;
+        case BinaryOp::Add:
+            return MirOperand::makeConstFloat(l + r);
+        case BinaryOp::Sub:
+            return MirOperand::makeConstFloat(l - r);
+        case BinaryOp::Mul:
+            return MirOperand::makeConstFloat(l * r);
+        case BinaryOp::Div:
+            if (r != 0.0)
+                return MirOperand::makeConstFloat(l / r);
+            break;
+        case BinaryOp::Eq:
+            return MirOperand::makeConstBool(l == r);
+        case BinaryOp::Neq:
+            return MirOperand::makeConstBool(l != r);
+        case BinaryOp::Lt:
+            return MirOperand::makeConstBool(l < r);
+        case BinaryOp::Gt:
+            return MirOperand::makeConstBool(l > r);
+        case BinaryOp::Lte:
+            return MirOperand::makeConstBool(l <= r);
+        case BinaryOp::Gte:
+            return MirOperand::makeConstBool(l >= r);
+        default:
+            break;
         }
     }
 
     // Bool folding
-    if (std::holds_alternative<MirConstBool>(lhs.constant) && std::holds_alternative<MirConstBool>(rhs.constant)) {
+    if (std::holds_alternative<MirConstBool>(lhs.constant) &&
+        std::holds_alternative<MirConstBool>(rhs.constant)) {
         bool l = std::get<MirConstBool>(lhs.constant).value;
         bool r = std::get<MirConstBool>(rhs.constant).value;
 
         switch (op) {
-            case BinaryOp::And: return MirOperand::makeConstBool(l && r);
-            case BinaryOp::Or:  return MirOperand::makeConstBool(l || r);
-            case BinaryOp::Eq:  return MirOperand::makeConstBool(l == r);
-            case BinaryOp::Neq: return MirOperand::makeConstBool(l != r);
-            default: break;
+        case BinaryOp::And:
+            return MirOperand::makeConstBool(l && r);
+        case BinaryOp::Or:
+            return MirOperand::makeConstBool(l || r);
+        case BinaryOp::Eq:
+            return MirOperand::makeConstBool(l == r);
+        case BinaryOp::Neq:
+            return MirOperand::makeConstBool(l != r);
+        default:
+            break;
         }
     }
 
     return std::nullopt;
 }
 
-std::optional<MirOperand> MirBuilder::foldUnaryOp(UnaryOp op, const MirOperand& operand) {
+std::optional<MirOperand> MirBuilder::foldUnaryOp(UnaryOp op, const MirOperand &operand) {
     if (operand.kind != MirOperand::Kind::Constant) {
         return std::nullopt;
     }
 
     if (std::holds_alternative<MirConstInt>(operand.constant)) {
         int64_t v = std::get<MirConstInt>(operand.constant).value;
-        if (op == UnaryOp::Negate) return MirOperand::makeConstInt(-v, operand.typeInfo);
+        if (op == UnaryOp::Negate)
+            return MirOperand::makeConstInt(-v, operand.typeInfo);
     }
 
     if (std::holds_alternative<MirConstFloat>(operand.constant)) {
         double v = std::get<MirConstFloat>(operand.constant).value;
-        if (op == UnaryOp::Negate) return MirOperand::makeConstFloat(-v);
+        if (op == UnaryOp::Negate)
+            return MirOperand::makeConstFloat(-v);
     }
 
     if (std::holds_alternative<MirConstBool>(operand.constant)) {
         bool v = std::get<MirConstBool>(operand.constant).value;
-        if (op == UnaryOp::Not) return MirOperand::makeConstBool(!v);
+        if (op == UnaryOp::Not)
+            return MirOperand::makeConstBool(!v);
     }
 
     return std::nullopt;

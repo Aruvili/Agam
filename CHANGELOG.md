@@ -3,7 +3,7 @@
 All notable changes to the Agam compiler, standard library, and ecosystem will be documented in this file. 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to Semantic Versioning.
 
-## [Unreleased]
+## [1.0.1] - 2026-05-02
 ### Added
 - **CLI Options:** Added `--lib-path <path>` to dynamically configure the standard library search path (an alternative to `AGAM_STD_PATH`), resolving a long-standing compiler TODO.
 - **AST Enhancements:** Added support for capturing and preserving the `viewName` alias in `BorrowExpr` (`borrow mut(x) as my_alias`), improving AST coverage for advanced memory operations in the ZPM memory model.

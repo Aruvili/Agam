@@ -1,7 +1,8 @@
 #pragma once
 
-#include "agam/ast/ast.h"  // TypeKind, BinaryOp, UnaryOp
-#include "agam/hir/hir.h"  // HirId
+#include "agam/ast/ast.h" // TypeKind, BinaryOp, UnaryOp
+#include "agam/hir/hir.h" // HirId
+
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -35,20 +36,29 @@ struct MirPlace {
 };
 
 /// A constant value.
-struct MirConstInt    { int64_t value; };
-struct MirConstFloat  { double value; };
-struct MirConstBool   { bool value; };
-struct MirConstString { std::string value; };
-struct MirConstNull   { };
+struct MirConstInt {
+    int64_t value;
+};
+struct MirConstFloat {
+    double value;
+};
+struct MirConstBool {
+    bool value;
+};
+struct MirConstString {
+    std::string value;
+};
+struct MirConstNull {};
 
-using MirConstant = std::variant<MirConstInt, MirConstFloat, MirConstBool, MirConstString, MirConstNull>;
+using MirConstant =
+    std::variant<MirConstInt, MirConstFloat, MirConstBool, MirConstString, MirConstNull>;
 
 /// An operand is either a copy of a local or a constant.
 struct MirOperand {
     enum class Kind { Copy, Constant };
     Kind kind;
-    MirPlace place;        // valid when kind == Copy
-    MirConstant constant;  // valid when kind == Constant
+    MirPlace place;       // valid when kind == Copy
+    MirConstant constant; // valid when kind == Constant
     TypeInfo typeInfo = TypeInfo::scalar(TypeKind::Unknown);
 
     static MirOperand makeCopy(MirLocalId local, TypeInfo t) {
@@ -174,7 +184,7 @@ struct MirRvalueEnumInit {
     std::string enumName;
     int variantIndex;
     bool hasPayload;
-    MirOperand payload; 
+    MirOperand payload;
     TypeInfo enumTypeInfo = TypeInfo::scalar(TypeKind::Unknown);
 };
 
@@ -234,12 +244,12 @@ struct MirRvaluePtrOffset {
     TypeInfo resultType;
 };
 
-using MirRvalue = std::variant<MirRvalueUse, MirRvalueBinaryOp, MirRvalueUnaryOp,
-                                MirRvalueCast, MirRvalueCall, MirRvalueArrayInit, MirRvalueIndex,
-                                MirRvalueStructInit, MirRvalueFieldAccess,
-                                MirRvalueEnumInit, MirRvalueEnumPayload, MirRvalueEnumTag,
-                                MirRvalueHeapAlloc, MirRvalueSlice, MirRvalueSliceLen, MirRvalueSlicePtr, MirRvalueStringLen,
-                                MirRvalueZoneAlloc, MirRvalueBorrow, MirRvalueEscape, MirRvaluePtrOffset>;
+using MirRvalue =
+    std::variant<MirRvalueUse, MirRvalueBinaryOp, MirRvalueUnaryOp, MirRvalueCast, MirRvalueCall,
+                 MirRvalueArrayInit, MirRvalueIndex, MirRvalueStructInit, MirRvalueFieldAccess,
+                 MirRvalueEnumInit, MirRvalueEnumPayload, MirRvalueEnumTag, MirRvalueHeapAlloc,
+                 MirRvalueSlice, MirRvalueSliceLen, MirRvalueSlicePtr, MirRvalueStringLen,
+                 MirRvalueZoneAlloc, MirRvalueBorrow, MirRvalueEscape, MirRvaluePtrOffset>;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  MIR Statement — an instruction within a basic block
@@ -282,7 +292,8 @@ struct MirZoneEnd {
     std::string zoneName;
 };
 
-using MirStatement = std::variant<MirAssign, MirIndexAssign, MirFieldAssign, MirDerefAssign, MirHeapFree, MirZoneBegin, MirZoneEnd>;
+using MirStatement = std::variant<MirAssign, MirIndexAssign, MirFieldAssign, MirDerefAssign,
+                                  MirHeapFree, MirZoneBegin, MirZoneEnd>;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  MIR Terminator — ends a basic block
@@ -294,8 +305,8 @@ struct MirGoto {
 
 struct MirSwitchInt {
     MirOperand discriminant;
-    MirBlockId thenBlock;   // if true
-    MirBlockId elseBlock;   // if false
+    MirBlockId thenBlock; // if true
+    MirBlockId elseBlock; // if false
 };
 
 struct MirSwitchValue {
@@ -314,7 +325,8 @@ struct MirReturnVoid {};
 /// Sentinel: block has not been terminated yet.
 struct MirUnreachable {};
 
-using MirTerminator = std::variant<MirGoto, MirSwitchInt, MirSwitchValue, MirReturn, MirReturnVoid, MirUnreachable>;
+using MirTerminator =
+    std::variant<MirGoto, MirSwitchInt, MirSwitchValue, MirReturn, MirReturnVoid, MirUnreachable>;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  MIR Basic Block
@@ -322,7 +334,7 @@ using MirTerminator = std::variant<MirGoto, MirSwitchInt, MirSwitchValue, MirRet
 
 struct MirBasicBlock {
     MirBlockId id;
-    std::string label;  // e.g., "entry", "then", "else", "whilecond"
+    std::string label; // e.g., "entry", "then", "else", "whilecond"
     std::vector<MirStatement> statements;
     MirTerminator terminator;
 };
@@ -333,9 +345,9 @@ struct MirBasicBlock {
 
 struct MirFunction {
     std::string name;
-    std::vector<MirLocal> params;     // function parameters
+    std::vector<MirLocal> params; // function parameters
     TypeInfo returnTypeInfo = TypeInfo::scalar(TypeKind::Unknown);
-    std::vector<MirLocal> locals;     // all locals (params + vars + temps)
+    std::vector<MirLocal> locals;      // all locals (params + vars + temps)
     std::vector<MirBasicBlock> blocks; // basic blocks (entry is blocks[0])
     bool isExtern = false;             // external C function (declared, not defined)
 };

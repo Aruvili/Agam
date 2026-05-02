@@ -12,7 +12,8 @@ bool ScopeResolver::resolve(Program &program, DiagnosticEngine &diag) {
 }
 
 void ScopeResolver::error(const SourceLocation &loc, const std::string &msg) {
-    if (diag_) diag_->error(loc, msg);
+    if (diag_)
+        diag_->error(loc, msg);
 }
 
 // ── Expressions ──────────────────────────────────────────────────────────────
@@ -64,7 +65,8 @@ void ScopeResolver::visit(DerefAssignExpr &node) {
 }
 
 void ScopeResolver::visit(ArrayLiteralExpr &node) {
-    for (auto &e : node.elements) e->accept(*this);
+    for (auto &e : node.elements)
+        e->accept(*this);
 }
 
 void ScopeResolver::visit(IndexExpr &node) {
@@ -79,7 +81,8 @@ void ScopeResolver::visit(IndexAssignExpr &node) {
 }
 
 void ScopeResolver::visit(StructLiteralExpr &node) {
-    for (auto &f : node.fields) f.value->accept(*this);
+    for (auto &f : node.fields)
+        f.value->accept(*this);
 }
 
 void ScopeResolver::visit(FieldAccessExpr &node) {
@@ -92,7 +95,8 @@ void ScopeResolver::visit(FieldAssignExpr &node) {
 }
 
 void ScopeResolver::visit(EnumVariantExpr &node) {
-    if (node.payload) node.payload->accept(*this);
+    if (node.payload)
+        node.payload->accept(*this);
 }
 
 void ScopeResolver::visit(MethodCallExpr &node) {
@@ -125,7 +129,8 @@ void ScopeResolver::visit(ZoneExpr &node) {
 }
 
 void ScopeResolver::visit(AllocExpr &node) {
-    if (node.count) node.count->accept(*this);
+    if (node.count)
+        node.count->accept(*this);
 }
 
 void ScopeResolver::visit(BorrowExpr &node) {
@@ -239,7 +244,8 @@ void ScopeResolver::visit(ConstDecl &node) {
         node.value->accept(*this);
     }
     if (symbols_.lookupCurrent(node.name)) {
-        error(node.loc, "நிலைமாறிலி (Constant) '" + node.name + "' ஏற்கனவே இந்த எல்லைக்குள் அறிவிக்கப்பட்டுள்ளது");
+        error(node.loc,
+              "நிலைமாறிலி (Constant) '" + node.name + "' ஏற்கனவே இந்த எல்லைக்குள் அறிவிக்கப்பட்டுள்ளது");
         return;
     }
     SymbolInfo info;
@@ -264,7 +270,7 @@ void ScopeResolver::visit(TraitDecl &) {
 void ScopeResolver::visit(ImplDecl &node) {
     for (auto &method : node.methods) {
         symbols_.enterScope();
-        
+
         for (auto &p : method->params) {
             SymbolInfo paramInfo;
             paramInfo.name = p.name;
@@ -281,7 +287,7 @@ void ScopeResolver::visit(ImplDecl &node) {
 
 void ScopeResolver::visit(Program &node) {
     // Pass 1: Register signatures
-    for (auto &sd : node.structs) {
+    for ([[maybe_unused]] auto &sd : node.structs) {
         // Structs are just names in ScopeResolver
     }
     for (auto &fn : node.functions) {
@@ -299,8 +305,10 @@ void ScopeResolver::visit(Program &node) {
     }
 
     // Pass 2: Resolve bodies
-    for (auto &td : node.traits) td->accept(*this);
-    for (auto &id : node.impls) id->accept(*this);
+    for (auto &td : node.traits)
+        td->accept(*this);
+    for (auto &id : node.impls)
+        id->accept(*this);
     for (auto &fn : node.functions) {
         if (fn->body) {
             symbols_.enterScope();
@@ -309,7 +317,8 @@ void ScopeResolver::visit(Program &node) {
                 pInfo.name = p.name;
                 symbols_.declare(p.name, pInfo);
             }
-            for (auto &stmt : fn->body->statements) stmt->accept(*this);
+            for (auto &stmt : fn->body->statements)
+                stmt->accept(*this);
             symbols_.exitScope();
         }
     }

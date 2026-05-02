@@ -1,6 +1,6 @@
 #pragma once
 
-#include "agam/ast/ast.h"    // TypeKind
+#include "agam/ast/ast.h" // TypeKind
 #include "agam/mir/mir.h"
 
 #include "llvm/IR/IRBuilder.h"
@@ -18,7 +18,7 @@ namespace agam {
 
 /// LLVM IR code generator: walks MIR basic blocks and emits LLVM IR.
 class CodeGenerator {
-public:
+  public:
     CodeGenerator();
     ~CodeGenerator();
 
@@ -33,7 +33,7 @@ public:
     void dumpIR() const;
     bool verify() const;
 
-private:
+  private:
     std::unique_ptr<llvm::LLVMContext> context_;
     std::unique_ptr<llvm::Module> module_;
     std::unique_ptr<llvm::IRBuilder<>> builder_;
@@ -50,10 +50,9 @@ private:
     /// Zone name → LLVM value (arena pointer).
     std::unordered_map<std::string, llvm::Value *> activeZones_;
 
-    llvm::Type *toLLVMType(const TypeInfo& typeInfo);
-    llvm::AllocaInst *createEntryBlockAlloca(llvm::Function *func,
-                                              const std::string &name,
-                                              llvm::Type *type);
+    llvm::Type *toLLVMType(const TypeInfo &typeInfo);
+    llvm::AllocaInst *createEntryBlockAlloca(llvm::Function *func, const std::string &name,
+                                             llvm::Type *type);
 
     // ── MIR lowering ────────────────────────────────────────────────────────
     void emitFunctionSignature(MirFunction &func);

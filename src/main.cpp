@@ -1,45 +1,46 @@
 /// Agam Compiler Driver
 ///
-/// Full pipeline: Source -> Lex -> Parse -> HIR -> THIR -> MIR -> LLVM IR -> [Optimize] -> Codegen/Execute
+/// Full pipeline: Source -> Lex -> Parse -> HIR -> THIR -> MIR -> LLVM IR -> [Optimize] ->
+/// Codegen/Execute
 ///
 /// Usage:
 ///   agamc <input.agam> [-o output] [--emit-ast] [--emit-hir] [--emit-thir] [--emit-mir]
 ///                      [--emit-llvm] [-O0|-O1|-O2|-O3] [--run]
 
+#include "agam/ast/ast_printer.h"
+#include "agam/codegen/codegen.h"
+#include "agam/codegen/executor.h"
+#include "agam/codegen/optimizer.h"
+#include "agam/hir/hir_builder.h"
+#include "agam/lexer/lexer.h"
+#include "agam/mir/mir_builder.h"
+#include "agam/mir/mir_optimizer.h"
+#include "agam/mir/mir_printer.h"
+#include "agam/parser/parser.h"
+#include "agam/semantic/monomorphizer.h"
+#include "agam/semantic/scope_resolver.h"
+#include "agam/semantic/type_checker.h"
+#include "agam/thir/thir_builder.h"
+#include "agam/utils/diagnostic_renderer.h"
+
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/MC/TargetRegistry.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Target/TargetOptions.h"
+#include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/Triple.h"
+
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <memory>
-#include <set>
-#include <filesystem>
-
-#include "agam/lexer/lexer.h"
-#include "agam/parser/parser.h"
-#include "agam/ast/ast_printer.h"
-#include "agam/semantic/scope_resolver.h"
-#include "agam/semantic/type_checker.h"
-#include "agam/semantic/monomorphizer.h"
-#include "agam/hir/hir_builder.h"
-#include "agam/thir/thir_builder.h"
-#include "agam/mir/mir_builder.h"
-#include "agam/mir/mir_printer.h"
-#include "agam/mir/mir_optimizer.h"
-#include "agam/codegen/codegen.h"
-#include "agam/codegen/optimizer.h"
-#include "agam/codegen/executor.h"
-#include "agam/utils/diagnostic_renderer.h"
-
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Target/TargetMachine.h"
-#include "llvm/Target/TargetOptions.h"
-#include "llvm/MC/TargetRegistry.h"
-#include "llvm/TargetParser/Host.h"
-#include "llvm/TargetParser/Triple.h"
-#include "llvm/IR/LegacyPassManager.h"
 
 using namespace agam;
 namespace fs = std::filesystem;
@@ -86,13 +87,14 @@ static int handleCreate(int argc, char *argv[]) {
     }
 
     fs::path srcDir = projectRoot / "src";
-    if (!fs::exists(srcDir)) fs::create_directory(srcDir);
+    if (!fs::exists(srcDir))
+        fs::create_directory(srcDir);
 
     // Create pk.arpk
     std::ofstream arpk(projectRoot / "pk.arpk");
     std::string name = (projNameArg == ".") ? projectRoot.filename().string() : projNameArg;
     arpk << "projectname: \"" << name << "\"\n"
-         << "version: \"0.1.0\"\n"
+         << "version: \"1.0.1\"\n"
          << "author: \"\"\n\n"
          << "#dependencies\n"
          << "[name]: [version]\n"
@@ -120,20 +122,24 @@ static int handleCreate(int argc, char *argv[]) {
 
 namespace agam {
 
-static std::string trim(const std::string& s) {
+static std::string trim(const std::string &s) {
     auto start = s.begin();
-    while (start != s.end() && std::isspace(*start)) start++;
+    while (start != s.end() && std::isspace(*start))
+        start++;
     auto end = s.end();
-    do { end--; } while (std::distance(start, end) > 0 && std::isspace(*end));
+    do {
+        end--;
+    } while (std::distance(start, end) > 0 && std::isspace(*end));
     return std::string(start, end + 1);
 }
 
 static fs::path g_exeDir;
 static std::string g_stdEnvPath;
 
-std::unique_ptr<Program> parseWithImports(const std::string &filename, std::set<std::string> &visited) {
+std::unique_ptr<Program> parseWithImports(const std::string &filename,
+                                          std::set<std::string> &visited) {
     fs::path targetPath = fs::absolute(filename);
-    
+
     // If not found, it might be a library import without full path
     if (!fs::exists(targetPath)) {
         std::cerr << "பிழை: எந்தத் தேடல் பாதையிலும் '" << filename << "' என்ற கோப்பினைத் தேட முடியவில்லை\n";
@@ -141,7 +147,8 @@ std::unique_ptr<Program> parseWithImports(const std::string &filename, std::set<
     }
 
     std::string absolutePath = targetPath.string();
-    if (visited.count(absolutePath)) return nullptr;
+    if (visited.count(absolutePath))
+        return nullptr;
     visited.insert(absolutePath);
 
     std::ifstream file(absolutePath);
@@ -179,9 +186,10 @@ std::unique_ptr<Program> parseWithImports(const std::string &filename, std::set<
     for (const auto &imp : discoveredImports) {
         fs::path impPath = baseDir / imp;
         bool found = false;
-        
+
         // 1. Try relative to current file
-        if (impPath.extension().empty()) impPath.replace_extension(".agam");
+        if (impPath.extension().empty())
+            impPath.replace_extension(".agam");
         if (fs::exists(impPath)) {
             found = true;
         }
@@ -189,22 +197,21 @@ std::unique_ptr<Program> parseWithImports(const std::string &filename, std::set<
         // 2. Try AGAM_STD_PATH
         if (!found && !g_stdEnvPath.empty()) {
             fs::path envPath = fs::path(g_stdEnvPath) / imp;
-            if (envPath.extension().empty()) envPath.replace_extension(".agam");
+            if (envPath.extension().empty())
+                envPath.replace_extension(".agam");
             if (fs::exists(envPath)) {
                 impPath = envPath;
                 found = true;
             }
         }
-        
+
         // 3. Try relative to executable
         if (!found) {
-            std::vector<fs::path> sysPaths = {
-                g_exeDir / ".." / "share" / "agam" / imp,
-                g_exeDir / ".." / imp,
-                g_exeDir / ".." / ".." / imp
-            };
+            std::vector<fs::path> sysPaths = {g_exeDir / ".." / "share" / "agam" / imp,
+                                              g_exeDir / ".." / imp, g_exeDir / ".." / ".." / imp};
             for (auto &sp : sysPaths) {
-                if (sp.extension().empty()) sp.replace_extension(".agam");
+                if (sp.extension().empty())
+                    sp.replace_extension(".agam");
                 if (fs::exists(sp)) {
                     impPath = sp;
                     found = true;
@@ -218,8 +225,10 @@ std::unique_ptr<Program> parseWithImports(const std::string &filename, std::set<
             std::cerr << "  (அடிப்படைப் பாதை: " << baseDir << ")\n";
             if (!g_stdEnvPath.empty()) {
                 fs::path envPath = fs::path(g_stdEnvPath) / imp;
-                if (envPath.extension().empty()) envPath.replace_extension(".agam");
-                std::cerr << "  (AGAM_STD_PATH check: " << envPath << " exists=" << (fs::exists(envPath) ? "true" : "false") << ")\n";
+                if (envPath.extension().empty())
+                    envPath.replace_extension(".agam");
+                std::cerr << "  (AGAM_STD_PATH check: " << envPath
+                          << " exists=" << (fs::exists(envPath) ? "true" : "false") << ")\n";
             }
             return nullptr;
         }
@@ -227,12 +236,18 @@ std::unique_ptr<Program> parseWithImports(const std::string &filename, std::set<
         auto subProg = parseWithImports(impPath.string(), visited);
         if (subProg) {
             // Merge declarations into master (flat namespace for now)
-            for (auto &f : subProg->functions) master->functions.push_back(std::move(f));
-            for (auto &s : subProg->structs) master->structs.push_back(std::move(s));
-            for (auto &e : subProg->enums) master->enums.push_back(std::move(e));
-            for (auto &t : subProg->traits) master->traits.push_back(std::move(t));
-            for (auto &i : subProg->impls) master->impls.push_back(std::move(i));
-            for (auto &c : subProg->constants) master->constants.push_back(std::move(c));
+            for (auto &f : subProg->functions)
+                master->functions.push_back(std::move(f));
+            for (auto &s : subProg->structs)
+                master->structs.push_back(std::move(s));
+            for (auto &e : subProg->enums)
+                master->enums.push_back(std::move(e));
+            for (auto &t : subProg->traits)
+                master->traits.push_back(std::move(t));
+            for (auto &i : subProg->impls)
+                master->impls.push_back(std::move(i));
+            for (auto &c : subProg->constants)
+                master->constants.push_back(std::move(c));
         }
     }
 
@@ -243,8 +258,9 @@ std::unique_ptr<Program> parseWithImports(const std::string &filename, std::set<
 
 int main(int argc, char *argv[]) {
     g_exeDir = fs::absolute(argv[0]).parent_path();
-    const char* envPath = std::getenv("AGAM_STD_PATH");
-    if (envPath) g_stdEnvPath = trim(envPath);
+    const char *envPath = std::getenv("AGAM_STD_PATH");
+    if (envPath)
+        g_stdEnvPath = trim(envPath);
 
     if (argc < 2) {
         printUsage(argv[0]);
@@ -263,7 +279,7 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "-C" && i + 1 < argc) {
-            fs::current_path(argv[i+1]);
+            fs::current_path(argv[i + 1]);
             // Re-order or skip? Let's just handle it here and we'll skip it in the main loop
         }
     }
@@ -287,7 +303,10 @@ int main(int argc, char *argv[]) {
             // Check for file in arguments, skipping -C and its value
             for (int i = 2; i < argc; i++) {
                 std::string arg = argv[i];
-                if (arg == "-C") { i++; continue; }
+                if (arg == "-C") {
+                    i++;
+                    continue;
+                }
                 if (arg[0] != '-') {
                     inputFile = arg;
                     argStart = i + 1;
@@ -295,7 +314,8 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (inputFile.empty()) {
-                std::cerr << "பிழை: 'pk.arpk' கோப்பு இல்லை மற்றும் 'run' செய்ய வேண்டிய கோப்பும் குறிப்பிடப்படவில்லை.\n";
+                std::cerr << "பிழை: 'pk.arpk' கோப்பு இல்லை மற்றும் 'run' செய்ய வேண்டிய கோப்பும் "
+                             "குறிப்பிடப்படவில்லை.\n";
                 return 1;
             }
         }
@@ -403,7 +423,8 @@ int main(int argc, char *argv[]) {
     HirBuilder hirBuilder;
     auto hir = hirBuilder.build(*ast);
     if (hirBuilder.hasErrors()) {
-        for (auto &e : hirBuilder.errors()) std::cerr << e << "\n";
+        for (auto &e : hirBuilder.errors())
+            std::cerr << e << "\n";
         return 1;
     }
 
@@ -426,7 +447,8 @@ int main(int argc, char *argv[]) {
 
     if (emitThir) {
         for (auto &fn : thir->functions) {
-            std::cout << "fn " << fn->name << " -> " << typeKindToString(fn->returnTypeInfo.kind) << std::endl;
+            std::cout << "fn " << fn->name << " -> " << typeKindToString(fn->returnTypeInfo.kind)
+                      << std::endl;
         }
         return 0;
     }
@@ -451,11 +473,10 @@ int main(int argc, char *argv[]) {
         std::cerr << "பிழை: குறியாக்கத்தில் (code generation) பிழை ஏற்பட்டது\n";
         return 1;
     }
-    
+
     if (optLevel != Optimizer::Level::O0) {
         Optimizer::optimize(*codegen.getModule(), optLevel);
     }
-
 
     if (emitLlvm) {
         std::cout << codegen.getIRString();
@@ -481,7 +502,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     std::string error;
-    auto target = llvm::TargetRegistry::lookupTarget(targetTriple.getTriple(), error);
+    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
     if (!target) {
         std::cerr << "பிழை: " << error << "\n";
         return 1;
@@ -494,7 +515,8 @@ int main(int argc, char *argv[]) {
 #if LLVM_VERSION_MAJOR >= 18
     auto targetMachine = target->createTargetMachine(targetTriple, CPU, Features, opt, RM);
 #else
-    auto targetMachine = target->createTargetMachine(targetTriple.getTriple(), CPU, Features, opt, RM);
+    auto targetMachine =
+        target->createTargetMachine(targetTriple.getTriple(), CPU, Features, opt, RM);
 #endif
 
     codegen.getModule()->setDataLayout(targetMachine->createDataLayout());

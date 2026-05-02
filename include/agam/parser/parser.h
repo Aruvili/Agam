@@ -2,8 +2,9 @@
 
 #include "agam/ast/ast.h"
 #include "agam/lexer/lexer.h"
-#include <memory>
 #include "agam/utils/diagnostic.h"
+
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -12,8 +13,9 @@ namespace agam {
 /// Hand-written recursive descent parser for the Agam language.
 /// Converts a token stream into an AST.
 class Parser {
-public:
-    explicit Parser(const std::vector<Token> &tokens, const std::string &source, const std::string &filename, DiagnosticEngine &diag);
+  public:
+    explicit Parser(const std::vector<Token> &tokens, const std::string &source,
+                    const std::string &filename, DiagnosticEngine &diag);
 
     /// Parse the token stream into a Program AST.
     /// Returns nullptr on failure.
@@ -22,7 +24,7 @@ public:
     /// Check if parsing succeeded (no errors).
     bool hasErrors() const { return diag_.hasErrors(); }
 
-private:
+  private:
     std::vector<Token> tokens_;
     size_t current_ = 0;
     std::string source_;
@@ -50,11 +52,11 @@ private:
     // Top-level
     std::unique_ptr<Program> parseProgram();
     std::unique_ptr<FunctionDecl> parseFunctionDecl();
-    std::unique_ptr<ConstDecl>    parseConstDecl();
-    std::unique_ptr<StructDecl>   parseStructDecl();
-    std::unique_ptr<EnumDecl>     parseEnumDecl();
-    std::unique_ptr<TraitDecl>    parseTraitDecl();
-    std::unique_ptr<ImplDecl>     parseImplDecl();
+    std::unique_ptr<ConstDecl> parseConstDecl();
+    std::unique_ptr<StructDecl> parseStructDecl();
+    std::unique_ptr<EnumDecl> parseEnumDecl();
+    std::unique_ptr<TraitDecl> parseTraitDecl();
+    std::unique_ptr<ImplDecl> parseImplDecl();
     std::vector<Param> parseParamList();
     TypeInfo parseTypeSpec();
     std::vector<std::string> parseTypeParams();

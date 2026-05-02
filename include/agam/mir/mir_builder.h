@@ -2,10 +2,11 @@
 
 #include "agam/mir/mir.h"
 #include "agam/thir/thir.h"
+
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <optional>
 
 namespace agam {
 
@@ -14,10 +15,10 @@ namespace agam {
 /// Nested expressions become sequences of tmp assignments.
 /// Control flow (if/while) becomes basic blocks with goto/switch terminators.
 class MirBuilder {
-public:
+  public:
     std::unique_ptr<MirProgram> build(ThirProgram &program);
 
-private:
+  private:
     // ── Per-function state ──────────────────────────────────────────────────
     MirFunction *currentFunc_ = nullptr;
     MirBlockId nextBlockId_ = 0;
@@ -51,8 +52,9 @@ private:
     MirOperand lowerExpr(ThirExpr &expr, MirBlockId &currentBlock);
 
     // ── Constant Folding ────────────────────────────────────────────────────
-    std::optional<MirOperand> foldBinaryOp(BinaryOp op, const MirOperand& lhs, const MirOperand& rhs);
-    std::optional<MirOperand> foldUnaryOp(UnaryOp op, const MirOperand& operand);
+    std::optional<MirOperand> foldBinaryOp(BinaryOp op, const MirOperand &lhs,
+                                           const MirOperand &rhs);
+    std::optional<MirOperand> foldUnaryOp(UnaryOp op, const MirOperand &operand);
 };
 
 } // namespace agam

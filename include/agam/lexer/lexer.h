@@ -1,7 +1,8 @@
 #pragma once
 
-#include "tokens.h"
 #include "agam/utils/diagnostic.h"
+#include "tokens.h"
+
 #include <string>
 #include <vector>
 
@@ -10,7 +11,7 @@ namespace agam {
 /// Hand-written lexer for the Agam language.
 /// Converts a source string into a stream of tokens.
 class Lexer {
-public:
+  public:
     explicit Lexer(const std::string &source, const std::string &filename, DiagnosticEngine &diag);
 
     /// Tokenize the entire source and return all tokens.
@@ -32,7 +33,7 @@ public:
     /// Get all errors encountered during lexing.
     bool hasErrors() const { return diag_.hasErrors(); }
 
-private:
+  private:
     std::string source_;
     std::string filename_;
     DiagnosticEngine &diag_;

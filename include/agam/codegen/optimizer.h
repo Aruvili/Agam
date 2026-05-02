@@ -1,13 +1,14 @@
 #pragma once
 
 #include "llvm/IR/Module.h"
+
 #include <string>
 
 namespace agam {
 
 /// Wraps LLVM's new pass manager to optimize a module.
 class Optimizer {
-public:
+  public:
     /// Optimization levels matching -O0 through -O3.
     enum class Level { O0, O1, O2, O3 };
 

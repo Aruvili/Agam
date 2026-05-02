@@ -1,6 +1,7 @@
 #pragma once
 
 #include "agam/ast/ast.h"
+
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -24,56 +25,56 @@ class HirBlock;
 
 /// Base class for HIR expressions.
 class HirExpr {
-public:
+  public:
     SourceLocation loc;
     virtual ~HirExpr() = default;
 };
 
 /// Integer literal: 42
 class HirIntLiteral : public HirExpr {
-public:
+  public:
     int64_t value;
     explicit HirIntLiteral(int64_t v) : value(v) {}
 };
 
 /// Float literal: 3.14
 class HirFloatLiteral : public HirExpr {
-public:
+  public:
     double value;
     explicit HirFloatLiteral(double v) : value(v) {}
 };
 
 /// String literal: "hello"
 class HirStringLiteral : public HirExpr {
-public:
+  public:
     std::string value;
     explicit HirStringLiteral(std::string v) : value(std::move(v)) {}
 };
 
 /// Bool literal: true / false
 class HirBoolLiteral : public HirExpr {
-public:
+  public:
     bool value;
     explicit HirBoolLiteral(bool v) : value(v) {}
 };
 
 /// Null literal: nil
 class HirNullLiteral : public HirExpr {
-public:
+  public:
     HirNullLiteral() {}
 };
 
 /// Variable reference — resolved to HirId of its declaration.
 class HirVarRef : public HirExpr {
-public:
-    HirId defId;       // points to the VarDecl or Param that defined this var
-    std::string name;  // kept for diagnostics/printing
+  public:
+    HirId defId;      // points to the VarDecl or Param that defined this var
+    std::string name; // kept for diagnostics/printing
     HirVarRef(HirId id, std::string name) : defId(id), name(std::move(name)) {}
 };
 
 /// Binary operation
 class HirBinaryExpr : public HirExpr {
-public:
+  public:
     BinaryOp op;
     std::unique_ptr<HirExpr> lhs;
     std::unique_ptr<HirExpr> rhs;
@@ -83,7 +84,7 @@ public:
 
 /// Unary operation
 class HirUnaryExpr : public HirExpr {
-public:
+  public:
     UnaryOp op;
     std::unique_ptr<HirExpr> operand;
     HirUnaryExpr(UnaryOp op, std::unique_ptr<HirExpr> operand)
@@ -92,9 +93,9 @@ public:
 
 /// Function call — callee resolved to HirId.
 class HirCallExpr : public HirExpr {
-public:
+  public:
     HirId calleeId;
-    std::string calleeName;  // for diagnostics
+    std::string calleeName; // for diagnostics
     std::vector<std::unique_ptr<HirExpr>> args;
     HirCallExpr(HirId id, std::string name, std::vector<std::unique_ptr<HirExpr>> args)
         : calleeId(id), calleeName(std::move(name)), args(std::move(args)) {}
@@ -102,7 +103,7 @@ public:
 
 /// Assignment: x = expr  (target resolved to HirId)
 class HirAssignExpr : public HirExpr {
-public:
+  public:
     HirId targetId;
     std::string targetName;
     std::unique_ptr<HirExpr> value;
@@ -112,7 +113,7 @@ public:
 
 /// Array literal: [1, 2, 3]
 class HirArrayLiteral : public HirExpr {
-public:
+  public:
     std::vector<std::unique_ptr<HirExpr>> elements;
     explicit HirArrayLiteral(std::vector<std::unique_ptr<HirExpr>> elements)
         : elements(std::move(elements)) {}
@@ -120,23 +121,26 @@ public:
 
 /// Array indexing: arr[index]
 class HirIndexExpr : public HirExpr {
-public:
+  public:
     std::unique_ptr<HirExpr> base;
     std::unique_ptr<HirExpr> index;
     std::unique_ptr<HirExpr> endIndex; // nullable
     bool isRange = false;
 
-    HirIndexExpr(std::unique_ptr<HirExpr> base, std::unique_ptr<HirExpr> index, std::unique_ptr<HirExpr> end = nullptr, bool range = false)
-        : base(std::move(base)), index(std::move(index)), endIndex(std::move(end)), isRange(range) {}
+    HirIndexExpr(std::unique_ptr<HirExpr> base, std::unique_ptr<HirExpr> index,
+                 std::unique_ptr<HirExpr> end = nullptr, bool range = false)
+        : base(std::move(base)), index(std::move(index)), endIndex(std::move(end)), isRange(range) {
+    }
 };
 
 /// Array index assignment: arr[index] = value
 class HirIndexAssign : public HirExpr {
-public:
+  public:
     std::unique_ptr<HirExpr> base;
     std::unique_ptr<HirExpr> index;
     std::unique_ptr<HirExpr> value;
-    HirIndexAssign(std::unique_ptr<HirExpr> base, std::unique_ptr<HirExpr> index, std::unique_ptr<HirExpr> value)
+    HirIndexAssign(std::unique_ptr<HirExpr> base, std::unique_ptr<HirExpr> index,
+                   std::unique_ptr<HirExpr> value)
         : base(std::move(base)), index(std::move(index)), value(std::move(value)) {}
 };
 
@@ -148,7 +152,7 @@ struct HirStructFieldInit {
 
 /// Struct constructor literal: Point { x: 10, y: 20 }
 class HirStructLiteral : public HirExpr {
-public:
+  public:
     std::string structName;
     std::vector<HirStructFieldInit> fields;
     HirStructLiteral(std::string name, std::vector<HirStructFieldInit> fields)
@@ -157,7 +161,7 @@ public:
 
 /// Field read: expr.fieldName
 class HirFieldAccess : public HirExpr {
-public:
+  public:
     std::unique_ptr<HirExpr> base;
     std::string field;
     HirFieldAccess(std::unique_ptr<HirExpr> base, std::string field)
@@ -165,7 +169,7 @@ public:
 };
 
 class HirFieldAssign : public HirExpr {
-public:
+  public:
     std::unique_ptr<HirExpr> base;
     std::string field;
     std::unique_ptr<HirExpr> value;
@@ -175,7 +179,7 @@ public:
 
 /// Pointer dereference assignment: *ptr = value
 class HirDerefAssign : public HirExpr {
-public:
+  public:
     std::unique_ptr<HirExpr> pointer;
     std::unique_ptr<HirExpr> value;
     HirDerefAssign(std::unique_ptr<HirExpr> ptr, std::unique_ptr<HirExpr> val)
@@ -183,7 +187,7 @@ public:
 };
 
 class HirEnumVariantExpr : public HirExpr {
-public:
+  public:
     std::string enumName;
     std::string variantName;
     std::unique_ptr<HirExpr> payload; // may be null
@@ -193,7 +197,7 @@ public:
 
 /// Explicit cast: expr as Type
 class HirCastExpr : public HirExpr {
-public:
+  public:
     std::unique_ptr<HirExpr> expr;
     TypeInfo targetType;
     HirCastExpr(std::unique_ptr<HirExpr> e, TypeInfo t)
@@ -202,7 +206,7 @@ public:
 
 /// Heap allocation: new T
 class HirNewExpr : public HirExpr {
-public:
+  public:
     TypeInfo allocatedType;
     std::unique_ptr<HirExpr> sizeExpr; // for dynamic arrays
 
@@ -212,7 +216,7 @@ public:
 
 /// ZPM Zone block: zone A { ... }
 class HirZoneExpr : public HirExpr {
-public:
+  public:
     std::string zoneName;
     std::unique_ptr<HirBlock> body;
     HirZoneExpr(std::string name, std::unique_ptr<HirBlock> body)
@@ -221,7 +225,7 @@ public:
 
 /// ZPM Allocation: alloc<T>(size)~A
 class HirAllocExpr : public HirExpr {
-public:
+  public:
     TypeInfo type;
     std::unique_ptr<HirExpr> count;
     std::string zoneName;
@@ -231,54 +235,53 @@ public:
 
 /// ZPM Borrow: borrow shared/mut (target)
 class HirBorrowExpr : public HirExpr {
-public:
+  public:
     bool isMutable;
     std::unique_ptr<HirExpr> target;
-    HirBorrowExpr(bool mut, std::unique_ptr<HirExpr> t)
-        : isMutable(mut), target(std::move(t)) {}
+    HirBorrowExpr(bool mut, std::unique_ptr<HirExpr> t) : isMutable(mut), target(std::move(t)) {}
 };
 
 /// ZPM Escape: escape(target) -> destination
 class HirEscapeExpr : public HirExpr {
-public:
+  public:
     std::unique_ptr<HirExpr> target;
     std::string destinationZone;
     HirEscapeExpr(std::unique_ptr<HirExpr> t, std::string dest)
         : target(std::move(t)), destinationZone(std::move(dest)) {}
 };
 
-
 // ═══════════════════════════════════════════════════════════════════════════════
 //  HIR Statements
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class HirStmt {
-public:
+  public:
     SourceLocation loc;
     virtual ~HirStmt() = default;
 };
 
 /// Expression statement
 class HirExprStmt : public HirStmt {
-public:
+  public:
     std::unique_ptr<HirExpr> expr;
     explicit HirExprStmt(std::unique_ptr<HirExpr> e) : expr(std::move(e)) {}
 };
 
 /// Variable declaration — gets its own HirId.
 class HirVarDecl : public HirStmt {
-public:
+  public:
     HirId id;
     std::string name;
     TypeInfo typeInfo;
-    std::unique_ptr<HirExpr> initializer;  // may be null
-    HirVarDecl(HirId id, std::string name, TypeInfo typeInfo, std::unique_ptr<HirExpr> init = nullptr)
+    std::unique_ptr<HirExpr> initializer; // may be null
+    HirVarDecl(HirId id, std::string name, TypeInfo typeInfo,
+               std::unique_ptr<HirExpr> init = nullptr)
         : id(id), name(std::move(name)), typeInfo(typeInfo), initializer(std::move(init)) {}
 };
 
 /// Block: { stmts }
 class HirBlock : public HirStmt {
-public:
+  public:
     std::vector<std::unique_ptr<HirStmt>> stmts;
     explicit HirBlock(std::vector<std::unique_ptr<HirStmt>> s) : stmts(std::move(s)) {}
 };
@@ -294,7 +297,7 @@ struct HirMatchArm {
 };
 
 class HirMatchExpr : public HirExpr {
-public:
+  public:
     std::unique_ptr<HirExpr> value;
     std::vector<HirMatchArm> arms;
     HirMatchExpr(std::unique_ptr<HirExpr> val, std::vector<HirMatchArm> arms)
@@ -303,26 +306,25 @@ public:
 
 /// Return statement
 class HirReturn : public HirStmt {
-public:
-    std::unique_ptr<HirExpr> value;  // may be null
+  public:
+    std::unique_ptr<HirExpr> value; // may be null
     explicit HirReturn(std::unique_ptr<HirExpr> v = nullptr) : value(std::move(v)) {}
 };
 
 /// If statement
 class HirIf : public HirStmt {
-public:
+  public:
     std::unique_ptr<HirExpr> condition;
     std::unique_ptr<HirBlock> thenBranch;
-    std::unique_ptr<HirBlock> elseBranch;  // may be null
+    std::unique_ptr<HirBlock> elseBranch; // may be null
     HirIf(std::unique_ptr<HirExpr> cond, std::unique_ptr<HirBlock> then,
           std::unique_ptr<HirBlock> else_ = nullptr)
-        : condition(std::move(cond)), thenBranch(std::move(then)),
-          elseBranch(std::move(else_)) {}
+        : condition(std::move(cond)), thenBranch(std::move(then)), elseBranch(std::move(else_)) {}
 };
 
 /// While loop
 class HirWhile : public HirStmt {
-public:
+  public:
     std::unique_ptr<HirExpr> condition;
     std::unique_ptr<HirBlock> body;
     HirWhile(std::unique_ptr<HirExpr> cond, std::unique_ptr<HirBlock> body)
@@ -331,18 +333,19 @@ public:
 
 /// For loop: for x in iterable { body }
 class HirFor : public HirStmt {
-public:
+  public:
     HirId varId;
     std::string varName;
     std::unique_ptr<HirExpr> iterable;
     std::unique_ptr<HirBlock> body;
-    HirFor(HirId id, std::string name, std::unique_ptr<HirExpr> iter, std::unique_ptr<HirBlock> body)
+    HirFor(HirId id, std::string name, std::unique_ptr<HirExpr> iter,
+           std::unique_ptr<HirBlock> body)
         : varId(id), varName(std::move(name)), iterable(std::move(iter)), body(std::move(body)) {}
 };
 
 /// Heap free: delete ptr
 class HirDeleteStmt : public HirStmt {
-public:
+  public:
     std::unique_ptr<HirExpr> pointer;
     explicit HirDeleteStmt(std::unique_ptr<HirExpr> ptr) : pointer(std::move(ptr)) {}
 };
@@ -360,7 +363,7 @@ struct HirParam {
 
 /// Function declaration
 class HirFuncDecl {
-public:
+  public:
     HirId id;
     std::string name;
     std::vector<HirParam> params;
@@ -368,10 +371,10 @@ public:
     std::unique_ptr<HirBlock> body;
     bool isExtern = false;
 
-    HirFuncDecl(HirId id, std::string name, std::vector<HirParam> params,
-                TypeInfo retType, std::unique_ptr<HirBlock> body, bool isExtern = false)
-        : id(id), name(std::move(name)), params(std::move(params)),
-          returnTypeInfo(retType), body(std::move(body)), isExtern(isExtern) {}
+    HirFuncDecl(HirId id, std::string name, std::vector<HirParam> params, TypeInfo retType,
+                std::unique_ptr<HirBlock> body, bool isExtern = false)
+        : id(id), name(std::move(name)), params(std::move(params)), returnTypeInfo(retType),
+          body(std::move(body)), isExtern(isExtern) {}
 };
 
 /// A resolved struct definition (stored in HIR for type queries).
@@ -386,7 +389,8 @@ struct HirStructDef {
     /// Returns field index, or -1 if not found.
     int fieldIndex(const std::string &fname) const {
         for (int i = 0; i < (int)fields.size(); ++i)
-            if (fields[i].name == fname) return i;
+            if (fields[i].name == fname)
+                return i;
         return -1;
     }
 };
@@ -400,10 +404,11 @@ struct HirEnumVariantDef {
 struct HirEnumDef {
     std::string name;
     std::vector<HirEnumVariantDef> variants;
-    
+
     int variantIndex(const std::string &vname) const {
         for (int i = 0; i < (int)variants.size(); ++i)
-            if (variants[i].name == vname) return i;
+            if (variants[i].name == vname)
+                return i;
         return -1;
     }
 };
@@ -417,7 +422,7 @@ struct HirConstDef {
 
 /// Top-level HIR program
 class HirProgram {
-public:
+  public:
     std::vector<std::unique_ptr<HirFuncDecl>> functions;
     std::vector<std::unique_ptr<HirConstDef>> constants;
     std::vector<HirStructDef> structs;
@@ -426,14 +431,16 @@ public:
     /// Find a struct def by name.
     const HirStructDef *findStruct(const std::string &name) const {
         for (auto &s : structs)
-            if (s.name == name) return &s;
+            if (s.name == name)
+                return &s;
         return nullptr;
     }
 
     /// Find an enum def by name.
     const HirEnumDef *findEnum(const std::string &name) const {
         for (auto &e : enums)
-            if (e.name == name) return &e;
+            if (e.name == name)
+                return &e;
         return nullptr;
     }
 };

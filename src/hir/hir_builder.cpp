@@ -1,4 +1,5 @@
 #include "agam/hir/hir_builder.h"
+
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -27,12 +28,12 @@ HirId HirBuilder::resolve(const std::string &name, const SourceLocation &loc) {
     // Walk scopes from innermost to outermost.
     for (auto it = scopes_.rbegin(); it != scopes_.rend(); ++it) {
         auto found = it->names.find(name);
-    if (found != it->names.end()) {
-        return found->second;
+        if (found != it->names.end()) {
+            return found->second;
+        }
     }
-}
-error(loc, "undeclared identifier '" + name + "'");
-return INVALID_HIR_ID;
+    error(loc, "undeclared identifier '" + name + "'");
+    return INVALID_HIR_ID;
 }
 
 void HirBuilder::error(const SourceLocation &loc, const std::string &msg) {
@@ -68,11 +69,15 @@ std::unique_ptr<HirProgram> HirBuilder::build(Program &program) {
 
     // Register all methods in impl blocks (skip generic impls)
     for (auto &impl : program.impls) {
-        if (!impl->typeParams.empty()) continue; // Skip generic impl templates
+        if (!impl->typeParams.empty())
+            continue; // Skip generic impl templates
         std::string typeStr;
-        if (impl->targetType.isStruct) typeStr = impl->targetType.structName;
-        else if (impl->targetType.isEnum) typeStr = impl->targetType.enumName;
-        else typeStr = typeKindToString(impl->targetType.kind);
+        if (impl->targetType.isStruct)
+            typeStr = impl->targetType.structName;
+        else if (impl->targetType.isEnum)
+            typeStr = impl->targetType.enumName;
+        else
+            typeStr = typeKindToString(impl->targetType.kind);
 
         for (auto &method : impl->methods) {
             std::string mangledName;
@@ -88,9 +93,10 @@ std::unique_ptr<HirProgram> HirBuilder::build(Program &program) {
 
     // Now lower each function.
     // We need to re-iterate because IDs were allocated in order above.
-    HirId fnId = 1;  // first allocated ID
+    // Now lower each function (IDs already allocated above).
     for (auto &fn : program.functions) {
-        if (!fn->typeParams.empty()) continue; // Skip generic
+        if (!fn->typeParams.empty())
+            continue; // Skip generic
         // The fnId was already allocated in the loop above, re-resolve it.
         HirId resolvedId = resolve(fn->name, fn->loc);
         hirProg->functions.push_back(lowerFunc(*fn));
@@ -98,11 +104,15 @@ std::unique_ptr<HirProgram> HirBuilder::build(Program &program) {
     }
 
     for (auto &impl : program.impls) {
-        if (!impl->typeParams.empty()) continue; // Skip generic impl templates
+        if (!impl->typeParams.empty())
+            continue; // Skip generic impl templates
         std::string typeStr;
-        if (impl->targetType.isStruct) typeStr = impl->targetType.structName;
-        else if (impl->targetType.isEnum) typeStr = impl->targetType.enumName;
-        else typeStr = typeKindToString(impl->targetType.kind);
+        if (impl->targetType.isStruct)
+            typeStr = impl->targetType.structName;
+        else if (impl->targetType.isEnum)
+            typeStr = impl->targetType.enumName;
+        else
+            typeStr = typeKindToString(impl->targetType.kind);
 
         for (auto &method : impl->methods) {
             std::string mangledName;
@@ -112,9 +122,10 @@ std::unique_ptr<HirProgram> HirBuilder::build(Program &program) {
                 mangledName = "_Impl_" + impl->traitName + "_for_" + typeStr + "_" + method->name;
             }
             HirId resolvedId = resolve(mangledName, method->loc);
-            
+
             // Correctly lower dengan 'self'
-            hirProg->functions.push_back(lowerImplMethod(*method, mangledName, resolvedId, impl->targetType));
+            hirProg->functions.push_back(
+                lowerImplMethod(*method, mangledName, resolvedId, impl->targetType));
         }
     }
 
@@ -131,7 +142,8 @@ std::unique_ptr<HirProgram> HirBuilder::build(Program &program) {
 
     // Lower struct definitions into HIR (register in hirProg->structs).
     for (auto &sd : program.structs) {
-        if (!sd->typeParams.empty()) continue; // Skip generic
+        if (!sd->typeParams.empty())
+            continue; // Skip generic
         HirStructDef hsd;
         hsd.name = sd->name;
         for (auto &f : sd->fields) {
@@ -142,7 +154,8 @@ std::unique_ptr<HirProgram> HirBuilder::build(Program &program) {
 
     // Lower enum definitions into HIR
     for (auto &ed : program.enums) {
-        if (!ed->typeParams.empty()) continue; // Skip generic
+        if (!ed->typeParams.empty())
+            continue; // Skip generic
         HirEnumDef hed;
         hed.name = ed->name;
         for (auto &v : ed->variants) {
@@ -178,15 +191,17 @@ std::unique_ptr<HirFuncDecl> HirBuilder::lowerFunc(FunctionDecl &node) {
 
     popScope();
 
-    return std::make_unique<HirFuncDecl>(
-        funcId, node.name, std::move(hirParams), node.returnTypeInfo, std::move(body), node.isExtern);
+    return std::make_unique<HirFuncDecl>(funcId, node.name, std::move(hirParams),
+                                         node.returnTypeInfo, std::move(body), node.isExtern);
 }
 
-std::unique_ptr<HirFuncDecl> HirBuilder::lowerImplMethod(FunctionDecl &node, const std::string &mangledName, HirId funcId, const TypeInfo &targetType) {
+std::unique_ptr<HirFuncDecl> HirBuilder::lowerImplMethod(FunctionDecl &node,
+                                                         const std::string &mangledName,
+                                                         HirId funcId, const TypeInfo &targetType) {
     // Implementation body scope: register 'self' + parameters.
     pushScope();
     std::vector<HirParam> hirParams;
-    
+
     for (auto &p : node.params) {
         HirId paramId = allocId();
         define(p.name, paramId);
@@ -200,8 +215,8 @@ std::unique_ptr<HirFuncDecl> HirBuilder::lowerImplMethod(FunctionDecl &node, con
 
     popScope();
 
-    return std::make_unique<HirFuncDecl>(
-        funcId, mangledName, std::move(hirParams), node.returnTypeInfo, std::move(body), node.isExtern);
+    return std::make_unique<HirFuncDecl>(funcId, mangledName, std::move(hirParams),
+                                         node.returnTypeInfo, std::move(body), node.isExtern);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -213,7 +228,8 @@ std::unique_ptr<HirBlock> HirBuilder::lowerBlock(BlockStmt &node) {
     std::vector<std::unique_ptr<HirStmt>> stmts;
     for (auto &s : node.statements) {
         auto hir = lowerStmt(*s);
-        if (hir) stmts.push_back(std::move(hir));
+        if (hir)
+            stmts.push_back(std::move(hir));
     }
     popScope();
     return std::make_unique<HirBlock>(std::move(stmts));
@@ -270,8 +286,8 @@ std::unique_ptr<HirStmt> HirBuilder::lowerStmt(Stmt &node) {
             }
         }
 
-        auto stmt = std::make_unique<HirIf>(
-            std::move(cond), std::move(thenBlock), std::move(elseBlock));
+        auto stmt =
+            std::make_unique<HirIf>(std::move(cond), std::move(thenBlock), std::move(elseBlock));
         stmt->loc = node.loc;
         return stmt;
     }
@@ -298,19 +314,21 @@ std::unique_ptr<HirStmt> HirBuilder::lowerStmt(Stmt &node) {
         pushScope();
         HirId varId = allocId();
         define(forS->varName, varId);
-        
+
         std::unique_ptr<HirBlock> hirBody;
-        if (auto *block = dynamic_cast<BlockStmt*>(forS->body.get())) {
+        if (auto *block = dynamic_cast<BlockStmt *>(forS->body.get())) {
             hirBody = lowerBlock(*block);
         } else {
             std::vector<std::unique_ptr<HirStmt>> stmts;
             auto s = lowerStmt(*forS->body);
-            if (s) stmts.push_back(std::move(s));
+            if (s)
+                stmts.push_back(std::move(s));
             hirBody = std::make_unique<HirBlock>(std::move(stmts));
         }
 
         popScope();
-        auto stmt = std::make_unique<HirFor>(varId, forS->varName, std::move(iter), std::move(hirBody));
+        auto stmt =
+            std::make_unique<HirFor>(varId, forS->varName, std::move(iter), std::move(hirBody));
         stmt->loc = node.loc;
         return stmt;
     }
@@ -374,7 +392,7 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
     }
 
     // NullLiteralExpr
-    if (auto *lit = dynamic_cast<NullLiteralExpr *>(&node)) {
+    if (dynamic_cast<NullLiteralExpr *>(&node)) {
         auto e = std::make_unique<HirNullLiteral>();
         e->loc = node.loc;
         return e;
@@ -445,7 +463,8 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
         if (idx->endIndex) {
             endIndex = lowerExpr(*idx->endIndex);
         }
-        auto e = std::make_unique<HirIndexExpr>(std::move(base), std::move(index), std::move(endIndex), idx->isRange);
+        auto e = std::make_unique<HirIndexExpr>(std::move(base), std::move(index),
+                                                std::move(endIndex), idx->isRange);
         e->loc = node.loc;
         return e;
     }
@@ -455,7 +474,8 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
         auto base = lowerExpr(*idxAssign->base);
         auto index = lowerExpr(*idxAssign->index);
         auto val = lowerExpr(*idxAssign->value);
-        auto e = std::make_unique<HirIndexAssign>(std::move(base), std::move(index), std::move(val));
+        auto e =
+            std::make_unique<HirIndexAssign>(std::move(base), std::move(index), std::move(val));
         e->loc = node.loc;
         return e;
     }
@@ -467,7 +487,8 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
             auto val = lowerExpr(*f.value);
             hfields.push_back({f.name, std::move(val)});
         }
-        auto e = std::make_unique<HirStructLiteral>(slit->structType.structName, std::move(hfields));
+        auto e =
+            std::make_unique<HirStructLiteral>(slit->structType.structName, std::move(hfields));
         e->loc = node.loc;
         return e;
     }
@@ -498,7 +519,8 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
         for (auto &arg : mc->args) {
             hirArgs.push_back(lowerExpr(*arg));
         }
-        auto e = std::make_unique<HirCallExpr>(calleeId, mc->resolvedMangledName, std::move(hirArgs));
+        auto e =
+            std::make_unique<HirCallExpr>(calleeId, mc->resolvedMangledName, std::move(hirArgs));
         e->loc = node.loc;
         return e;
     }
@@ -506,7 +528,7 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
     // FieldAssignExpr → HirFieldAssign
     if (auto *fassign = dynamic_cast<FieldAssignExpr *>(&node)) {
         auto base = lowerExpr(*fassign->base);
-        auto val  = lowerExpr(*fassign->value);
+        auto val = lowerExpr(*fassign->value);
         auto e = std::make_unique<HirFieldAssign>(std::move(base), fassign->field, std::move(val));
         e->loc = node.loc;
         return e;
@@ -527,7 +549,8 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
         if (eve->payload) {
             payloadHir = lowerExpr(*eve->payload);
         }
-        auto e = std::make_unique<HirEnumVariantExpr>(eve->enumName, eve->variantName, std::move(payloadHir));
+        auto e = std::make_unique<HirEnumVariantExpr>(eve->enumName, eve->variantName,
+                                                      std::move(payloadHir));
         e->loc = node.loc;
         return e;
     }
@@ -541,14 +564,14 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
             harm.variantName = arm.variantName;
             harm.hasBinding = arm.hasBinding;
             harm.bindingName = arm.bindingName;
-            
+
             // Scope for bindings
             pushScope();
             if (arm.hasBinding) {
                 harm.bindingId = allocId();
                 define(arm.bindingName, harm.bindingId);
             }
-            
+
             if (auto *b = dynamic_cast<BlockStmt *>(arm.body.get())) {
                 harm.blockBody = lowerBlock(*b);
             } else if (auto *ex = dynamic_cast<Expr *>(arm.body.get())) {
@@ -556,11 +579,11 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
             } else {
                 error(node.loc, "Match arm body is neither block nor expression");
             }
-            
+
             popScope();
             arms.push_back(std::move(harm));
         }
-        
+
         auto e = std::make_unique<HirMatchExpr>(std::move(valHir), std::move(arms));
         e->loc = node.loc;
         return e;
@@ -592,7 +615,8 @@ std::unique_ptr<HirExpr> HirBuilder::lowerExpr(Expr &node) {
     // AllocExpr → HirAllocExpr
     if (auto *allocE = dynamic_cast<AllocExpr *>(&node)) {
         std::unique_ptr<HirExpr> count = nullptr;
-        if (allocE->count) count = lowerExpr(*allocE->count);
+        if (allocE->count)
+            count = lowerExpr(*allocE->count);
         auto e = std::make_unique<HirAllocExpr>(allocE->type, std::move(count), currentZone_);
         e->loc = node.loc;
         return e;

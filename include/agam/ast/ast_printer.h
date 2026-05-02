@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast.h"
+
 #include <iostream>
 #include <string>
 
@@ -8,7 +9,7 @@ namespace agam {
 
 /// Pretty-prints an AST tree to an output stream (for debugging/testing).
 class ASTPrinter : public ASTVisitor {
-public:
+  public:
     explicit ASTPrinter(std::ostream &os = std::cout) : os_(os) {}
 
     void print(ASTNode &node) {
@@ -61,10 +62,18 @@ public:
         printIndent();
         const char *opStr = "?";
         switch (node.op) {
-            case UnaryOp::Negate: opStr = "-"; break;
-            case UnaryOp::Not: opStr = "!"; break;
-            case UnaryOp::AddressOf: opStr = "&"; break;
-            case UnaryOp::Dereference: opStr = "*"; break;
+        case UnaryOp::Negate:
+            opStr = "-";
+            break;
+        case UnaryOp::Not:
+            opStr = "!";
+            break;
+        case UnaryOp::AddressOf:
+            opStr = "&";
+            break;
+        case UnaryOp::Dereference:
+            opStr = "*";
+            break;
         }
         os_ << "UnaryExpr(" << opStr << ")\n";
         indent_++;
@@ -102,7 +111,8 @@ public:
         printIndent();
         os_ << "ArrayLiteral(" << node.elements.size() << " elements)\n";
         indent_++;
-        for (auto &e : node.elements) e->accept(*this);
+        for (auto &e : node.elements)
+            e->accept(*this);
         indent_--;
     }
 
@@ -162,7 +172,8 @@ public:
         if (!node.genericArgs.empty()) {
             os_ << "<";
             for (size_t i = 0; i < node.genericArgs.size(); ++i) {
-                if (i > 0) os_ << ", ";
+                if (i > 0)
+                    os_ << ", ";
                 os_ << typeInfoToString(node.genericArgs[i]);
             }
             os_ << ">";
@@ -183,7 +194,8 @@ public:
         for (auto &arm : node.arms) {
             printIndent();
             os_ << "Arm(" << arm.variantName;
-            if (arm.hasBinding) os_ << ", bind: " << arm.bindingName;
+            if (arm.hasBinding)
+                os_ << ", bind: " << arm.bindingName;
             os_ << ")\n";
             indent_++;
             arm.body->accept(*this);
@@ -245,7 +257,8 @@ public:
         os_ << "MethodCall(" << node.methodName << ")\n";
         indent_++;
         node.base->accept(*this);
-        for (auto &arg : node.args) arg->accept(*this);
+        for (auto &arg : node.args)
+            arg->accept(*this);
         indent_--;
     }
 
@@ -381,12 +394,18 @@ public:
         printIndent();
         os_ << "Program\n";
         indent_++;
-        for (auto &sd : node.structs) sd->accept(*this);
-        for (auto &cn : node.constants) cn->accept(*this);
-        for (auto &ed : node.enums) ed->accept(*this);
-        for (auto &td : node.traits) td->accept(*this);
-        for (auto &id : node.impls) id->accept(*this);
-        for (auto &fn : node.functions) fn->accept(*this);
+        for (auto &sd : node.structs)
+            sd->accept(*this);
+        for (auto &cn : node.constants)
+            cn->accept(*this);
+        for (auto &ed : node.enums)
+            ed->accept(*this);
+        for (auto &td : node.traits)
+            td->accept(*this);
+        for (auto &id : node.impls)
+            id->accept(*this);
+        for (auto &fn : node.functions)
+            fn->accept(*this);
         indent_--;
     }
 
@@ -416,7 +435,8 @@ public:
         for (auto &v : node.variants) {
             printIndent();
             os_ << "Variant(" << v.name;
-            if (v.hasPayload) os_ << ": " << typeInfoToString(v.payloadType);
+            if (v.hasPayload)
+                os_ << ": " << typeInfoToString(v.payloadType);
             os_ << ")\n";
         }
         indent_--;
@@ -426,19 +446,22 @@ public:
         printIndent();
         os_ << "TraitDecl(" << node.name << ")\n";
         indent_++;
-        for (auto &m : node.methods) m->accept(*this);
+        for (auto &m : node.methods)
+            m->accept(*this);
         indent_--;
     }
 
     void visit(ImplDecl &node) override {
         printIndent();
-        os_ << "ImplDecl(" << node.traitName << " for " << typeInfoToString(node.targetType) << ")\n";
+        os_ << "ImplDecl(" << node.traitName << " for " << typeInfoToString(node.targetType)
+            << ")\n";
         indent_++;
-        for (auto &m : node.methods) m->accept(*this);
+        for (auto &m : node.methods)
+            m->accept(*this);
         indent_--;
     }
 
-private:
+  private:
     std::ostream &os_;
     int indent_ = 0;
 
@@ -446,7 +469,8 @@ private:
         std::string s;
         for (size_t i = 0; i < params.size(); i++) {
             s += params[i];
-            if (i < params.size() - 1) s += ", ";
+            if (i < params.size() - 1)
+                s += ", ";
         }
         return s;
     }

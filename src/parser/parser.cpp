@@ -1,10 +1,12 @@
 #include "agam/parser/parser.h"
-#include <stdexcept>
+
 #include <sstream>
+#include <stdexcept>
 
 namespace agam {
 
-Parser::Parser(const std::vector<Token> &tokens, const std::string &source, const std::string &filename, DiagnosticEngine &diag) 
+Parser::Parser(const std::vector<Token> &tokens, const std::string &source,
+               const std::string &filename, DiagnosticEngine &diag)
     : tokens_(tokens), source_(source), filename_(filename), diag_(diag) {}
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -20,7 +22,8 @@ const Token &Parser::previous() const {
 }
 
 const Token &Parser::advance() {
-    if (!isAtEnd()) current_++;
+    if (!isAtEnd())
+        current_++;
     return previous();
 }
 
@@ -29,7 +32,8 @@ bool Parser::isAtEnd() const {
 }
 
 bool Parser::check(TokenType type) const {
-    if (isAtEnd()) return false;
+    if (isAtEnd())
+        return false;
     return peek().type == type;
 }
 
@@ -52,7 +56,8 @@ bool Parser::match(std::initializer_list<TokenType> types) {
 }
 
 Token Parser::consume(TokenType type, const std::string &errMsg) {
-    if (check(type)) return advance();
+    if (check(type))
+        return advance();
     error(peek(), errMsg);
     return peek(); // Return current token even on error
 }
@@ -72,7 +77,8 @@ void Parser::error(const Token &tok, const std::string &msg) {
 void Parser::synchronize() {
     advance();
     while (!isAtEnd()) {
-        if (previous().type == TokenType::SEMICOLON) return;
+        if (previous().type == TokenType::SEMICOLON)
+            return;
         switch (peek().type) {
         case TokenType::KW_FUNC:
         case TokenType::KW_LET:
@@ -110,7 +116,9 @@ std::unique_ptr<Program> Parser::parseProgram() {
     while (!isAtEnd()) {
         try {
             if (match(TokenType::KW_IMPORT)) {
-                Token pathTok = consume(TokenType::STRING_LITERAL, "இறக்குமதிக்கு (import) பின் சரம் (string literal) எதிர்பார்க்கிறோம்");
+                Token pathTok =
+                    consume(TokenType::STRING_LITERAL,
+                            "இறக்குமதிக்கு (import) பின் சரம் (string literal) எதிர்பார்க்கிறோம்");
                 // Remove quotes from string literal
                 std::string path = pathTok.value;
                 if (path.size() >= 2 && path.front() == '"' && path.back() == '"') {
@@ -143,7 +151,8 @@ std::unique_ptr<Program> Parser::parseProgram() {
             } else if (match(TokenType::KW_IMPL)) {
                 program->impls.push_back(parseImplDecl());
             } else {
-                error(peek(), "இறக்குமதி (import), செயல் (func), அமைப்பு (struct) அல்லது பட்டியல் (enum) அறிவிப்பை எதிர்பார்க்கிறோம்");
+                error(peek(), "இறக்குமதி (import), செயல் (func), அமைப்பு (struct) அல்லது பட்டியல் (enum) "
+                              "அறிவிப்பை எதிர்பார்க்கிறோம்");
                 synchronize();
             }
         } catch (const std::runtime_error &) {
@@ -180,7 +189,8 @@ std::unique_ptr<FunctionDecl> Parser::parseFunctionDecl() {
 
     std::unique_ptr<BlockStmt> body = nullptr;
     if (isExtern) {
-        consume(TokenType::SEMICOLON, "வெளிப்புறச் செயல் (extern func) அறிவிப்புக்குப்பின் ';' எதிர்பார்க்கிறோம்");
+        consume(TokenType::SEMICOLON,
+                "வெளிப்புறச் செயல் (extern func) அறிவிப்புக்குப்பின் ';' எதிர்பார்க்கிறோம்");
     } else if (check(TokenType::SEMICOLON)) {
         advance();
     } else {
@@ -201,8 +211,8 @@ std::unique_ptr<FunctionDecl> Parser::parseFunctionDecl() {
         }
     }
 
-    auto func = std::make_unique<FunctionDecl>(
-        name, std::move(typeParams), std::move(params), retType, std::move(body), isExtern, isMutating);
+    auto func = std::make_unique<FunctionDecl>(name, std::move(typeParams), std::move(params),
+                                               retType, std::move(body), isExtern, isMutating);
     func->loc = {funcTok.filename, funcTok.line, funcTok.column};
     return func;
 }
@@ -224,7 +234,8 @@ std::unique_ptr<ConstDecl> Parser::parseConstDecl() {
 std::vector<Param> Parser::parseParamList() {
     std::vector<Param> params;
 
-    if (check(TokenType::RPAREN)) return params; // Empty param list
+    if (check(TokenType::RPAREN))
+        return params; // Empty param list
 
     do {
         bool isMut = match(TokenType::KW_MUT);
@@ -269,26 +280,43 @@ TypeInfo Parser::parseTypeSpec() {
         int size = std::stoi(sizeTok.value);
         consume(TokenType::RBRACKET, "அணி வகைக்குப்பின் ']' எதிர்பார்க்கிறோம்");
         ti = TypeInfo::array(elemTI, size);
-    } else if (match(TokenType::KW_INT))     ti = TypeInfo::scalar(TypeKind::Int);
-    else if (match(TokenType::KW_FLOAT))   ti = TypeInfo::scalar(TypeKind::Float);
-    else if (match(TokenType::KW_STRING))  ti = TypeInfo::scalar(TypeKind::String);
-    else if (match(TokenType::KW_BOOL))    ti = TypeInfo::scalar(TypeKind::Bool);
-    else if (match(TokenType::KW_VOID))    ti = TypeInfo::scalar(TypeKind::Void);
+    } else if (match(TokenType::KW_INT))
+        ti = TypeInfo::scalar(TypeKind::Int);
+    else if (match(TokenType::KW_FLOAT))
+        ti = TypeInfo::scalar(TypeKind::Float);
+    else if (match(TokenType::KW_STRING))
+        ti = TypeInfo::scalar(TypeKind::String);
+    else if (match(TokenType::KW_BOOL))
+        ti = TypeInfo::scalar(TypeKind::Bool);
+    else if (match(TokenType::KW_VOID))
+        ti = TypeInfo::scalar(TypeKind::Void);
     // Sized integers
-    else if (match(TokenType::KW_INT8))    ti = TypeInfo::scalar(TypeKind::Int8);
-    else if (match(TokenType::KW_INT16))   ti = TypeInfo::scalar(TypeKind::Int16);
-    else if (match(TokenType::KW_INT32))   ti = TypeInfo::scalar(TypeKind::Int32);
-    else if (match(TokenType::KW_INT64))   ti = TypeInfo::scalar(TypeKind::Int64);
-    else if (match(TokenType::KW_INT128))  ti = TypeInfo::scalar(TypeKind::Int128);
+    else if (match(TokenType::KW_INT8))
+        ti = TypeInfo::scalar(TypeKind::Int8);
+    else if (match(TokenType::KW_INT16))
+        ti = TypeInfo::scalar(TypeKind::Int16);
+    else if (match(TokenType::KW_INT32))
+        ti = TypeInfo::scalar(TypeKind::Int32);
+    else if (match(TokenType::KW_INT64))
+        ti = TypeInfo::scalar(TypeKind::Int64);
+    else if (match(TokenType::KW_INT128))
+        ti = TypeInfo::scalar(TypeKind::Int128);
     // Unsigned
-    else if (match(TokenType::KW_UINT8))   ti = TypeInfo::scalar(TypeKind::UInt8);
-    else if (match(TokenType::KW_UINT16))  ti = TypeInfo::scalar(TypeKind::UInt16);
-    else if (match(TokenType::KW_UINT32))  ti = TypeInfo::scalar(TypeKind::UInt32);
-    else if (match(TokenType::KW_UINT64))  ti = TypeInfo::scalar(TypeKind::UInt64);
-    else if (match(TokenType::KW_UINT128)) ti = TypeInfo::scalar(TypeKind::UInt128);
+    else if (match(TokenType::KW_UINT8))
+        ti = TypeInfo::scalar(TypeKind::UInt8);
+    else if (match(TokenType::KW_UINT16))
+        ti = TypeInfo::scalar(TypeKind::UInt16);
+    else if (match(TokenType::KW_UINT32))
+        ti = TypeInfo::scalar(TypeKind::UInt32);
+    else if (match(TokenType::KW_UINT64))
+        ti = TypeInfo::scalar(TypeKind::UInt64);
+    else if (match(TokenType::KW_UINT128))
+        ti = TypeInfo::scalar(TypeKind::UInt128);
     // Sized floats
-    else if (match(TokenType::KW_FLOAT32)) ti = TypeInfo::scalar(TypeKind::Float32);
-    else if (match(TokenType::KW_FLOAT64)) ti = TypeInfo::scalar(TypeKind::Float64);
+    else if (match(TokenType::KW_FLOAT32))
+        ti = TypeInfo::scalar(TypeKind::Float32);
+    else if (match(TokenType::KW_FLOAT64))
+        ti = TypeInfo::scalar(TypeKind::Float64);
     else if (match(TokenType::IDENTIFIER)) {
         Token typeNameTok = previous();
         if (typeNameTok.value == "தன்னிலை") {
@@ -296,7 +324,7 @@ TypeInfo Parser::parseTypeSpec() {
         } else {
             // Check if it's a generic parameter
             bool isGen = false;
-            for (const auto& tp : currentTypeParams_) {
+            for (const auto &tp : currentTypeParams_) {
                 if (tp == typeNameTok.value) {
                     ti = TypeInfo::generic(tp);
                     isGen = true;
@@ -317,10 +345,11 @@ TypeInfo Parser::parseTypeSpec() {
     if (match(TokenType::LT)) {
         ti.genericArgs = parseTypeArgs();
     }
-    
+
     // ZPM Pulse Tag: ~A
     if (match(TokenType::TILDE)) {
-        Token tagTok = consume(TokenType::IDENTIFIER, "மண்டல அடையாளங்காட்டியை (region identifier) '~' பின் எதிர்பார்க்கிறோம்");
+        Token tagTok = consume(TokenType::IDENTIFIER,
+                               "மண்டல அடையாளங்காட்டியை (region identifier) '~' பின் எதிர்பார்க்கிறோம்");
         ti.pulseTag = tagTok.value;
     }
 
@@ -347,12 +376,18 @@ std::unique_ptr<BlockStmt> Parser::parseBlock() {
 }
 
 std::unique_ptr<Stmt> Parser::parseStatement() {
-    if (check(TokenType::KW_LET))    return parseVarDecl();
-    if (check(TokenType::KW_IF))     return parseIfStmt();
-    if (check(TokenType::KW_WHILE))  return parseWhileStmt();
-    if (check(TokenType::KW_FOR))    return parseForStmt();
-    if (check(TokenType::KW_RETURN)) return parseReturnStmt();
-    if (check(TokenType::KW_DELETE)) return parseDeleteStmt();
+    if (check(TokenType::KW_LET))
+        return parseVarDecl();
+    if (check(TokenType::KW_IF))
+        return parseIfStmt();
+    if (check(TokenType::KW_WHILE))
+        return parseWhileStmt();
+    if (check(TokenType::KW_FOR))
+        return parseForStmt();
+    if (check(TokenType::KW_RETURN))
+        return parseReturnStmt();
+    if (check(TokenType::KW_DELETE))
+        return parseDeleteStmt();
 
     if (check(TokenType::LBRACE)) {
         auto block = parseBlock();
@@ -413,8 +448,8 @@ std::unique_ptr<IfStmt> Parser::parseIfStmt() {
         }
     }
 
-    auto stmt = std::make_unique<IfStmt>(
-        std::move(condition), std::move(thenBranch), std::move(elseBranch));
+    auto stmt = std::make_unique<IfStmt>(std::move(condition), std::move(thenBranch),
+                                         std::move(elseBranch));
     stmt->loc = {ifTok.filename, ifTok.line, ifTok.column};
     return stmt;
 }
@@ -460,7 +495,7 @@ std::unique_ptr<Expr> Parser::parseAssignment() {
     if (check(TokenType::ASSIGN)) {
         if (auto *varExpr = dynamic_cast<VariableExpr *>(expr.get())) {
             std::string name = varExpr->name;
-            Token eqTok = advance(); // consume '='
+            Token eqTok = advance();        // consume '='
             auto value = parseAssignment(); // Right-associative
             auto assign = std::make_unique<AssignExpr>(name, std::move(value));
             assign->loc = {eqTok.filename, eqTok.line, eqTok.column};
@@ -469,12 +504,13 @@ std::unique_ptr<Expr> Parser::parseAssignment() {
             if (unary->op == UnaryOp::Dereference) {
                 Token eqTok = advance(); // consume '='
                 auto value = parseAssignment();
-                auto derefAssign = std::make_unique<DerefAssignExpr>(std::move(unary->operand), std::move(value));
+                auto derefAssign =
+                    std::make_unique<DerefAssignExpr>(std::move(unary->operand), std::move(value));
                 derefAssign->loc = {eqTok.filename, eqTok.line, eqTok.column};
                 return derefAssign;
             }
         }
-        
+
         error(peek(), "தவறான ஒதுக்கீடு இலக்கு (Invalid assignment target)");
         return expr;
     }
@@ -488,8 +524,7 @@ std::unique_ptr<Expr> Parser::parseOr() {
     while (match(TokenType::OR)) {
         Token opTok = previous();
         auto right = parseAnd();
-        auto bin = std::make_unique<BinaryExpr>(
-            BinaryOp::Or, std::move(left), std::move(right));
+        auto bin = std::make_unique<BinaryExpr>(BinaryOp::Or, std::move(left), std::move(right));
         bin->loc = {opTok.filename, opTok.line, opTok.column};
         left = std::move(bin);
     }
@@ -503,8 +538,7 @@ std::unique_ptr<Expr> Parser::parseAnd() {
     while (match(TokenType::AND)) {
         Token opTok = previous();
         auto right = parseEquality();
-        auto bin = std::make_unique<BinaryExpr>(
-            BinaryOp::And, std::move(left), std::move(right));
+        auto bin = std::make_unique<BinaryExpr>(BinaryOp::And, std::move(left), std::move(right));
         bin->loc = {opTok.filename, opTok.line, opTok.column};
         left = std::move(bin);
     }
@@ -534,11 +568,21 @@ std::unique_ptr<Expr> Parser::parseComparison() {
         Token opTok = previous();
         BinaryOp op;
         switch (opTok.type) {
-        case TokenType::LT:  op = BinaryOp::Lt; break;
-        case TokenType::GT:  op = BinaryOp::Gt; break;
-        case TokenType::LTE: op = BinaryOp::Lte; break;
-        case TokenType::GTE: op = BinaryOp::Gte; break;
-        default: op = BinaryOp::Lt; break;
+        case TokenType::LT:
+            op = BinaryOp::Lt;
+            break;
+        case TokenType::GT:
+            op = BinaryOp::Gt;
+            break;
+        case TokenType::LTE:
+            op = BinaryOp::Lte;
+            break;
+        case TokenType::GTE:
+            op = BinaryOp::Gte;
+            break;
+        default:
+            op = BinaryOp::Lt;
+            break;
         }
         auto right = parseAddition();
         auto bin = std::make_unique<BinaryExpr>(op, std::move(left), std::move(right));
@@ -571,10 +615,18 @@ std::unique_ptr<Expr> Parser::parseMultiplication() {
         Token opTok = previous();
         BinaryOp op;
         switch (opTok.type) {
-            case TokenType::STAR: op = BinaryOp::Mul; break;
-            case TokenType::SLASH: op = BinaryOp::Div; break;
-            case TokenType::PERCENT: op = BinaryOp::Mod; break;
-            default: op = BinaryOp::Mul; break;
+        case TokenType::STAR:
+            op = BinaryOp::Mul;
+            break;
+        case TokenType::SLASH:
+            op = BinaryOp::Div;
+            break;
+        case TokenType::PERCENT:
+            op = BinaryOp::Mod;
+            break;
+        default:
+            op = BinaryOp::Mul;
+            break;
         }
         auto right = parseUnary();
         auto bin = std::make_unique<BinaryExpr>(op, std::move(left), std::move(right));
@@ -639,7 +691,8 @@ std::unique_ptr<Expr> Parser::parseCall() {
                 }
                 consume(TokenType::RPAREN, "அளபுருக்களுக்குப்பிறகு (arguments) ')' எதிர்பார்க்கிறோம்");
 
-                auto call = std::make_unique<CallExpr>(callee, std::move(args), varExpr->genericArgs);
+                auto call =
+                    std::make_unique<CallExpr>(callee, std::move(args), varExpr->genericArgs);
                 call->loc = loc;
                 expr = std::move(call);
                 continue;
@@ -661,11 +714,12 @@ std::unique_ptr<Expr> Parser::parseCall() {
             // Check for index assignment: arr[i] = value (only for simple index)
             if (!isRange && match(TokenType::ASSIGN)) {
                 auto value = parseExpression();
-                auto ia = std::make_unique<IndexAssignExpr>(
-                    std::move(expr), std::move(index), std::move(value));
+                auto ia = std::make_unique<IndexAssignExpr>(std::move(expr), std::move(index),
+                                                            std::move(value));
                 expr = std::move(ia);
             } else {
-                auto ie = std::make_unique<IndexExpr>(std::move(expr), std::move(index), std::move(endIndex), isRange);
+                auto ie = std::make_unique<IndexExpr>(std::move(expr), std::move(index),
+                                                      std::move(endIndex), isRange);
                 expr = std::move(ie);
             }
             continue;
@@ -673,14 +727,16 @@ std::unique_ptr<Expr> Parser::parseCall() {
 
         // Postfix field access or method call
         if (match(TokenType::DOT)) {
-            Token memberTok = consume(TokenType::IDENTIFIER, "'.'-க்குப்பின் உறுப்பு பெயரை (member name) எதிர்பார்க்கிறோம்");
-            
+            Token memberTok = consume(TokenType::IDENTIFIER,
+                                      "'.'-க்குப்பின் உறுப்பு பெயரை (member name) எதிர்பார்க்கிறோம்");
+
             std::vector<TypeInfo> genArgs;
             if (match(TokenType::LT)) {
                 do {
                     genArgs.push_back(parseTypeSpec());
                 } while (match(TokenType::COMMA));
-                consume(TokenType::GT, "பொதுவான தருமங்களுக்குப்பின் (generic arguments) '>' எதிர்பார்க்கிறோம்");
+                consume(TokenType::GT,
+                        "பொதுவான தருமங்களுக்குப்பின் (generic arguments) '>' எதிர்பார்க்கிறோம்");
             }
 
             if (match(TokenType::LPAREN)) {
@@ -691,15 +747,17 @@ std::unique_ptr<Expr> Parser::parseCall() {
                         args.push_back(parseExpression());
                     } while (match(TokenType::COMMA));
                 }
-                consume(TokenType::RPAREN, "செயல்முறை அளபுருக்களுக்குப்பின் (method arguments) ')' எதிர்பார்க்கிறோம்");
-                auto mc = std::make_unique<MethodCallExpr>(std::move(expr), memberTok.value, std::move(args), std::move(genArgs));
+                consume(TokenType::RPAREN,
+                        "செயல்முறை அளபுருக்களுக்குப்பின் (method arguments) ')' எதிர்பார்க்கிறோம்");
+                auto mc = std::make_unique<MethodCallExpr>(std::move(expr), memberTok.value,
+                                                           std::move(args), std::move(genArgs));
                 mc->loc = {memberTok.filename, memberTok.line, memberTok.column};
                 expr = std::move(mc);
             } else if (match(TokenType::ASSIGN)) {
                 // Field assignment: expr.field = value
                 auto value = parseExpression();
-                auto fa = std::make_unique<FieldAssignExpr>(
-                    std::move(expr), memberTok.value, std::move(value));
+                auto fa = std::make_unique<FieldAssignExpr>(std::move(expr), memberTok.value,
+                                                            std::move(value));
                 fa->loc = {memberTok.filename, memberTok.line, memberTok.column};
                 expr = std::move(fa);
             } else {
@@ -779,15 +837,16 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
     // Heap allocation: new T or new [T; n]
     if (match(TokenType::KW_NEW)) {
         Token newTok = previous();
-        
+
         // Special case: new [T; n]
         if (check(TokenType::LBRACKET)) {
             consume(TokenType::LBRACKET, "'[' எதிர்பார்க்கிறோம்");
             TypeInfo elemTI = parseTypeSpec();
-            consume(TokenType::SEMICOLON, "இயக்கநிலை அணி ஒதுக்கீட்டில் (dynamic array allocation) ';' எதிர்பார்க்கிறோம்");
+            consume(TokenType::SEMICOLON,
+                    "இயக்கநிலை அணி ஒதுக்கீட்டில் (dynamic array allocation) ';' எதிர்பார்க்கிறோம்");
             auto sizeExpr = parseExpression();
             consume(TokenType::RBRACKET, "']' எதிர்பார்க்கிறோம்");
-            
+
             TypeInfo arrayTI = TypeInfo::array(elemTI, 0); // size 0 means dynamic
             auto expr = std::make_unique<NewExpr>(arrayTI, std::move(sizeExpr));
             expr->loc = {newTok.filename, newTok.line, newTok.column};
@@ -800,12 +859,17 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
         return expr;
     }
 
-    if (match(TokenType::KW_ZONE)) return parseZoneExpr();
-    if (match(TokenType::KW_ALLOC)) return parseAllocExpr();
-    if (match(TokenType::KW_BORROW)) return parseBorrowExpr();
-    if (match(TokenType::KW_ESCAPE)) return parseEscapeExpr();
+    if (match(TokenType::KW_ZONE))
+        return parseZoneExpr();
+    if (match(TokenType::KW_ALLOC))
+        return parseAllocExpr();
+    if (match(TokenType::KW_BORROW))
+        return parseBorrowExpr();
+    if (match(TokenType::KW_ESCAPE))
+        return parseEscapeExpr();
 
-    // Identifier: either a variable or the start of a struct literal: SomeName { ... } or SomeName<T> { ... }
+    // Identifier: either a variable or the start of a struct literal: SomeName { ... } or
+    // SomeName<T> { ... }
     if (match(TokenType::IDENTIFIER)) {
         Token tok = previous();
         TypeInfo ti = TypeInfo::namedStruct(tok.value);
@@ -817,23 +881,26 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
             int depth = 0;
             int lookahead = 0;
             while (true) {
-                if (current_ + lookahead >= tokens_.size()) break;
+                if (current_ + lookahead >= tokens_.size())
+                    break;
                 TokenType type = tokens_[current_ + lookahead].type;
-                if (type == TokenType::LT) depth++;
+                if (type == TokenType::LT)
+                    depth++;
                 else if (type == TokenType::GT) {
                     depth--;
                     if (depth == 0) {
                         // Found matching '>', now check if next is '{' or '('
                         if (current_ + lookahead + 1 < tokens_.size()) {
                             TokenType nextType = tokens_[current_ + lookahead + 1].type;
-                            if (nextType == TokenType::LBRACE || nextType == TokenType::LPAREN || nextType == TokenType::DOUBLE_COLON) {
+                            if (nextType == TokenType::LBRACE || nextType == TokenType::LPAREN ||
+                                nextType == TokenType::DOUBLE_COLON) {
                                 isGeneric = true;
                             }
                         }
                         break;
                     }
-                }
-                else if (type == TokenType::TOKEN_EOF || type == TokenType::LBRACE || type == TokenType::RBRACE || type == TokenType::SEMICOLON) {
+                } else if (type == TokenType::TOKEN_EOF || type == TokenType::LBRACE ||
+                           type == TokenType::RBRACE || type == TokenType::SEMICOLON) {
                     break;
                 }
                 lookahead++;
@@ -846,16 +913,19 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
             } while (match(TokenType::COMMA));
             consume(TokenType::GT, "பொதுவான தருமங்களுக்குப்பின் (generic arguments) '>' எதிர்பார்க்கிறோம்");
         }
-        
+
         // Enum variant instantiation: EnumName::Variant or EnumName::Variant(payload)
         if (match(TokenType::DOUBLE_COLON)) {
-            Token variantTok = consume(TokenType::IDENTIFIER, "'::' பின் எண்ணும்தொகுதி (enum variant) பெயரை எதிர்பார்க்கிறோம்");
+            Token variantTok = consume(TokenType::IDENTIFIER,
+                                       "'::' பின் எண்ணும்தொகுதி (enum variant) பெயரை எதிர்பார்க்கிறோம்");
             std::unique_ptr<Expr> payload = nullptr;
             if (match(TokenType::LPAREN)) {
                 payload = parseExpression();
-                consume(TokenType::RPAREN, "எண்ணும்தொகுதி சுமைக்குப்பிறகு (enum variant payload) ')' எதிர்பார்க்கிறோம்");
+                consume(TokenType::RPAREN,
+                        "எண்ணும்தொகுதி சுமைக்குப்பிறகு (enum variant payload) ')' எதிர்பார்க்கிறோம்");
             }
-            auto expr = std::make_unique<EnumVariantExpr>(tok.value, variantTok.value, ti.genericArgs, std::move(payload));
+            auto expr = std::make_unique<EnumVariantExpr>(tok.value, variantTok.value,
+                                                          ti.genericArgs, std::move(payload));
             expr->loc = {tok.filename, tok.line, tok.column};
             return expr;
         }
@@ -865,14 +935,16 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
             advance(); // consume '{'
             std::vector<StructFieldInit> fields;
             while (!check(TokenType::RBRACE) && !isAtEnd()) {
-                Token fnameTok = consume(TokenType::IDENTIFIER, "புலப் பெயரை (field name) எதிர்பார்க்கிறோம்");
+                Token fnameTok =
+                    consume(TokenType::IDENTIFIER, "புலப் பெயரை (field name) எதிர்பார்க்கிறோம்");
                 consume(TokenType::COLON, "புலப் பெயருக்குப்பின் ':' எதிர்பார்க்கிறோம்");
                 auto fval = parseExpression();
                 StructFieldInit sfi;
                 sfi.name = fnameTok.value;
                 sfi.value = std::move(fval);
                 fields.push_back(std::move(sfi));
-                if (!match(TokenType::COMMA)) break;
+                if (!match(TokenType::COMMA))
+                    break;
             }
             consume(TokenType::RBRACE, "அமைப்பு மாறிலிக்குப்பின் (struct literal) '}' எதிர்பார்க்கிறோம்");
             auto slit = std::make_unique<StructLiteralExpr>(ti, std::move(fields));
@@ -907,7 +979,7 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
     }
 
     error(peek(), "கோவையை (expression) எதிர்பார்க்கிறோம்");
-    advance(); // Skip the problematic token
+    advance();                                  // Skip the problematic token
     return std::make_unique<IntLiteralExpr>(0); // Error recovery: return dummy
 }
 
@@ -930,7 +1002,8 @@ std::unique_ptr<StructDecl> Parser::parseStructDecl() {
         consume(TokenType::COLON, "புலப் பெயருக்குப்பின் ':' எதிர்பார்க்கிறோம்");
         TypeInfo ftype = parseTypeSpec();
         fields.push_back({fnameTok.value, ftype, isMut});
-        if (!match(TokenType::COMMA)) break;
+        if (!match(TokenType::COMMA))
+            break;
     }
     consume(TokenType::RBRACE, "புலங்களுக்குப்பின் (fields) '}' எதிர்பார்க்கிறோம்");
     currentTypeParams_.clear();
@@ -960,7 +1033,7 @@ std::unique_ptr<EnumDecl> Parser::parseEnumDecl() {
         } else {
             vnameTok = consume(TokenType::IDENTIFIER, "மாற்றினை (variant) எதிர்பார்க்கிறோம்");
         }
-        
+
         EnumVariant variant;
         variant.name = vnameTok.value;
         if (match(TokenType::LPAREN)) {
@@ -969,7 +1042,8 @@ std::unique_ptr<EnumDecl> Parser::parseEnumDecl() {
             consume(TokenType::RPAREN, "சுமை வகைக்குப்பின் (payload type) ')' எதிர்பார்க்கிறோம்");
         }
         variants.push_back(std::move(variant));
-        if (!match(TokenType::COMMA)) break;
+        if (!match(TokenType::COMMA))
+            break;
     }
     consume(TokenType::RBRACE, "பட்டியல் மாற்றின்களுக்குப்பின் (variants) '}' எதிர்பார்க்கிறோம்");
     currentTypeParams_.clear();
@@ -989,12 +1063,13 @@ std::unique_ptr<Expr> Parser::parseMatchExpr() {
     std::vector<MatchArm> arms;
     while (!check(TokenType::RBRACE) && !isAtEnd()) {
         MatchArm arm;
-        
+
         Token variantTok;
         if (check(TokenType::IDENTIFIER) || check(TokenType::KW_NIL)) {
             variantTok = advance();
         } else {
-            variantTok = consume(TokenType::IDENTIFIER, "'பொருத்து' (match) பிரிவின் மாற்றின் (variant) பெயரை எதிர்பார்க்கிறோம்");
+            variantTok = consume(TokenType::IDENTIFIER,
+                                 "'பொருத்து' (match) பிரிவின் மாற்றின் (variant) பெயரை எதிர்பார்க்கிறோம்");
         }
         arm.variantName = variantTok.value;
 
@@ -1003,14 +1078,16 @@ std::unique_ptr<Expr> Parser::parseMatchExpr() {
             if (check(TokenType::IDENTIFIER) || check(TokenType::KW_NIL)) {
                 actualVariantTok = advance();
             } else {
-                actualVariantTok = consume(TokenType::IDENTIFIER, "'::' பின் மாற்றின் (variant) பெயரை எதிர்பார்க்கிறோம்");
+                actualVariantTok =
+                    consume(TokenType::IDENTIFIER, "'::' பின் மாற்றின் (variant) பெயரை எதிர்பார்க்கிறோம்");
             }
             arm.variantName = actualVariantTok.value;
         }
 
         if (match(TokenType::LPAREN)) {
             arm.hasBinding = true;
-            Token bindTok = consume(TokenType::IDENTIFIER, "சுமை பிணைப்பு (payload binding) பெயரை எதிர்பார்க்கிறோம்");
+            Token bindTok = consume(TokenType::IDENTIFIER,
+                                    "சுமை பிணைப்பு (payload binding) பெயரை எதிர்பார்க்கிறோம்");
             arm.bindingName = bindTok.value;
             consume(TokenType::RPAREN, "சுமை பிணைப்பிற்குப்பின் ')' எதிர்பார்க்கிறோம்");
         }
@@ -1042,8 +1119,8 @@ std::unique_ptr<Expr> Parser::parseZoneExpr() {
     Token zoneTok = previous();
     Token nameTok = consume(TokenType::IDENTIFIER, "மண்டல (zone) பெயரை எதிர்பார்க்கிறோம்");
     auto body = parseBlock();
-    auto expr = std::make_unique<ZoneExpr>(nameTok.value, 
-        std::unique_ptr<BlockStmt>(static_cast<BlockStmt*>(body.release())));
+    auto expr = std::make_unique<ZoneExpr>(
+        nameTok.value, std::unique_ptr<BlockStmt>(static_cast<BlockStmt *>(body.release())));
     expr->loc = {zoneTok.filename, zoneTok.line, zoneTok.column};
     return expr;
 }
@@ -1053,13 +1130,13 @@ std::unique_ptr<Expr> Parser::parseAllocExpr() {
     consume(TokenType::LT, "'ஒதுக்கீடு' (alloc) பின் '<' எதிர்பார்க்கிறோம்");
     TypeInfo ti = parseTypeSpec();
     consume(TokenType::GT, "வகையின் பின் '>' எதிர்பார்க்கிறோம்");
-    
+
     std::unique_ptr<Expr> count = nullptr;
     if (match(TokenType::LPAREN)) {
         count = parseExpression();
         consume(TokenType::RPAREN, "எதிர்பார்க்கிறோம் ')' after count");
     }
-    
+
     auto expr = std::make_unique<AllocExpr>(ti, std::move(count));
     expr->loc = {allocTok.filename, allocTok.line, allocTok.column};
     return expr;
@@ -1068,22 +1145,26 @@ std::unique_ptr<Expr> Parser::parseAllocExpr() {
 std::unique_ptr<Expr> Parser::parseBorrowExpr() {
     Token borrowTok = previous();
     bool isMut = false;
-    
-    if (match(TokenType::KW_MUT)) isMut = true;
-    else if (match(TokenType::KW_SHARED)) isMut = false;
-    else error(peek(), "'கடன்' (borrow) பின் 'பகிர்வு' (shared) அல்லது 'நிலை' (mut) எதிர்பார்க்கிறோம்");
-    
+
+    if (match(TokenType::KW_MUT))
+        isMut = true;
+    else if (match(TokenType::KW_SHARED))
+        isMut = false;
+    else
+        error(peek(), "'கடன்' (borrow) பின் 'பகிர்வு' (shared) அல்லது 'நிலை' (mut) எதிர்பார்க்கிறோம்");
+
     consume(TokenType::LPAREN, "கடன் முறைக்குப் (borrow mode) பின் '(' எதிர்பார்க்கிறோம்");
     auto target = parseExpression();
     consume(TokenType::RPAREN, "இலக்கிற்குப்பின் (target) ')' எதிர்பார்க்கிறோம்");
-    
+
     std::string viewName = "";
     // Optional: as <identifier>
     if (match(TokenType::KW_AS)) {
-        Token viewTok = consume(TokenType::IDENTIFIER, "'ஆக' (as) பின் அடையாளங்காட்டியை (view name) எதிர்பார்க்கிறோம்");
+        Token viewTok = consume(TokenType::IDENTIFIER,
+                                "'ஆக' (as) பின் அடையாளங்காட்டியை (view name) எதிர்பார்க்கிறோம்");
         viewName = viewTok.value;
     }
-    
+
     auto expr = std::make_unique<BorrowExpr>(isMut, std::move(target), viewName);
     expr->loc = {borrowTok.filename, borrowTok.line, borrowTok.column};
     return expr;
@@ -1094,10 +1175,11 @@ std::unique_ptr<Expr> Parser::parseEscapeExpr() {
     consume(TokenType::LPAREN, "'தப்பித்தல்' (escape) பின் '(' எதிர்பார்க்கிறோம்");
     auto target = parseExpression();
     consume(TokenType::RPAREN, "இலக்கிற்குப்பின் (target) ')' எதிர்பார்க்கிறோம்");
-    
+
     consume(TokenType::ARROW, "தப்பிக்கும் இலக்கிற்குப்பின் '->' எதிர்பார்க்கிறோம்");
-    Token destTok = consume(TokenType::IDENTIFIER, "இலக்கு மண்டலத்தின் (destination zone) பெயரை எதிர்பார்க்கிறோம்");
-    
+    Token destTok =
+        consume(TokenType::IDENTIFIER, "இலக்கு மண்டலத்தின் (destination zone) பெயரை எதிர்பார்க்கிறோம்");
+
     auto expr = std::make_unique<EscapeExpr>(std::move(target), destTok.value);
     expr->loc = {escapeTok.filename, escapeTok.line, escapeTok.column};
     return expr;
@@ -1126,7 +1208,6 @@ std::unique_ptr<ForStmt> Parser::parseForStmt() {
     return stmt;
 }
 
-
 std::unique_ptr<TraitDecl> Parser::parseTraitDecl() {
     Token nameTok = consume(TokenType::IDENTIFIER, "பண்பு (trait) பெயரை எதிர்பார்க்கிறோம்");
     consume(TokenType::LBRACE, "பண்பு உடற்பகுதிக்குமுன் '{' எதிர்பார்க்கிறோம்");
@@ -1141,12 +1222,15 @@ std::unique_ptr<TraitDecl> Parser::parseTraitDecl() {
 }
 
 std::unique_ptr<ImplDecl> Parser::parseImplDecl() {
-    SourceLocation loc = {tokens_[current_ - 1].filename, tokens_[current_ - 1].line, tokens_[current_ - 1].column};
-    
+    SourceLocation loc = {tokens_[current_ - 1].filename, tokens_[current_ - 1].line,
+                          tokens_[current_ - 1].column};
+
     std::vector<std::string> typeParams;
     if (match(TokenType::LT)) {
         do {
-            typeParams.push_back(consume(TokenType::IDENTIFIER, "வகை அளபுரு (type parameter) பெயரை எதிர்பார்க்கிறோம்").value);
+            typeParams.push_back(
+                consume(TokenType::IDENTIFIER, "வகை அளபுரு (type parameter) பெயரை எதிர்பார்க்கிறோம்")
+                    .value);
         } while (match(TokenType::COMMA));
         consume(TokenType::GT, "வகை அளபுருக்களுக்குப்பின் '>' எதிர்பார்க்கிறோம்");
     }
@@ -1154,7 +1238,8 @@ std::unique_ptr<ImplDecl> Parser::parseImplDecl() {
     std::string traitName = "";
 
     // Check if it's `impl Trait for Type` or `impl Type`
-    if (check(TokenType::IDENTIFIER) && (current_ + 1 < tokens_.size()) && tokens_[current_ + 1].type == TokenType::KW_FOR) {
+    if (check(TokenType::IDENTIFIER) && (current_ + 1 < tokens_.size()) &&
+        tokens_[current_ + 1].type == TokenType::KW_FOR) {
         traitName = consume(TokenType::IDENTIFIER, "பண்பு (trait) பெயரை எதிர்பார்க்கிறோம்").value;
         consume(TokenType::KW_FOR, "பண்பு பெயருக்குப்பின் 'சுற்று' (for) அல்லது 'உள்' (in) எதிர்பார்க்கிறோம்");
     }
@@ -1172,7 +1257,8 @@ std::unique_ptr<ImplDecl> Parser::parseImplDecl() {
     }
     consume(TokenType::RBRACE, "செயல்படுத்து (impl) உடற்பகுதிக்குப்பின் '}' எதிர்பார்க்கிறோம்");
     currentTypeParams_ = prevTypeParams;
-    auto id = std::make_unique<ImplDecl>(traitName, std::move(typeParams), targetType, std::move(methods));
+    auto id = std::make_unique<ImplDecl>(traitName, std::move(typeParams), targetType,
+                                         std::move(methods));
     id->loc = loc;
     return id;
 }
@@ -1180,7 +1266,9 @@ std::unique_ptr<ImplDecl> Parser::parseImplDecl() {
 std::vector<std::string> Parser::parseTypeParams() {
     std::vector<std::string> params;
     do {
-        params.push_back(consume(TokenType::IDENTIFIER, "வகை அளபுரு (type parameter) பெயரை எதிர்பார்க்கிறோம்").value);
+        params.push_back(
+            consume(TokenType::IDENTIFIER, "வகை அளபுரு (type parameter) பெயரை எதிர்பார்க்கிறோம்")
+                .value);
     } while (match(TokenType::COMMA));
     consume(TokenType::GT, "வகை அளபுருக்களுக்குப்பின் '>' எதிர்பார்க்கிறோம்");
     return params;

@@ -1,10 +1,11 @@
 #pragma once
 
 #include "agam/ast/ast.h"
+
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <optional>
 
 namespace agam {
 
@@ -15,8 +16,8 @@ struct SymbolInfo {
     bool isFunction = false;
     bool isMutable = false;
     bool isConstant = false;
-    std::vector<std::string> typeParams; // For generic functions
-    std::vector<TypeInfo> paramTypes; // Only for functions
+    std::vector<std::string> typeParams;                    // For generic functions
+    std::vector<TypeInfo> paramTypes;                       // Only for functions
     TypeInfo returnType = TypeInfo::scalar(TypeKind::Void); // Only for functions
     bool isMutating = false; // Only for methods (receiver mutability)
 
@@ -56,20 +57,20 @@ struct EnumInfo {
 
 /// Scoped symbol table supporting nested lexical scopes.
 class SymbolTable {
-public:
+  public:
     SymbolTable(); // Ensure default constructor
     /// Enter a new scope (e.g., function body, block).
     void enterScope();
 
     /// Exit the current scope.
     void exitScope();
- 
+
     /// Add a borrow to the current scope.
     void addBorrow(const std::string &name, bool isMutable);
- 
+
     /// Remove a borrow from the current scope.
     void removeBorrow(const std::string &name, bool isMutable);
- 
+
     /// Helper to get current borrows for cleanup
     void releaseBorrows();
 
@@ -83,7 +84,7 @@ public:
 
     /// Look up a symbol and return a pointer to it for modification.
     /// Returns nullptr if not found.
-    SymbolInfo* lookupMutable(const std::string &name);
+    SymbolInfo *lookupMutable(const std::string &name);
 
     /// Look up a symbol only in the current (innermost) scope.
     std::optional<SymbolInfo> lookupCurrent(const std::string &name) const;
@@ -94,24 +95,27 @@ public:
     // Trait Management
     void declareTrait(const std::string &name, const TraitInfo &info);
     void declareImpl(const ImplInfo &info);
-    const TraitInfo* lookupTrait(const std::string &name) const;
-    const ImplInfo* findImpl(const std::string &traitName, const TypeInfo &targetType) const;
-    const ImplInfo* findImplForMethod(const TypeInfo &targetType, const std::string &methodName) const;
+    const TraitInfo *lookupTrait(const std::string &name) const;
+    const ImplInfo *findImpl(const std::string &traitName, const TypeInfo &targetType) const;
+    const ImplInfo *findImplForMethod(const TypeInfo &targetType,
+                                      const std::string &methodName) const;
 
     // Type management
-    void declareStruct(const std::string &name, const std::vector<std::string> &typeParams, const std::vector<SymbolInfo> &fields);
-    const StructInfo* lookupStruct(const std::string &name) const;
-    void declareEnum(const std::string &name, const std::vector<std::string> &typeParams, const EnumInfo &info);
-    const EnumInfo* lookupEnum(const std::string &name) const;
+    void declareStruct(const std::string &name, const std::vector<std::string> &typeParams,
+                       const std::vector<SymbolInfo> &fields);
+    const StructInfo *lookupStruct(const std::string &name) const;
+    void declareEnum(const std::string &name, const std::vector<std::string> &typeParams,
+                     const EnumInfo &info);
+    const EnumInfo *lookupEnum(const std::string &name) const;
 
     // Region (Zone) Management
     void enterZone(const std::string &name);
     void exitZone();
     bool isZoneInScope(const std::string &name) const;
     std::string currentZone() const;
-    const std::vector<std::string>& zoneStack() const { return zones_; }
+    const std::vector<std::string> &zoneStack() const { return zones_; }
 
-private:
+  private:
     using Scope = std::unordered_map<std::string, SymbolInfo>;
     std::vector<Scope> scopes_;
     std::unordered_map<std::string, TraitInfo> traits_;

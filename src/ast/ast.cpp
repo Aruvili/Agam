@@ -201,7 +201,7 @@ std::unique_ptr<ASTNode> AllocExpr::clone() const {
 void BorrowExpr::accept(ASTVisitor &v) { v.visit(*this); }
 std::unique_ptr<ASTNode> BorrowExpr::clone() const {
     auto copy = std::make_unique<BorrowExpr>(isMutable,
-        std::unique_ptr<Expr>(static_cast<Expr*>(target->clone().release())));
+        std::unique_ptr<Expr>(static_cast<Expr*>(target->clone().release())), viewName);
     copy->loc = loc;
     return copy;
 }

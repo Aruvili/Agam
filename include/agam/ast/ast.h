@@ -675,8 +675,9 @@ class BorrowExpr : public Expr {
 public:
     bool isMutable;
     std::unique_ptr<Expr> target;
-    BorrowExpr(bool mut, std::unique_ptr<Expr> tgt)
-        : isMutable(mut), target(std::move(tgt)) {}
+    std::string viewName;
+    BorrowExpr(bool mut, std::unique_ptr<Expr> tgt, std::string vName = "")
+        : isMutable(mut), target(std::move(tgt)), viewName(std::move(vName)) {}
     void accept(ASTVisitor &visitor) override;
     std::unique_ptr<ASTNode> clone() const override;
 };

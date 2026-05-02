@@ -1077,13 +1077,14 @@ std::unique_ptr<Expr> Parser::parseBorrowExpr() {
     auto target = parseExpression();
     consume(TokenType::RPAREN, "இலக்கிற்குப்பின் (target) ')' எதிர்பார்க்கிறோம்");
     
+    std::string viewName = "";
     // Optional: as <identifier>
     if (match(TokenType::KW_AS)) {
-        consume(TokenType::IDENTIFIER, "'ஆக' (as) பின் அடையாளங்காட்டியை (view name) எதிர்பார்க்கிறோம்");
-        // TODO: Store view name in BorrowExpr if needed
+        Token viewTok = consume(TokenType::IDENTIFIER, "'ஆக' (as) பின் அடையாளங்காட்டியை (view name) எதிர்பார்க்கிறோம்");
+        viewName = viewTok.value;
     }
     
-    auto expr = std::make_unique<BorrowExpr>(isMut, std::move(target));
+    auto expr = std::make_unique<BorrowExpr>(isMut, std::move(target), viewName);
     expr->loc = {borrowTok.filename, borrowTok.line, borrowTok.column};
     return expr;
 }

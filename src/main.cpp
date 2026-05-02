@@ -502,7 +502,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     std::string error;
-    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
+    auto target = llvm::TargetRegistry::lookupTarget(targetTriple.getTriple(), error);
     if (!target) {
         std::cerr << "பிழை: " << error << "\n";
         return 1;

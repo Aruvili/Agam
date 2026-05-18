@@ -324,7 +324,7 @@ int main(int argc, char *argv[]) {
     for (int i = argStart; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "-C") {
-            i++; // skip
+            i++;
             continue;
         }
         if ((arg == "-o" || arg == "--output") && i + 1 < argc) {

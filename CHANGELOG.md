@@ -3,6 +3,30 @@
 All notable changes to the Agam compiler, standard library, and ecosystem will be documented in this file. 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to Semantic Versioning.
 
+## [1.2.0] - 2026-05-18
+### Added
+- **Language Server Protocol (LSP):** Built `agam-lsp`, a production-grade LSP server supporting:
+  - Real-time diagnostics (`textDocument/publishDiagnostics`) — live Tamil error messages in-editor.
+  - Autocomplete (`textDocument/completion`) — 35+ Tamil keywords with rich markdown documentation, code examples, and snippet insertion.
+  - Hover (`textDocument/hover`) — hover over any keyword or user-defined symbol to see documentation.
+  - Go-to-Definition (`textDocument/definition`) — jump to function, struct, and enum definitions.
+- **Expanded Standard Library:**
+  - `std/os.agam` — provides exit (`வெளியேறு`), getenv (`சூழல்_மதிப்பு`), system shell command (`கட்டளை_இயக்கு`), and OS platform name (`இயக்கமுறைமை_பெயர்`) functions.
+  - `std/time.agam` — provides Unix epoch timestamps (`நொடி_நேரம்`) and high-resolution sleeping (`உறங்கு`, `உறங்கு_மில்லி`).
+- **VS Code Extension (`agam-vscode`):** Official extension in `editors/vscode/` with:
+  - TextMate grammar for Tamil keyword syntax highlighting.
+  - Language Client that spawns `agam-lsp` via stdio.
+  - Language configuration (auto-close brackets, `#` comments).
+- **Smart Output Naming:** Compiling `hello.agam` now produces `hello.exe` (or `hello` on Unix) instead of `a.exe`/`a.out`.
+- **Manual Release Trigger:** Added `workflow_dispatch` to `release.yml` for on-demand releases via GitHub UI.
+
+### Fixed
+- **CI Branch Trigger:** `ci.yml` was targeting `main`/`develop` (non-existent). Now correctly triggers on `master`.
+- **Security Vulnerabilities:** Resolved all 8 Dependabot alerts (6 High, 2 Moderate) in `docs-site/` npm dependencies.
+- **MSYS2 Package Names:** Fixed `flex`, `bison`, and `zip` package names in CI/release workflows (removed invalid `mingw-w64-ucrt-x86_64-` prefixes).
+- **Installer Scripts:** Both `install.ps1` and `install.sh` now bundle `agam-lsp` alongside `agamc`.
+- **Release Pipeline:** Migrated Windows CI/CD from Chocolatey to MSYS2 UCRT64 for reliable cross-platform builds.
+
 ## [1.0.1] - 2026-05-02
 ### Added
 - **CLI Options:** Added `--lib-path <path>` to dynamically configure the standard library search path (an alternative to `AGAM_STD_PATH`), resolving a long-standing compiler TODO.

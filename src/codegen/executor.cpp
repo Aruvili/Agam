@@ -167,6 +167,64 @@ extern "C" int agam_fprintf_stderr_float(const char *fmt, double f) {
     return fprintf(stderr, fmt, f);
 }
 
+// ── OS Library JIT Wrappers ──
+
+extern "C" void agam_os_exit(int64_t code) {
+    exit((int)code);
+}
+
+extern "C" const char *agam_os_getenv(const char *name) {
+    const char *val = getenv(name);
+    return val ? val : "";
+}
+
+extern "C" int64_t agam_os_system(const char *cmd) {
+    return system(cmd);
+}
+
+extern "C" const char *agam_os_name() {
+#ifdef _WIN32
+    return "windows";
+#elif __APPLE__
+    return "macos";
+#else
+    return "linux";
+#endif
+}
+
+// ── Time Library JIT Wrappers ──
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <time.h>
+#endif
+
+extern "C" int64_t agam_time_epoch() {
+    return (int64_t)time(nullptr);
+}
+
+extern "C" void agam_time_sleep(double seconds) {
+#ifdef _WIN32
+    Sleep((DWORD)(seconds * 1000.0));
+#else
+    struct timespec ts;
+    ts.tv_sec = (time_t)seconds;
+    ts.tv_nsec = (long)((seconds - ts.tv_sec) * 1e9);
+    nanosleep(&ts, nullptr);
+#endif
+}
+
+extern "C" void agam_time_sleep_ms(int64_t ms) {
+#ifdef _WIN32
+    Sleep((DWORD)ms);
+#else
+    usleep(ms * 1000);
+#endif
+}
+
+
 namespace agam {
 
 #ifdef __MINGW32__
@@ -368,6 +426,47 @@ int Executor::run(llvm::Module &module, const std::string &entryPoint) {
         if (auto err =
                 jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
             std::cerr << "Warning: failed to define output helpers: "
+                      << llvm::toString(std::move(err)) << "\n";
+        }
+    }
+
+    // Register OS helpers
+    {
+        llvm::orc::SymbolMap symbols;
+        symbols[jit->mangleAndIntern("agam_os_exit")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_os_exit)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_os_getenv")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_os_getenv)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_os_system")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_os_system)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_os_name")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_os_name)),
+            llvm::JITSymbolFlags::Exported);
+        if (auto err =
+                jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
+            std::cerr << "Warning: failed to define OS helpers: "
+                      << llvm::toString(std::move(err)) << "\n";
+        }
+    }
+
+    // Register Time helpers
+    {
+        llvm::orc::SymbolMap symbols;
+        symbols[jit->mangleAndIntern("agam_time_epoch")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_time_epoch)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_time_sleep")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_time_sleep)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_time_sleep_ms")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_time_sleep_ms)),
+            llvm::JITSymbolFlags::Exported);
+        if (auto err =
+                jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
+            std::cerr << "Warning: failed to define Time helpers: "
                       << llvm::toString(std::move(err)) << "\n";
         }
     }

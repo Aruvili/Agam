@@ -15,7 +15,7 @@
 
 > **Program in Tamil. Build for the real world.**
 
-**அகம் (Agam)** is a modern, statically-typed, Tamil-first programming language built on **C++17**, **Flex**, **Bison**, and **LLVM 17**. It combines Python-like simplicity with native performance and memory safety.
+**அகம் (Agam)** is a modern, statically-typed, Tamil-first programming language built on **C++17** and **LLVM 17**. It combines Python-like simplicity with native performance and memory safety.
 
 ---
 

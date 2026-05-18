@@ -149,3 +149,60 @@ void agam_bound_error() {
     fprintf(stderr, "Index out of bounds\n");
     exit(1);
 }
+
+// ── OS Library Wrappers ──
+
+void agam_os_exit(int64_t code) {
+    exit((int)code);
+}
+
+const char* agam_os_getenv(const char* name) {
+    const char* val = getenv(name);
+    return val ? val : "";
+}
+
+int64_t agam_os_system(const char* cmd) {
+    return system(cmd);
+}
+
+const char* agam_os_name() {
+#ifdef _WIN32
+    return "windows";
+#elif __APPLE__
+    return "macos";
+#else
+    return "linux";
+#endif
+}
+
+// ── Time Library Wrappers ──
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#include <time.h>
+#endif
+
+int64_t agam_time_epoch() {
+    return (int64_t)time(NULL);
+}
+
+void agam_time_sleep(double seconds) {
+#ifdef _WIN32
+    Sleep((DWORD)(seconds * 1000.0));
+#else
+    struct timespec ts;
+    ts.tv_sec = (time_t)seconds;
+    ts.tv_nsec = (long)((seconds - ts.tv_sec) * 1e9);
+    nanosleep(&ts, NULL);
+#endif
+}
+
+void agam_time_sleep_ms(int64_t ms) {
+#ifdef _WIN32
+    Sleep((DWORD)ms);
+#else
+    usleep(ms * 1000);
+#endif
+}

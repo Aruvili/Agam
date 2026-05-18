@@ -2,7 +2,7 @@
   "name": "agam-vscode",
   "displayName": "Agam",
   "description": "Tamil Programming Language Support (Agam)",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "publisher": "Aruvili",
   "engines": {
     "vscode": "^1.80.0"

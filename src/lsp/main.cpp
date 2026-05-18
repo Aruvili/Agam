@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
+#include <unordered_map>
 #include <nlohmann/json.hpp>
 
 #include "agam/lexer/lexer.h"
@@ -13,6 +15,17 @@
 #endif
 
 using json = nlohmann::json;
+
+// ── Document Store (keeps latest source text per URI) ────────────────────────
+static std::unordered_map<std::string, std::string> g_documents;
+
+// ── Symbol Location (for Go-to-Definition) ───────────────────────────────────
+struct SymbolLocation {
+    std::string uri;
+    int line;   // 0-indexed
+    int col;    // 0-indexed
+};
+static std::unordered_map<std::string, SymbolLocation> g_symbols;
 
 // ── Keyword Completion Items with Documentation ─────────────────────────────
 struct CompletionEntry {
@@ -510,6 +523,7 @@ void handle_initialize(const json& request, json& response) {
         {"capabilities", {
             {"textDocumentSync", 1}, // Full sync
             {"hoverProvider", true},
+            {"definitionProvider", true},
             {"completionProvider", {
                 {"resolveProvider", false},
                 {"triggerCharacters", json::array()}
@@ -517,9 +531,145 @@ void handle_initialize(const json& request, json& response) {
         }},
         {"serverInfo", {
             {"name", "agam-lsp"},
-            {"version", "1.0.1"}
+            {"version", "1.2.0"}
         }}
     };
+}
+
+// ── Hover Handler ───────────────────────────────────────────────────────────
+
+// Extract the word at a given line/col from the document text
+static std::string get_word_at(const std::string& text, int line, int col) {
+    std::istringstream stream(text);
+    std::string current_line;
+    int cur = 0;
+    while (std::getline(stream, current_line)) {
+        if (cur == line) break;
+        cur++;
+    }
+    if (cur != line || current_line.empty()) return "";
+
+    // Find word boundaries at col (UTF-8 aware: Tamil chars are multi-byte)
+    // We walk by bytes but consider non-ASCII as part of identifiers
+    int byte_pos = 0;
+    int char_col = 0;
+    while (byte_pos < (int)current_line.size() && char_col < col) {
+        unsigned char c = current_line[byte_pos];
+        if (c < 0x80) byte_pos++;
+        else if (c < 0xE0) byte_pos += 2;
+        else if (c < 0xF0) byte_pos += 3;
+        else byte_pos += 4;
+        char_col++;
+    }
+
+    // Find start of word
+    int start = byte_pos;
+    while (start > 0) {
+        unsigned char c = current_line[start - 1];
+        if (c >= 0x80 || std::isalnum(c) || c == '_') {
+            // Walk back one UTF-8 char
+            int prev = start - 1;
+            while (prev > 0 && (current_line[prev] & 0xC0) == 0x80) prev--;
+            start = prev;
+        } else break;
+    }
+
+    // Find end of word
+    int end = byte_pos;
+    while (end < (int)current_line.size()) {
+        unsigned char c = current_line[end];
+        if (c >= 0x80 || std::isalnum(c) || c == '_') {
+            if (c < 0x80) end++;
+            else if (c < 0xE0) end += 2;
+            else if (c < 0xF0) end += 3;
+            else end += 4;
+        } else break;
+    }
+
+    if (start >= end) return "";
+    return current_line.substr(start, end - start);
+}
+
+void handle_hover(const json& request, json& response) {
+    std::string uri = request["params"]["textDocument"]["uri"];
+    int line = request["params"]["position"]["line"];
+    int col = request["params"]["position"]["character"];
+
+    auto it = g_documents.find(uri);
+    if (it == g_documents.end()) {
+        response["result"] = nullptr;
+        return;
+    }
+
+    std::string word = get_word_at(it->second, line, col);
+    if (word.empty()) {
+        response["result"] = nullptr;
+        return;
+    }
+
+    // Search completion entries for documentation
+    for (const auto& entry : get_completions()) {
+        if (entry.label == word) {
+            response["result"] = {
+                {"contents", {
+                    {"kind", "markdown"},
+                    {"value", entry.doc}
+                }}
+            };
+            return;
+        }
+    }
+
+    // Check if it's a user-defined symbol
+    auto sym = g_symbols.find(word);
+    if (sym != g_symbols.end()) {
+        std::string hover_doc = "### " + word + "\n\n"
+            "User-defined symbol.\n\n"
+            "Defined at line " + std::to_string(sym->second.line + 1);
+        response["result"] = {
+            {"contents", {
+                {"kind", "markdown"},
+                {"value", hover_doc}
+            }}
+        };
+        return;
+    }
+
+    response["result"] = nullptr;
+}
+
+// ── Go-to-Definition Handler ────────────────────────────────────────────────
+
+void handle_definition(const json& request, json& response) {
+    std::string uri = request["params"]["textDocument"]["uri"];
+    int line = request["params"]["position"]["line"];
+    int col = request["params"]["position"]["character"];
+
+    auto it = g_documents.find(uri);
+    if (it == g_documents.end()) {
+        response["result"] = nullptr;
+        return;
+    }
+
+    std::string word = get_word_at(it->second, line, col);
+    if (word.empty()) {
+        response["result"] = nullptr;
+        return;
+    }
+
+    auto sym = g_symbols.find(word);
+    if (sym != g_symbols.end()) {
+        response["result"] = {
+            {"uri", sym->second.uri},
+            {"range", {
+                {"start", {{"line", sym->second.line}, {"character", sym->second.col}}},
+                {"end", {{"line", sym->second.line}, {"character", sym->second.col}}}
+            }}
+        };
+        return;
+    }
+
+    response["result"] = nullptr;
 }
 
 void handle_completion(const json& request, json& response) {
@@ -543,7 +693,48 @@ void handle_completion(const json& request, json& response) {
     response["result"] = items;
 }
 
+void update_symbols(const std::string& uri, const std::string& text) {
+    // Clear old symbols for this URI
+    for (auto it = g_symbols.begin(); it != g_symbols.end(); ) {
+        if (it->second.uri == uri) it = g_symbols.erase(it);
+        else ++it;
+    }
+
+    // Parse to extract function/struct/enum definitions
+    agam::SourceManager sm;
+    sm.addSource(uri, text);
+    agam::DiagnosticEngine diag(sm);
+    agam::Lexer lexer(text, uri, diag);
+    auto tokens = lexer.tokenize();
+    agam::Parser parser(tokens, text, uri, diag);
+    auto ast = parser.parse();
+
+    if (ast) {
+        for (const auto& fn : ast->functions) {
+            int ln = fn->loc.line > 0 ? fn->loc.line - 1 : 0;
+            int cl = fn->loc.column > 0 ? fn->loc.column - 1 : 0;
+            g_symbols[fn->name] = {uri, ln, cl};
+        }
+        for (const auto& st : ast->structs) {
+            int ln = st->loc.line > 0 ? st->loc.line - 1 : 0;
+            int cl = st->loc.column > 0 ? st->loc.column - 1 : 0;
+            g_symbols[st->name] = {uri, ln, cl};
+        }
+        for (const auto& en : ast->enums) {
+            int ln = en->loc.line > 0 ? en->loc.line - 1 : 0;
+            int cl = en->loc.column > 0 ? en->loc.column - 1 : 0;
+            g_symbols[en->name] = {uri, ln, cl};
+        }
+    }
+}
+
 void publish_diagnostics(const std::string& uri, const std::string& text) {
+    // Store the document text for hover/definition lookups
+    g_documents[uri] = text;
+
+    // Update symbol table
+    update_symbols(uri, text);
+
     agam::SourceManager sm;
     sm.addSource(uri, text);
     agam::DiagnosticEngine diag(sm);
@@ -624,6 +815,10 @@ void process_message(const std::string& message) {
             return;
         } else if (method == "textDocument/completion") {
             handle_completion(request, response);
+        } else if (method == "textDocument/hover") {
+            handle_hover(request, response);
+        } else if (method == "textDocument/definition") {
+            handle_definition(request, response);
         } else {
             if (request.contains("id")) {
                 response["error"] = {

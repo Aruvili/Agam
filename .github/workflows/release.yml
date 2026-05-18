@@ -48,31 +48,36 @@ jobs:
 
       - name: Install Dependencies (Windows)
         if: matrix.target == 'windows'
-        run: |
-          # LLVM is often pre-installed on GitHub runners. Try to find it.
-          $llvmConfig = Get-Command llvm-config -ErrorAction SilentlyContinue
-          if (-not $llvmConfig) {
-             choco install llvm --version=18.1.8 -y --allow-downgrade
-             $llvmBin = "C:/Program Files/LLVM/bin"
-             if (Test-Path "$llvmBin/llvm-config.exe") {
-               $llvmConfig = "$llvmBin/llvm-config.exe"
-             }
-          }
-          
-          if ($llvmConfig) {
-            $cmakeDir = & $llvmConfig --cmakedir
-            echo "LLVM_DIR=$cmakeDir" >> $env:GITHUB_ENV
-            echo "Detected LLVM CMake dir: $cmakeDir"
-          } else {
-            throw "LLVM not found"
-          }
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-llvm
+            mingw-w64-ucrt-x86_64-flex
+            mingw-w64-ucrt-x86_64-bison
+            mingw-w64-ucrt-x86_64-zip
 
       - name: Configure CMake
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DLLVM_DIR="${{ env.LLVM_DIR }}"
+          if [ "${{ matrix.target }}" = "windows" ]; then
+            cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF
+          else
+            cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DLLVM_DIR="${{ env.LLVM_DIR }}"
+          fi
+        shell: ${{ matrix.target == 'windows' && 'msys2 {0}' || 'bash' }}
 
       - name: Build
-        run: cmake --build build --config Release
+        run: |
+          if [ "${{ matrix.target }}" = "windows" ]; then
+            cmake --build build
+          else
+            cmake --build build --config Release
+          fi
+        shell: ${{ matrix.target == 'windows' && 'msys2 {0}' || 'bash' }}
 
       - name: Package (Unix)
         if: matrix.target != 'windows'
@@ -85,13 +90,13 @@ jobs:
 
       - name: Package (Windows)
         if: matrix.target == 'windows'
+        shell: msys2 {0}
         run: |
-          mkdir release_pack\std
-          copy build\bin\Release\agamc.exe release_pack\
-          xcopy std release_pack\std /E /I /K /Y
-          if (Test-Path README.md) { copy README.md release_pack\ }
-          if (Test-Path LICENSE) { copy LICENSE release_pack\ }
-          Compress-Archive -Path release_pack\* -DestinationPath ${{ matrix.asset_name }}
+          mkdir -p release_pack/std
+          cp build/bin/agamc.exe release_pack/
+          cp -r std/* release_pack/std/
+          cp README.md LICENSE release_pack/ || true
+          cd release_pack && zip -r ../${{ matrix.asset_name }} *
 
       - name: Release
         uses: softprops/action-gh-release@v2

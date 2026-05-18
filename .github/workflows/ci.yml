@@ -39,34 +39,30 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install LLVM
-        run: |
-          $llvmConfig = Get-Command llvm-config -ErrorAction SilentlyContinue
-          if (-not $llvmConfig) {
-             choco install llvm --version=18.1.8 -y
-             $llvmBin = "C:/Program Files/LLVM/bin"
-             if (Test-Path "$llvmBin/llvm-config.exe") {
-               $llvmConfig = "$llvmBin/llvm-config.exe"
-             }
-          }
-          if ($llvmConfig) {
-            $cmakeDir = & $llvmConfig --cmakedir
-            echo "LLVM_DIR=$cmakeDir" >> $env:GITHUB_ENV
-          } else {
-            throw "LLVM not found"
-          }
-
-      - name: Install Flex & Bison
-        run: choco install winflexbison3 -y
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-llvm
+            mingw-w64-ucrt-x86_64-flex
+            mingw-w64-ucrt-x86_64-bison
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR="${{ env.LLVM_DIR }}"
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build
-        run: cmake --build build --config Debug
+        run: cmake --build build
 
       - name: Test
-        run: cd build && ctest -C Debug --output-on-failure
+        run: cd build && ctest --output-on-failure

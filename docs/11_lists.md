@@ -5,9 +5,9 @@
 A list is an ordered collection of items. Items can be of any type.
 
 ```
-மாறி numbers = [1, 2, 3, 4, 5]
-மாறி names = ["Alice", "Bob", "Charlie"]
-மாறி mixed = [1, "hello", உண்மை, 3.14]
+மாறி numbers = [1, 2, 3, 4, 5];
+மாறி names = ["Alice", "Bob", "Charlie"];
+மாறி mixed = [1, "hello", உண்மை, 3.14];
 ```
 
 ---
@@ -16,13 +16,13 @@ A list is an ordered collection of items. Items can be of any type.
 
 ```
 # Empty list
-மாறி empty = []
+மாறி empty = [];
 
 # List with values
-மாறி fruits = ["apple", "banana", "cherry"]
+மாறி fruits = ["apple", "banana", "cherry"];
 
 # List with numbers
-மாறி scores = [85, 90, 78, 92, 88]
+மாறி scores = [85, 90, 78, 92, 88];
 ```
 
 ---
@@ -32,13 +32,13 @@ A list is an ordered collection of items. Items can be of any type.
 Use index numbers (starting from 0):
 
 ```
-மாறி fruits = ["apple", "banana", "cherry", "date"]
+மாறி fruits = ["apple", "banana", "cherry", "date"];
 
-அச்சிடு(fruits[0])    # Output: apple (first)
-அச்சிடு(fruits[1])    # Output: banana (second)
-அச்சிடு(fruits[2])    # Output: cherry (third)
-அச்சிடு(fruits[-1])   # Output: date (last)
-அச்சிடு(fruits[-2])   # Output: cherry (second to last)
+பதிப்பி(fruits[0])    # Output: apple (first);
+பதிப்பி(fruits[1])    # Output: banana (second);
+பதிப்பி(fruits[2])    # Output: cherry (third);
+பதிப்பி(fruits[-1])   # Output: date (last);
+பதிப்பி(fruits[-2])   # Output: cherry (second to last);
 ```
 
 ### Index Reference
@@ -57,23 +57,23 @@ Use index numbers (starting from 0):
 ### Add Items
 
 ```
-மாறி fruits = ["apple", "banana"]
+மாறி fruits = ["apple", "banana"];
 
 சேர்(fruits, "cherry")
-அச்சிடு(fruits)   # Output: [apple, banana, cherry]
+பதிப்பி(fruits)   # Output: [apple, banana, cherry];
 
 சேர்(fruits, "date")
-அச்சிடு(fruits)   # Output: [apple, banana, cherry, date]
+பதிப்பி(fruits)   # Output: [apple, banana, cherry, date];
 ```
 
 ### Remove Items
 
 ```
-மாறி fruits = ["apple", "banana", "cherry"]
+மாறி fruits = ["apple", "banana", "cherry"];
 
-மாறி removed = நீக்கு(fruits)
-அச்சிடு(removed)   # Output: cherry
-அச்சிடு(fruits)    # Output: [apple, banana]
+மாறி removed = நீக்கு(fruits);
+பதிப்பி(removed)   # Output: cherry;
+பதிப்பி(fruits)    # Output: [apple, banana];
 ```
 
 ---
@@ -81,8 +81,8 @@ Use index numbers (starting from 0):
 ## List Length
 
 ```
-மாறி numbers = [10, 20, 30, 40, 50]
-அச்சிடு(நீளம்(numbers))   # Output: 5
+மாறி numbers = [10, 20, 30, 40, 50];
+பதிப்பி(நீளம்(numbers))   # Output: 5;
 ```
 
 ---
@@ -90,11 +90,12 @@ Use index numbers (starting from 0):
 ## Iterating Over Lists
 
 ```
-மாறி colors = ["red", "green", "blue"]
+மாறி colors = ["red", "green", "blue"];
 
-ஒவ்வொரு color உள்ள colors:
-    அச்சிடு("Color:", color)
+சுற்று (color உள் colors) {
+    பதிப்பி("Color:", color);
 
+}
 # Output:
 # Color: red
 # Color: green
@@ -104,13 +105,14 @@ Use index numbers (starting from 0):
 ### With Index
 
 ```
-மாறி fruits = ["apple", "banana", "cherry"]
-மாறி index = 0
+மாறி fruits = ["apple", "banana", "cherry"];
+மாறி index = 0;
 
-ஒவ்வொரு fruit உள்ள fruits:
-    அச்சிடு(சரமாக(index) + ": " + fruit)
-    index = index + 1
+சுற்று (fruit உள் fruits) {
+    பதிப்பி(சரமாக(index) + ": " + fruit);
+    index = index + 1;
 
+}
 # Output:
 # 0: apple
 # 1: banana
@@ -124,62 +126,69 @@ Use index numbers (starting from 0):
 ### Example 1: Sum of Numbers
 
 ```
-மாறி numbers = [10, 20, 30, 40, 50]
-மாறி total = 0
+மாறி numbers = [10, 20, 30, 40, 50];
+மாறி total = 0;
 
-ஒவ்வொரு num உள்ள numbers:
-    total = total + num
+சுற்று (num உள் numbers) {
+    total = total + num;
 
-அச்சிடு("Sum:", total)   # Output: Sum: 150
+}
+பதிப்பி("Sum:", total)   # Output: Sum: 150;
 ```
 
 ### Example 2: Find Maximum
 
 ```
-செயல் find_max(numbers):
-    மாறி max_val = numbers[0]
+செயல் find_max(numbers) {
+    மாறி max_val = numbers[0];
     
-    ஒவ்வொரு num உள்ள numbers:
-        என்றால் num > max_val:
-            max_val = num
+    சுற்று (num உள் numbers) {
+        எனில் num > max_val:
+            max_val = num;
     
-    திரும்பு max_val
+    }
+    விடை max_val;
 
-மாறி scores = [78, 92, 85, 96, 88]
-அச்சிடு("Highest:", find_max(scores))
+}
+மாறி scores = [78, 92, 85, 96, 88];
+பதிப்பி("Highest:", find_max(scores));
 # Output: Highest: 96
 ```
 
 ### Example 3: Filter Even Numbers
 
 ```
-செயல் get_evens(numbers):
-    மாறி evens = []
+செயல் get_evens(numbers) {
+    மாறி evens = [];
     
-    ஒவ்வொரு num உள்ள numbers:
-        என்றால் num % 2 == 0:
+    சுற்று (num உள் numbers) {
+        எனில் num % 2 == 0:;
             சேர்(evens, num)
     
-    திரும்பு evens
+    }
+    விடை evens;
 
-மாறி all = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-அச்சிடு(get_evens(all))   # Output: [2, 4, 6, 8, 10]
+}
+மாறி all = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+பதிப்பி(get_evens(all))   # Output: [2, 4, 6, 8, 10];
 ```
 
 ### Example 4: Reverse a List
 
 ```
-செயல் reverse_list(items):
-    மாறி result = []
-    மாறி i = நீளம்(items) - 1
+செயல் reverse_list(items) {
+    மாறி result = [];
+    மாறி i = நீளம்(items) - 1;
     
-    வரை i >= 0:
+    வரை (i >= 0) {
         சேர்(result, items[i])
-        i = i - 1
+        i = i - 1;
     
-    திரும்பு result
+    }
+    விடை result;
 
-அச்சிடு(reverse_list([1, 2, 3, 4, 5]))
+}
+பதிப்பி(reverse_list([1, 2, 3, 4, 5]));
 # Output: [5, 4, 3, 2, 1]
 ```
 

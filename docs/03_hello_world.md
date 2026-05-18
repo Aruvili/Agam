@@ -9,7 +9,7 @@ Let's write your first program in Tamil!
 Create a file named `hello.agam`:
 
 ```
-அச்சிடு("வணக்கம் உலகம்!")
+பதிப்பி("வணக்கம் உலகம்!")
 ```
 
 ### Step 2: Run It
@@ -31,11 +31,11 @@ cargo run --release -- hello.agam
 
 ## Understanding the Code
 
-Let's break down `அச்சிடு("வணக்கம் உலகம்!")`:
+Let's break down `பதிப்பி("வணக்கம் உலகம்!")`:
 
 | Part | Meaning |
 |------|---------|
-| `அச்சிடு` | The "print" function - displays text |
+| `பதிப்பி` | The "print" function - displays text |
 | `(` | Opening parenthesis - starts the arguments |
 | `"வணக்கம் உலகம்!"` | The text to display (a "string") |
 | `)` | Closing parenthesis - ends the arguments |
@@ -47,9 +47,9 @@ Let's break down `அச்சிடு("வணக்கம் உலகம்!"
 ### Print Multiple Lines
 
 ```
-அச்சிடு("வணக்கம்!")
-அச்சிடு("எப்படி இருக்கிறீர்கள்?")
-அச்சிடு("நலமா?")
+பதிப்பி("வணக்கம்!")
+பதிப்பி("எப்படி இருக்கிறீர்கள்?")
+பதிப்பி("நலமா?")
 ```
 
 Output:
@@ -62,8 +62,8 @@ Output:
 ### Print Numbers
 
 ```
-அச்சிடு(42)
-அச்சிடு(3.14159)
+பதிப்பி(42)
+பதிப்பி(3.14159)
 ```
 
 Output:
@@ -75,8 +75,8 @@ Output:
 ### Print Multiple Items
 
 ```
-அச்சிடு("Number:", 42)
-அச்சிடு("Name:", "agam", "Version:", 1)
+பதிப்பி("Number:", 42)
+பதிப்பி("Name:", "agam", "Version:", 1)
 ```
 
 Output:
@@ -88,9 +88,9 @@ Name: agam Version: 1
 ### Print with Expressions
 
 ```
-அச்சிடு(10 + 5)
-அச்சிடு(100 / 4)
-அச்சிடு("Result:", 7 * 8)
+பதிப்பி(10 + 5)
+பதிப்பி(100 / 4)
+பதிப்பி("Result:", 7 * 8)
 ```
 
 Output:
@@ -108,11 +108,11 @@ Use `#` to write notes that are ignored by the computer:
 
 ```
 # This is a comment - it does nothing!
-அச்சிடு("Hello")  # This is an inline comment
+பதிப்பி("Hello")  # This is an inline comment
 
 # You can use comments to explain your code:
 # The line below prints a greeting
-அச்சிடு("வணக்கம்!")
+பதிப்பி("வணக்கம்!")
 ```
 
 ---
@@ -122,13 +122,13 @@ Use `#` to write notes that are ignored by the computer:
 ### ❌ Missing Quotes
 
 ```
-அச்சிடு(வணக்கம்)  # Error! Text needs quotes
+பதிப்பி(வணக்கம்)  # Error! Text needs quotes
 ```
 
 ### ✅ Correct
 
 ```
-அச்சிடு("வணக்கம்")  # Correct!
+பதிப்பி("வணக்கம்")  # Correct!
 ```
 
 ---
@@ -136,13 +136,13 @@ Use `#` to write notes that are ignored by the computer:
 ### ❌ Wrong Parentheses
 
 ```
-அச்சிடு "வணக்கம்"  # Error! Missing parentheses
+பதிப்பி "வணக்கம்"  # Error! Missing parentheses
 ```
 
 ### ✅ Correct
 
 ```
-அச்சிடு("வணக்கம்")  # Correct!
+பதிப்பி("வணக்கம்")  # Correct!
 ```
 
 ---
@@ -161,8 +161,8 @@ Write a program that prints:
 <summary>Solution</summary>
 
 ```
-அச்சிடு("என் பெயர் அகம்")
-அச்சிடு("நான் தமிழில் பேசுவேன்")
+பதிப்பி("என் பெயர் அகம்")
+பதிப்பி("நான் தமிழில் பேசுவேன்")
 ```
 </details>
 
@@ -174,9 +174,9 @@ Write a program that calculates and prints `25 + 17`:
 <summary>Solution</summary>
 
 ```
-அச்சிடு(25 + 17)
+பதிப்பி(25 + 17)
 # Or with a message:
-அச்சிடு("25 + 17 =", 25 + 17)
+பதிப்பி("25 + 17 =", 25 + 17)
 ```
 </details>
 
@@ -186,9 +186,9 @@ Write a program that calculates and prints `25 + 17`:
 
 | What You Learned | Example |
 |-----------------|---------|
-| Print text | `அச்சிடு("Hello")` |
-| Print numbers | `அச்சிடு(42)` |
-| Print calculations | `அச்சிடு(10 + 5)` |
+| Print text | `பதிப்பி("Hello")` |
+| Print numbers | `பதிப்பி(42)` |
+| Print calculations | `பதிப்பி(10 + 5)` |
 | Comments | `# This is a comment` |
 
 ---

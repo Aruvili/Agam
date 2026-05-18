@@ -32,25 +32,25 @@
 
 ## Quick Example
 
-```agam
-அச்சிடு("வணக்கம் உலகம்!")
+```
+பதிப்பி("வணக்கம் உலகம்!");
 ```
 
 ```
 வணக்கம் உலகம்!
 ```
 
-```agam
-செயல் கூட்டல்(அ: முழு, ஆ: முழு): முழு {
-    திரும்பு அ + ஆ
+```
+செயல் கூட்டல்(அ: எண், ஆ: எண்): எண் {
+    விடை அ + ஆ;
 }
 
-செயல் முதன்மை(): முழு {
-    மாறி முடிவு: முழு = கூட்டல்(3, 4)
-    என்றால் (முடிவு > 5) {
-        திரும்பு முடிவு
+செயல் மைய(): எண் {
+    மாறி முடிவு: எண் = கூட்டல்(3, 4);
+    எனில் (முடிவு > 5) {
+        விடை முடிவு;
     }
-    திரும்பு 0
+    விடை 0;
 }
 ```
 
@@ -60,46 +60,50 @@
 
 ### Variables & Constants
 
-```agam
-மாறி பெயர் = "தமிழ்"
-மாறி வயது = 25
-மாறாத பை = 3.14159
+```
+மாறி பெயர்: சரம் = "தமிழ்";
+மாறி வயது: எண் = 25;
+மாறி நிலைமாறிலி பை: தசமம்64 = 3.14159;
 ```
 
 ### Conditionals
 
-```agam
-மாறி மதிப்பெண் = 85
+```
+மாறி மதிப்பெண்: எண் = 85;
 
-என்றால் மதிப்பெண் >= 90:
-    அச்சிடு("தர நிலை: அ+")
-இல்லையென்றால் மதிப்பெண் >= 80:
-    அச்சிடு("தர நிலை: அ")
-இல்லை:
-    அச்சிடு("மேம்படுத்த வேண்டும்")
+எனில் (மதிப்பெண் >= 90) {
+    பதிப்பி("தர நிலை: அ+");
+} இல்லையெனில் (மதிப்பெண் >= 80) {
+    பதிப்பி("தர நிலை: அ");
+} இல்லையெனில் {
+    பதிப்பி("மேம்படுத்த வேண்டும்");
+}
 ```
 
 ### Loops
 
-```agam
+```
 # While loop
-மாறி எண் = 1
-வரை எண் <= 5:
-    அச்சிடு(எண்)
-    எண் = எண் + 1
+மாறி நிலை i: எண் = 1;
+வரை (i <= 5) {
+    பதிப்பி(i);
+    i = i + 1;
+}
 
 # For loop
-ஒவ்வொரு எண் உள்ள வரம்பு(1, 6):
-    அச்சிடு(எண்)
+சுற்று (i உள் 6) {
+    பதிப்பி(i);
+}
 ```
 
 ### Functions
 
-```agam
-செயல் வணக்கம்(பெயர்):
-    திரும்பு "வணக்கம், " + பெயர் + "!"
+```
+செயல் வணக்கம்(பெயர்: சரம்): சரம் {
+    விடை "வணக்கம், " + பெயர் + "!";
+}
 
-அச்சிடு(வணக்கம்("நண்பா"))
+பதிப்பி(வணக்கம்("நண்பா"));
 ```
 
 ---
@@ -112,41 +116,43 @@
 |---|---|---|
 | `செயல்` | `fn` | Function |
 | `மாறி` | `let` | Variable |
-| `மாறாத` | `const` | Constant |
-| `என்றால்` | `if` | Conditional |
-| `இல்லையென்றால்` | `elif` | Else-if |
-| `இல்லை` | `else` | Else |
+| `நிலைமாறிலி` | `const` | Constant |
+| `எனில்` | `if` | Conditional |
+| `இல்லையெனில்` | `else` | Else |
 | `வரை` | `while` | While loop |
-| `ஒவ்வொரு` | `for` | For loop |
-| `உள்ள` | `in` | In |
-| `திரும்பு` | `return` | Return |
-| `நிறுத்து` | `break` | Break |
-| `தொடர்` | `continue` | Continue |
+| `சுற்று` | `for` | For loop |
+| `உள்` | `in` | In |
+| `விடை` | `return` | Return |
 | `உண்மை` | `true` | Boolean true |
 | `பொய்` | `false` | Boolean false |
-| `இல்லா` | `null` | Null |
-| `மற்றும்` | `and` | Logical AND |
-| `அல்லது` | `or` | Logical OR |
-| `இல்ல` | `not` | Logical NOT |
+| `இல்லை` | `null` | Null |
 
 ### Advanced
 
 | Tamil | English | Purpose |
 |---|---|---|
-| `கட்டமைப்பு` | `struct` | Define struct |
-| `விருப்பம்` | `enum` | Define enum |
+| `அமைப்பு` | `struct` | Define struct |
+| `பட்டியல்` | `enum` | Define enum |
+| `பண்பு` | `trait` | Define trait |
+| `செயல்படுத்து` | `impl` | Implement methods |
 | `பொருத்து` | `match` | Pattern matching |
 | `இறக்குமதி` | `import` | Import module |
-| `இருந்து` | `from` | From |
-| `முயற்சி` | `try` | Try block |
-| `பிடி` | `catch` | Catch block |
-| `வீசு` | `throw` | Throw error |
+| `வெளி` | `extern` | Extern FFI declaration |
+| `நிலை` | `mut` | Mutable reference |
+| `மண்டலம்` | `zone` | Memory zone |
+| `கடன்` | `borrow` | Borrow reference |
+| `பகிர்வு` | `shared` | Shared reference |
+| `தப்பித்தல்` | `escape` | Escape memory zone |
+| `புதிய` | `new` | Instantiate |
+| `நீக்கு` | `delete` | Free memory |
+| `ஒதுக்கீடு` | `alloc` | Allocate memory |
+| `ஆக` | `as` | Alias/Cast |
 
 ### Built-in Functions
 
 | Tamil | English | Purpose |
 |---|---|---|
-| `அச்சிடு` | `print` | Output |
+| `பதிப்பி` | `print` | Output |
 | `உள்ளீடு` | `input` | Input |
 | `நீளம்` | `len` | Get length |
 | `வகை` | `type` | Get type |
@@ -207,6 +213,9 @@ agamc run hello.agam
 # Emit intermediate representations
 agamc hello.agam --emit-ast     # Abstract Syntax Tree
 agamc hello.agam --emit-llvm    # LLVM IR
+
+# Specify standard library search path (e.g. for dynamic std libs)
+agamc hello.agam --lib-path /path/to/agam/std
 ```
 
 ---

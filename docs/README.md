@@ -34,7 +34,7 @@ Welcome to **The agam Book** - a comprehensive guide to learning programming in 
 14. [Error Messages](14_errors.md) - பிழைச் செய்திகள்
 
 ### Advanced Features
-15. [Structs](15_structs.md) - கட்டமைப்புகள்
+15. [Structs](15_structs.md) - அமைப்புகள்
 16. [Enums](16_enums.md) - விருப்பங்கள்
 17. [Pattern Matching](17_pattern_matching.md) - பொருத்தமிடுதல்
 18. [Error Handling](18_error_handling.md) - பிழை கையாளுதல்
@@ -53,10 +53,11 @@ This book is for:
 ## 🚀 Quick Example
 
 ```
-செயல் வணக்கம்(பெயர்):
-    திரும்பு "வணக்கம், " + பெயர் + "!"
+செயல் வணக்கம்(பெயர்) {
+    விடை "வணக்கம், " + பெயர் + "!";
 
-அச்சிடு(வணக்கம்("உலகம்"))
+}
+பதிப்பி(வணக்கம்("உலகம்"));
 ```
 
 Output: `வணக்கம், உலகம்!`
@@ -68,12 +69,12 @@ Output: `வணக்கம், உலகம்!`
 | Feature | Tamil Keyword | Description |
 |---------|---------------|-------------|
 | Variables | `மாறி` | Declare variables |
-| Constants | `மாறாத` | Declare constants |
+| Constants | `நிலைமாறிலி` | Declare constants |
 | Functions | `செயல்` | Define functions |
-| If/Else | `என்றால்/இல்லை` | Conditionals |
+| If/Else | `எனில்/இல்லை` | Conditionals |
 | Loops | `வரை/ஒவ்வொரு` | While/For loops |
-| Structs | `கட்டமைப்பு` | Custom data types |
-| Enums | `விருப்பம்` | Enumerations |
+| Structs | `அமைப்பு` | Custom data types |
+| Enums | `பட்டியல்` | Enumerations |
 | Pattern Matching | `பொருத்து` | Match expressions |
 | Error Handling | `முயற்சி/பிடி` | Try-Catch |
 | Modules | `இறக்குமதி` | Import modules |

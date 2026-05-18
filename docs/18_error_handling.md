@@ -14,7 +14,7 @@ Error handling allows your program to gracefully handle unexpected situations. I
     risky_operation()
 பிடி error:
     # Handle the error
-    அச்சிடு("Error:", error)
+    பதிப்பி("Error:", error)
 ```
 
 ---
@@ -22,12 +22,13 @@ Error handling allows your program to gracefully handle unexpected situations. I
 ## Try-Catch Example
 
 ```
-முயற்சி:
-    மாறி result = 10 / 0
-    அச்சிடு(result)
-பிடி error:
-    அச்சிடு("An error occurred!")
-    அச்சிடு("Details:", error)
+முயற்சி {
+    மாறி result = 10 / 0;
+    பதிப்பி(result);
+} பிடி (error) {
+    பதிப்பி("An error occurred!");
+    பதிப்பி("Details:", error);
+}
 ```
 
 ---
@@ -37,18 +38,20 @@ Error handling allows your program to gracefully handle unexpected situations. I
 Use `வீசு` (throw) to raise an error:
 
 ```
-செயல் check_age(age):
-    என்றால் age < 0:
+செயல் check_age(age) {
+    எனில் age < 0:
         வீசு("Age cannot be negative!")
-    என்றால் age > 150:
+    எனில் age > 150:
         வீசு("Age is too high!")
-    திரும்பு "Valid age"
+    விடை "Valid age";
 
-முயற்சி:
-    மாறி result = check_age(-5)
-    அச்சிடு(result)
-பிடி error:
-    அச்சிடு("Error:", error)
+}
+முயற்சி {
+    மாறி result = check_age(-5);
+    பதிப்பி(result);
+} பிடி (error) {
+    பதிப்பி("Error:", error);
+}
 ```
 
 ---
@@ -58,10 +61,11 @@ Use `வீசு` (throw) to raise an error:
 agam provides error messages in Tamil for better understanding:
 
 ```
-முயற்சி:
-    மாறி x = எண்ணாக("hello")  # Invalid conversion
-பிடி error:
-    அச்சிடு(error)
+முயற்சி {
+    மாறி x = எண்ணாக("hello")  # Invalid conversion;
+} பிடி (error) {
+    பதிப்பி(error);
+}
 # Output: 'hello' எண்ணாக மாற்ற இயலவில்லை
 ```
 
@@ -72,98 +76,108 @@ agam provides error messages in Tamil for better understanding:
 ### Example 1: Safe Division
 
 ```
-செயல் safe_divide(a, b):
-    என்றால் b == 0:
+செயல் safe_divide(a, b) {
+    எனில் b == 0:;
         வீசு("Cannot divide by zero!")
-    திரும்பு a / b
+    விடை a / b;
 
-முயற்சி:
-    அச்சிடு(safe_divide(10, 2))   # Output: 5
-    அச்சிடு(safe_divide(10, 0))   # This will throw
-பிடி error:
-    அச்சிடு("Division error:", error)
+}
+முயற்சி {
+    பதிப்பி(safe_divide(10, 2))   # Output: 5;
+    பதிப்பி(safe_divide(10, 0))   # This will throw;
+} பிடி (error) {
+    பதிப்பி("Division error:", error);
+}
 ```
 
 ### Example 2: File Reading
 
 ```
-செயல் read_config(filename):
-    என்றால் இல்ல உள்ளது(filename):
+செயல் read_config(filename) {
+    எனில் இல்ல உள்ளது(filename):
         வீசு("Config file not found: " + filename)
-    திரும்பு படி(filename)
+    விடை படி(filename);
 
-முயற்சி:
-    மாறி config = read_config("settings.txt")
-    அச்சிடு("Config loaded:", config)
-பிடி error:
-    அச்சிடு("Failed to load config")
-    அச்சிடு("Error:", error)
+}
+முயற்சி {
+    மாறி config = read_config("settings.txt");
+    பதிப்பி("Config loaded:", config);
+} பிடி (error) {
+    பதிப்பி("Failed to load config");
+    பதிப்பி("Error:", error);
     # Use default settings
-    மாறி config = "default settings"
+    மாறி config = "default settings";
+}
 ```
 
 ### Example 3: Input Validation
 
 ```
-செயல் get_positive_number():
-    மாறி input_str = உள்ளீடு("Enter a positive number: ")
+செயல் get_positive_number() {
+    மாறி input_str = உள்ளீடு("Enter a positive number: ");
     
-    முயற்சி:
-        மாறி num = எண்ணாக(input_str)
-        என்றால் num <= 0:
+    முயற்சி {
+        மாறி num = எண்ணாக(input_str);
+        எனில் num <= 0:;
             வீசு("Number must be positive!")
-        திரும்பு num
-    பிடி error:
-        அச்சிடு("Invalid input:", error)
-        திரும்பு get_positive_number()  # Retry
+        விடை num;
+    } பிடி (error) {
+        பதிப்பி("Invalid input:", error);
+        விடை get_positive_number()  # Retry;
 
-மாறி number = get_positive_number()
-அச்சிடு("You entered:", number)
+    }
+மாறி number = get_positive_number();
+பதிப்பி("You entered:", number);
 ```
 
 ### Example 4: Bank Transaction
 
 ```
-கட்டமைப்பு Account:
-    name
-    balance
+அமைப்பு Account {
+    name,
+    balance,
 
-செயல் withdraw(account, amount):
-    என்றால் amount <= 0:
-        வீசு("Withdrawal amount must be positive!")
-    என்றால் amount > account.balance:
-        வீசு("Insufficient funds! Available: " + சரமாக(account.balance))
+}
+செயல் withdraw(account, amount) {
+    எனில் amount <= 0:;
+        வீசு("Withdrawal amount must be positive!"),
+    எனில் amount > account.balance:,
+        வீசு("Insufficient funds! Available: " + சரமாக(account.balance)),
     
-    account.balance = account.balance - amount
-    திரும்பு account.balance
+    account.balance = account.balance - amount;
+    விடை account.balance,
 
-மாறி my_account = Account("Raja", 1000)
+}
+மாறி my_account = Account("Raja", 1000);
 
-முயற்சி:
-    withdraw(my_account, 500)
-    அச்சிடு("Withdrawal successful!")
-    அச்சிடு("New balance:", my_account.balance)
+முயற்சி {
+    withdraw(my_account, 500),
+    பதிப்பி("Withdrawal successful!"),
+    பதிப்பி("New balance:", my_account.balance),
     
-    withdraw(my_account, 600)  # This will fail
-பிடி error:
-    அச்சிடு("Transaction failed:", error)
+    withdraw(my_account, 600)  # This will fail,
+} பிடி (error) {
+    பதிப்பி("Transaction failed:", error),
+}
 ```
 
 ### Example 5: Array Index Safety
 
 ```
-செயல் safe_get(list, index):
-    என்றால் index < 0 அல்லது index >= நீளம்(list):
+செயல் safe_get(list, index) {
+    எனில் index < 0 அல்லது index >= நீளம்(list):;
         வீசு("Index out of bounds: " + சரமாக(index))
-    திரும்பு list[index]
+    விடை list[index];
 
-மாறி items = ["apple", "banana", "cherry"]
+}
+மாறி items = ["apple", "banana", "cherry"];
 
-முயற்சி:
-    அச்சிடு(safe_get(items, 1))   # Output: banana
-    அச்சிடு(safe_get(items, 10))  # This will throw
-பிடி error:
-    அச்சிடு("Access error:", error)
+முயற்சி {
+    பதிப்பி(safe_get(items, 1))   # Output: banana;
+    பதிப்பி(safe_get(items, 10))  # This will throw;
+} பிடி (error) {
+    பதிப்பி("Access error:", error);
+}
 ```
 
 ---
@@ -173,83 +187,90 @@ agam provides error messages in Tamil for better understanding:
 ### Pattern 1: Default Value on Error
 
 ```
-செயல் parse_number(text, default):
-    முயற்சி:
-        திரும்பு எண்ணாக(text)
-    பிடி error:
-        திரும்பு default
+செயல் parse_number(text, default) {
+    முயற்சி {
+        விடை எண்ணாக(text);
+    } பிடி (error) {
+        விடை default;
 
-மாறி value = parse_number("abc", 0)
-அச்சிடு(value)  # Output: 0
+    }
+மாறி value = parse_number("abc", 0);
+பதிப்பி(value)  # Output: 0;
 ```
 
 ### Pattern 2: Retry Logic
 
 ```
-செயல் retry_operation(max_attempts):
-    மாறி attempts = 0
+செயல் retry_operation(max_attempts) {
+    மாறி attempts = 0;
     
-    வரை attempts < max_attempts:
-        முயற்சி:
+    வரை (attempts < max_attempts) {
+        முயற்சி {
             # Simulate operation that might fail
-            என்றால் தற்செயல்() < 0.7:
+            எனில் தற்செயல்() < 0.7:
                 வீசு("Random failure!")
-            அச்சிடு("Success!")
-            திரும்பு உண்மை
-        பிடி error:
-            attempts = attempts + 1
-            அச்சிடு("Attempt", attempts, "failed:", error)
+            பதிப்பி("Success!");
+            விடை உண்மை;
+        } பிடி (error) {
+            attempts = attempts + 1;
+            பதிப்பி("Attempt", attempts, "failed:", error);
     
-    அச்சிடு("All attempts failed!")
-    திரும்பு பொய்
+        }
+    பதிப்பி("All attempts failed!");
+    விடை பொய்;
 
+}
 retry_operation(3)
 ```
 
 ### Pattern 3: Cleanup on Error
 
 ```
-செயல் process_file(filename):
-    மாறி file_opened = பொய்
+செயல் process_file(filename) {
+    மாறி file_opened = பொய்;
     
-    முயற்சி:
-        என்றால் உள்ளது(filename):
-            மாறி content = படி(filename)
-            file_opened = உண்மை
+    முயற்சி {
+        எனில் உள்ளது(filename):
+            மாறி content = படி(filename);
+            file_opened = உண்மை;
             
             # Process content
-            மாறி processed = மேல்(content)
+            மாறி processed = மேல்(content);
             எழுது("output.txt", processed)
             
-            அச்சிடு("File processed successfully!")
-        இல்லை:
+            பதிப்பி("File processed successfully!");
+        } இல்லையெனில் {
             வீசு("File not found!")
-    பிடி error:
-        அச்சிடு("Processing failed:", error)
+    } பிடி (error) {
+        பதிப்பி("Processing failed:", error);
         
         # Cleanup
-        என்றால் file_opened:
-            அச்சிடு("Cleaning up...")
+        எனில் file_opened:
+            பதிப்பி("Cleaning up...");
+    }
 ```
 
 ### Pattern 4: Error Propagation
 
 ```
-செயல் low_level_operation():
+செயல் low_level_operation() {
     வீசு("Low level error!")
 
-செயல் mid_level_operation():
-    முயற்சி:
+}
+செயல் mid_level_operation() {
+    முயற்சி {
         low_level_operation()
-    பிடி error:
+    } பிடி (error) {
         வீசு("Mid level failed: " + error)
 
-செயல் high_level_operation():
-    முயற்சி:
+    }
+செயல் high_level_operation() {
+    முயற்சி {
         mid_level_operation()
-    பிடி error:
-        அச்சிடு("High level caught:", error)
+    } பிடி (error) {
+        பதிப்பி("High level caught:", error);
 
+    }
 high_level_operation()
 ```
 

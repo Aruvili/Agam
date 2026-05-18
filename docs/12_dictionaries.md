@@ -29,8 +29,8 @@ Use the key to get its value:
 ```
 மாறி person = {"name": "Tamil", "age": 25}
 
-அச்சிடு(person["name"])   # Output: Tamil
-அச்சிடு(person["age"])    # Output: 25
+பதிப்பி(person["name"])   # Output: Tamil;
+பதிப்பி(person["age"])    # Output: 25;
 ```
 
 ---
@@ -42,23 +42,25 @@ Use the key to get its value:
 ```
 மாறி student = {"name": "Priya", "roll": 101, "marks": {"math": 95, "science": 88, "tamil": 92}}
 
-அச்சிடு("Name:", student["name"])
-அச்சிடு("Roll:", student["roll"])
-அச்சிடு("Math Marks:", student["marks"]["math"])
+பதிப்பி("Name:", student["name"]);
+பதிப்பி("Roll:", student["roll"]);
+பதிப்பி("Math Marks:", student["marks"]["math"]);
 ```
 
 ### Example 2: Word Counter
 
 ```
-செயல் count_chars(text):
+செயல் count_chars(text) {
     மாறி counts = {}
     
-    ஒவ்வொரு char உள்ள text:
+    சுற்று (char உள் text) {
         # This is simplified - in real usage you'd update counts
-        அச்சிடு(char)
+        பதிப்பி(char);
     
-    திரும்பு counts
+    }
+    விடை counts;
 
+}
 count_chars("hello")
 ```
 

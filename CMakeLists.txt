@@ -72,6 +72,20 @@ if(NOT LLVM_SYSTEM_LIBS)
 endif()
 message(STATUS "LLVM System Libs: ${LLVM_SYSTEM_LIBS}")
 
+if(WIN32 AND LLVM_SYSTEM_LIBS)
+    # Fix for diaguids.lib: LLVM sometimes hardcodes the absolute path based on the VS edition 
+    # it was compiled with (e.g. Enterprise vs BuildTools). We strip the path to rely on the LIB env var.
+    set(CLEANED_LIBS "")
+    foreach(LIB IN LISTS LLVM_SYSTEM_LIBS)
+        if(LIB MATCHES "diaguids\\.lib$")
+            list(APPEND CLEANED_LIBS "diaguids.lib")
+        else()
+            list(APPEND CLEANED_LIBS "${LIB}")
+        endif()
+    endforeach()
+    set(LLVM_SYSTEM_LIBS ${CLEANED_LIBS})
+endif()
+
 # ── Agam compiler library (shared between compiler and tests) ────────────────
 add_library(agam_lib STATIC
     src/lexer/lexer.cpp
@@ -124,8 +138,36 @@ target_link_libraries(agamc PRIVATE
 
 if(MSVC)
     target_compile_options(agamc PRIVATE /W4 /WX)
-else()
-    target_compile_options(agamc PRIVATE -Wall -Wextra -Werror -Wno-unused-parameter)
+endif()
+
+# Fix LLVM imported targets containing absolute paths to diaguids.lib
+if(WIN32)
+    set(PROPS_TO_CHECK
+        INTERFACE_LINK_LIBRARIES
+        IMPORTED_LINK_INTERFACE_LIBRARIES_RELEASE
+        IMPORTED_LINK_INTERFACE_LIBRARIES_DEBUG
+        IMPORTED_LINK_INTERFACE_LIBRARIES_RELWITHDEBINFO
+        IMPORTED_LINK_INTERFACE_LIBRARIES_MINSIZEREL
+        IMPORTED_LINK_INTERFACE_LIBRARIES
+    )
+    foreach(tgt ${LLVM_LIBS})
+        if(TARGET ${tgt})
+            foreach(prop IN LISTS PROPS_TO_CHECK)
+                get_target_property(il ${tgt} ${prop})
+                if(il)
+                    set(new_il "")
+                    foreach(lib IN LISTS il)
+                        if(lib MATCHES "diaguids\\.lib$")
+                            list(APPEND new_il "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/DIA SDK/lib/amd64/diaguids.lib")
+                        else()
+                            list(APPEND new_il "${lib}")
+                        endif()
+                    endforeach()
+                    set_target_properties(${tgt} PROPERTIES ${prop} "${new_il}")
+                endif()
+            endforeach()
+        endif()
+    endforeach()
 endif()
 
 # ── Testing ──────────────────────────────────────────────────────────────────

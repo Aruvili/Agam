@@ -1,107 +1,71 @@
-﻿# Chapter 2: Installation (நிறுவுதல்)
+# Chapter 2: Installation (நிறுவுதல்)
 
 ## Prerequisites
 
 Before installing agam, you need:
 
-1. **Rust** (version 1.70 or later)
-2. **Cargo** (comes with Rust)
+1. **C++17 Compiler** (GCC 9+ / Clang 10+ / MSVC 2019+)
+2. **CMake** (version 3.20 or later)
+3. **LLVM** (version 17 or later)
 
 ---
 
-## Installing Rust
+## Installing Agam
 
-### Windows
+### Option 1: Quick Install Scripts
 
-1. Download the installer from [rustup.rs](https://rustup.rs)
-2. Run `rustup-init.exe`
-3. Follow the prompts
-4. Restart your terminal
-
-### Linux / macOS
-
-Open terminal and run:
-
+**Linux/macOS**
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl -sSL https://dl.aruvili.com/install.sh | bash
 ```
 
-### Verify Installation
-
-```bash
-rustc --version
-cargo --version
-```
-
-You should see version numbers for both.
-
----
-
-## Installing agam
-
-### Option 1: Build from Source (Recommended)
-
-```bash
-# Step 1: Navigate to the Language directory
-cd d:\agam\Language
-
-# Step 2: Build the release version
-cargo build --release
-
-# Step 3: The binary is now at:
-# Windows: target\release\agam.exe
-# Linux/Mac: target/release/agam
-```
-
-### Option 2: Add to PATH (Optional)
-
-To run `agam` from anywhere:
-
-**Windows (PowerShell as Admin):**
+**Windows (PowerShell)**
 ```powershell
-# Add to user PATH
-$env:Path += ";D:\agam\Language\target\release"
-[Environment]::SetEnvironmentVariable("Path", $env:Path, "User")
+irm https://dl.aruvili.com/install.ps1 | iex
 ```
 
-**Linux/macOS:**
+### Option 2: Build from Source (Recommended for Contributors)
+
 ```bash
-# Add to ~/.bashrc or ~/.zshrc
-export PATH="$PATH:/path/to/agam/target/release"
+# Step 1: Clone the repository and navigate to it
+git clone https://github.com/Aruvili/Agam.git
+cd Agam
+
+# Step 2: Configure the build with CMake
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+# Step 3: Build the project
+cmake --build build --config Release
+
+# Step 4: Run the test suite to verify
+cd build && ctest --output-on-failure
 ```
+
+The compiled binary will be located in the `build/` directory (or `build/Release/` on Windows).
 
 ---
 
 ## Running agam
 
-### Method 1: Using Cargo (Easiest)
+### Command Line Interface
 
 ```bash
-# Navigate to project directory
-cd d:\agam\Language
+# Verify installation
+agamc --version
 
-# Run a file
-cargo run --release -- examples/hello.agam
+# Run a file interactively (JIT execution)
+agamc run examples/hello.agam
 
-# Start REPL (interactive mode)
-cargo run --release
+# Compile to an executable
+agamc examples/hello.agam -o hello
 ```
 
-### Method 2: Using the Binary Directly
+### Specifying Standard Library Path
+
+If your standard library is located in a custom directory, you can pass it to the compiler using the `--lib-path` flag:
 
 ```bash
-# Windows
-.\target\release\agam.exe examples/hello.agam
-
-# Linux/Mac
-./target/release/agam examples/hello.agam
-```
-
-### Method 3: After Adding to PATH
-
-```bash
-agam examples/hello.agam
-agam --help
+agamc hello.agam --lib-path /path/to/agam/std
 ```
 
 ---
@@ -113,14 +77,14 @@ agam --help
 Create a file called `test.agam`:
 
 ```
-அச்சிடு("agam நிறுவல் வெற்றி!")
-அச்சிடு("Installation successful!")
+பதிப்பி("agam நிறுவல் வெற்றி!")
+பதிப்பி("Installation successful!")
 ```
 
 ### Step 2: Run It
 
 ```bash
-cargo run --release -- test.agam
+agamc run test.agam
 ```
 
 ### Expected Output
@@ -134,63 +98,17 @@ Installation successful!
 
 ---
 
-## The REPL (Interactive Mode)
-
-Start the REPL to try code interactively:
-
-```bash
-cargo run --release
-```
-
-You'll see:
-```
-╔══════════════════════════════════════════════════════════════╗
-║     அகம் - agam Programming Language v0.1.0           ║
-║     தமிழில் நிரலாக்கம் செய்யுங்கள்!                           ║
-╚══════════════════════════════════════════════════════════════╝
-
->>> 
-```
-
-Try these commands:
-```
->>> அச்சிடு("வணக்கம்!")
-வணக்கம்!
->>> மாறி x = 10
->>> அச்சிடு(x * 2)
-20
->>> வெளியேறு()
-```
-
----
-
-## Command Line Options
-
-| Command | Description |
-|---------|-------------|
-| `agam` | Start REPL |
-| `agam file.agam` | Run a file |
-| `agam --help` | Show help |
-| `agam --version` | Show version |
-
----
-
 ## Troubleshooting
 
 ### "Command not found"
 
-Make sure you're in the correct directory:
-```bash
-cd d:\agam\Language
-cargo run --release -- examples/hello.agam
-```
+If you installed via the quick script, make sure the installation directory is added to your system's PATH.
 
-### Build Errors
+### Build Errors (LLVM not found)
 
-Update Rust:
-```bash
-rustup update
-```
+Ensure LLVM 17 is installed and reachable by CMake. 
+On Windows, make sure you have LLVM installed (via the official installer or winget) and its `bin` directory is in your PATH.
+On macOS/Linux, `llvm-config` from LLVM 17 must be available in your PATH.
 
 ### Unicode Display Issues
 

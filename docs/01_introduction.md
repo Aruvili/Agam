@@ -23,8 +23,8 @@ Here's what agam code looks like:
 ```
 # This is a comment (குறிப்பு)
 
-மாறி பெயர் = "Tamil"
-அச்சிடு("Hello, " + பெயர் + "!")
+மாறி பெயர் = "Tamil";
+பதிப்பி("Hello, " + பெயர் + "!");
 ```
 
 Let's break this down:
@@ -36,7 +36,7 @@ Let's break this down:
 | `பெயர்` | The name of our variable |
 | `=` | Assignment - puts a value in the variable |
 | `"Tamil"` | A string (text) value |
-| `அச்சிடு` | "Print" - displays output |
+| `பதிப்பி` | "Print" - displays output |
 
 ---
 
@@ -50,8 +50,8 @@ agam uses Tamil words as keywords:
 |-------|---------|-----|
 | மாறி | let | Create a variable |
 | செயல் | function | Create a function |
-| அச்சிடு | print | Display output |
-| என்றால் | if | Make a decision |
+| பதிப்பி | print | Display output |
+| எனில் | if | Make a decision |
 | வரை | while | Repeat code |
 
 ### 2. Indentation (உள்தள்ளுதல்)
@@ -59,10 +59,10 @@ agam uses Tamil words as keywords:
 Like Python, agam uses **spaces** to group code:
 
 ```
-என்றால் 10 > 5:
-    அச்சிடு("Ten is bigger!")    # ← indented with 4 spaces
-    அச்சிடு("This is also inside")
-அச்சிடு("This is outside")       # ← no indentation
+எனில் 10 > 5:
+    பதிப்பி("Ten is bigger!")    # ← indented with 4 spaces
+    பதிப்பி("This is also inside")
+பதிப்பி("This is outside")       # ← no indentation
 ```
 
 > **Important:** Use consistent indentation (4 spaces recommended)
@@ -73,7 +73,7 @@ Use `#` to write comments that explain your code:
 
 ```
 # This is a comment
-மாறி வயது = 25  # This is also a comment
+மாறி வயது = 25  # This is also a comment;
 ```
 
 ---
@@ -85,11 +85,11 @@ Use `#` to write comments that explain your code:
 | Python | agam | Meaning |
 |--------|---------|---------|
 | `name = "Hello"` | `மாறி பெயர் = "Hello"` | Variable |
-| `if x > 5:` | `என்றால் x > 5:` | If statement |
+| `if x > 5:` | `எனில் x > 5:` | If statement |
 | `while True:` | `வரை உண்மை:` | While loop |
 | `def greet():` | `செயல் greet():` | Function |
-| `print("Hi")` | `அச்சிடு("Hi")` | Print |
-| `return x` | `திரும்பு x` | Return |
+| `print("Hi")` | `பதிப்பி("Hi")` | Print |
+| `return x` | `விடை x` | Return |
 
 ---
 

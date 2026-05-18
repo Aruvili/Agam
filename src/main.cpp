@@ -495,10 +495,15 @@ int main(int argc, char *argv[]) {
     llvm::InitializeNativeTargetAsmParser();
 
     auto targetTriple = llvm::Triple(llvm::sys::getDefaultTargetTriple());
+#if LLVM_VERSION_MAJOR >= 22
+    codegen.getModule()->setTargetTriple(targetTriple);
+    std::string error;
+    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
+#else
     codegen.getModule()->setTargetTriple(targetTriple.getTriple());
-
     std::string error;
     auto target = llvm::TargetRegistry::lookupTarget(targetTriple.getTriple(), error);
+#endif
     if (!target) {
         std::cerr << "பிழை: " << error << "\n";
         return 1;
@@ -508,7 +513,11 @@ int main(int argc, char *argv[]) {
     auto Features = "";
     llvm::TargetOptions opt;
     auto RM = std::optional<llvm::Reloc::Model>();
+#if LLVM_VERSION_MAJOR >= 22
+    auto targetMachine = target->createTargetMachine(targetTriple, CPU, Features, opt, RM);
+#else
     auto targetMachine = target->createTargetMachine(targetTriple.getTriple(), CPU, Features, opt, RM);
+#endif
 
     codegen.getModule()->setDataLayout(targetMachine->createDataLayout());
 

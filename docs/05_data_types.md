@@ -21,14 +21,14 @@ Numbers can be integers or decimals:
 
 ```
 # Integers (முழு எண்கள்)
-மாறி age = 25
-மாறி year = 2024
-மாறி negative = -10
+மாறி age = 25;
+மாறி year = 2024;
+மாறி negative = -10;
 
 # Decimals (தசம எண்கள்)
-மாறி price = 99.50
-மாறி pi = 3.14159
-மாறி tiny = 0.001
+மாறி price = 99.50;
+மாறி pi = 3.14159;
+மாறி tiny = 0.001;
 ```
 
 ### Tamil Numerals
@@ -36,8 +36,8 @@ Numbers can be integers or decimals:
 agam also supports Tamil numerals!
 
 ```
-மாறி எண் = ௧௨௩    # 123 in Tamil numerals
-அச்சிடு(எண்)      # Output: 123
+மாறி எண் = ௧௨௩    # 123 in Tamil numerals;
+பதிப்பி(எண்)      # Output: 123;
 ```
 
 Tamil numerals:
@@ -61,66 +61,66 @@ Tamil numerals:
 Strings are text enclosed in double quotes:
 
 ```
-மாறி greeting = "வணக்கம்!"
-மாறி name = "agam"
-மாறி empty = ""
-மாறி sentence = "I love programming in Tamil"
+மாறி greeting = "வணக்கம்!";
+மாறி name = "agam";
+மாறி empty = "";
+மாறி sentence = "I love programming in Tamil";
 ```
 
 ### String Operations
 
 ```
 # Concatenation (joining)
-மாறி full = "Hello" + " " + "World"
-அச்சிடு(full)   # Output: Hello World
+மாறி full = "Hello" + " " + "World";
+பதிப்பி(full)   # Output: Hello World;
 
 # Repetition
-மாறி stars = "*" * 5
-அச்சிடு(stars)   # Output: *****
+மாறி stars = "*" * 5;
+பதிப்பி(stars)   # Output: *****;
 
 # Length
-அச்சிடு(நீளம்("Hello"))   # Output: 5
-அச்சிடு(நீளம்("தமிழ்"))   # Output: 5
+பதிப்பி(நீளம்("Hello"))   # Output: 5;
+பதிப்பி(நீளம்("தமிழ்"))   # Output: 5;
 ```
 
 ### Accessing Characters
 
 ```
-மாறி word = "Hello"
-அச்சிடு(word[0])   # Output: H (first character)
-அச்சிடு(word[1])   # Output: e (second character)
-அச்சிடு(word[-1])  # Output: o (last character)
+மாறி word = "Hello";
+பதிப்பி(word[0])   # Output: H (first character);
+பதிப்பி(word[1])   # Output: e (second character);
+பதிப்பி(word[-1])  # Output: o (last character);
 ```
 
 ### Escape Characters
 
 ```
-மாறி text = "Line 1\nLine 2"   # \n = new line
-அச்சிடு(text)
+மாறி text = "Line 1\nLine 2"   # \n = new line;
+பதிப்பி(text);
 # Output:
 # Line 1
 # Line 2
 
-மாறி quote = "He said \"Hello\""   # \" = quote inside string
-அச்சிடு(quote)   # Output: He said "Hello"
+மாறி quote = "He said \"Hello\""   # \" = quote inside string;
+பதிப்பி(quote)   # Output: He said "Hello";
 ```
 
 ### String Interpolation (F-Strings)
 
 As of version 0.1.2, you can embed expressions directly inside strings using `f` prefix and `{}`:
 
-```agam
-மாறி name = "Kumar"
-மாறி age = 25
+```
+மாறி name = "Kumar";
+மாறி age = 25;
 
 # Basic interpolation
-அச்சிடு(f"வணக்கம் {name}!")       # Output: வணக்கம் Kumar!
+பதிப்பி(f"வணக்கம் {name}!")       # Output: வணக்கம் Kumar!;
 
 # With expressions
-அச்சிடு(f"Next year: {age + 1}")  # Output: Next year: 26
+பதிப்பி(f"Next year: {age + 1}")  # Output: Next year: 26;
 
 # Nested quotes (use different quote types)
-அச்சிடு(f"Status: {'Adult' if age >= 18 else 'Minor'}")
+பதிப்பி(f"Status: {'Adult' if age >= 18 else 'Minor'}");
 ```
 
 ---
@@ -130,12 +130,12 @@ As of version 0.1.2, you can embed expressions directly inside strings using `f`
 Booleans represent true or false:
 
 ```
-மாறி is_student = உண்மை    # true
-மாறி is_old = பொய்        # false
+மாறி is_student = உண்மை    # true;
+மாறி is_old = பொய்        # false;
 
 # In comparisons
-மாறி result = 10 > 5      # உண்மை
-மாறி equal = 5 == 6       # பொய்
+மாறி result = 10 > 5      # உண்மை;
+மாறி equal = 5 == 6       # பொய்;
 ```
 
 ### Boolean Keywords
@@ -152,10 +152,10 @@ Booleans represent true or false:
 Null represents "no value" or "nothing":
 
 ```
-மாறி data = இல்லா   # null/nothing
+மாறி data = இல்லா   # null/nothing;
 
-என்றால் data == இல்லா:
-    அச்சிடு("No data available")
+எனில் data == இல்லா:;
+    பதிப்பி("No data available");
 ```
 
 ---
@@ -166,34 +166,34 @@ Lists store multiple values in order:
 
 ```
 # Creating lists
-மாறி numbers = [1, 2, 3, 4, 5]
-மாறி names = ["Alice", "Bob", "Charlie"]
-மாறி mixed = [1, "hello", உண்மை, 3.14]
+மாறி numbers = [1, 2, 3, 4, 5];
+மாறி names = ["Alice", "Bob", "Charlie"];
+மாறி mixed = [1, "hello", உண்மை, 3.14];
 
 # Empty list
-மாறி empty = []
+மாறி empty = [];
 ```
 
 ### List Operations
 
 ```
-மாறி fruits = ["apple", "banana", "cherry"]
+மாறி fruits = ["apple", "banana", "cherry"];
 
 # Access by index (starts at 0)
-அச்சிடு(fruits[0])   # Output: apple
-அச்சிடு(fruits[2])   # Output: cherry
-அச்சிடு(fruits[-1])  # Output: cherry (last item)
+பதிப்பி(fruits[0])   # Output: apple;
+பதிப்பி(fruits[2])   # Output: cherry;
+பதிப்பி(fruits[-1])  # Output: cherry (last item);
 
 # Length
-அச்சிடு(நீளம்(fruits))   # Output: 3
+பதிப்பி(நீளம்(fruits))   # Output: 3;
 
 # Add item
 சேர்(fruits, "orange")
-அச்சிடு(fruits)   # Output: [apple, banana, cherry, orange]
+பதிப்பி(fruits)   # Output: [apple, banana, cherry, orange];
 
 # Remove last item
-மாறி removed = நீக்கு(fruits)
-அச்சிடு(removed)   # Output: orange
+மாறி removed = நீக்கு(fruits);
+பதிப்பி(removed)   # Output: orange;
 ```
 
 ---
@@ -210,8 +210,8 @@ Dictionaries store key-value pairs:
 }
 
 # Access by key
-அச்சிடு(person["name"])   # Output: Tamil
-அச்சிடு(person["age"])    # Output: 25
+பதிப்பி(person["name"])   # Output: Tamil;
+பதிப்பி(person["age"])    # Output: 25;
 ```
 
 ---
@@ -221,11 +221,11 @@ Dictionaries store key-value pairs:
 Use `வகை()` to check a value's type:
 
 ```
-அச்சிடு(வகை(42))           # Output: எண்
-அச்சிடு(வகை("Hello"))      # Output: சரம்
-அச்சிடு(வகை(உண்மை))        # Output: உண்மைபொய்
-அச்சிடு(வகை([1, 2, 3]))    # Output: பட்டியல்
-அச்சிடு(வகை(இல்லா))        # Output: இல்லா
+பதிப்பி(வகை(42))           # Output: எண்
+பதிப்பி(வகை("Hello"))      # Output: சரம்
+பதிப்பி(வகை(உண்மை))        # Output: உண்மைபொய்
+பதிப்பி(வகை([1, 2, 3]))    # Output: பட்டியல்
+பதிப்பி(வகை(இல்லா))        # Output: இல்லா
 ```
 
 ---
@@ -236,16 +236,16 @@ Convert between types:
 
 ```
 # To integer
-மாறி num = எண்ணாக("42")
-அச்சிடு(num + 8)   # Output: 50
+மாறி num = எண்ணாக("42");
+பதிப்பி(num + 8)   # Output: 50;
 
 # To float
-மாறி decimal = தசமாக("3.14")
-அச்சிடு(decimal)   # Output: 3.14
+மாறி decimal = தசமாக("3.14");
+பதிப்பி(decimal)   # Output: 3.14;
 
 # To string
-மாறி text = சரமாக(100)
-அச்சிடு("Value: " + text)   # Output: Value: 100
+மாறி text = சரமாக(100);
+பதிப்பி("Value: " + text)   # Output: Value: 100;
 ```
 
 ### Conversion Functions

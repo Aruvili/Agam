@@ -22,8 +22,8 @@ Problems with individual characters or tokens:
 
 **Example:**
 ```
-மாறி x = @invalid    # Error: unexpected character
-மாறி text = "hello   # Error: unterminated string
+மாறி x = @invalid    # Error: unexpected character;
+மாறி text = "hello   # Error: unterminated string;
 ```
 
 ---
@@ -44,12 +44,12 @@ Problems with code structure:
 **Example:**
 ```
 # Missing colon
-என்றால் x > 5     # Error: ':' expected
-    அச்சிடு(x)
+எனில் x > 5     # Error: ':' expected
+    பதிப்பி(x)
 
 # Missing indentation
-என்றால் x > 5:
-அச்சிடு(x)        # Error: indentation expected
+எனில் x > 5:
+பதிப்பி(x)        # Error: indentation expected
 ```
 
 ---
@@ -77,14 +77,14 @@ Problems during program execution:
 **Error:** You're using a variable that doesn't exist.
 
 ```
-அச்சிடு(பெயர்)   # Error: பெயர் is not defined
+பதிப்பி(பெயர்)   # Error: பெயர் is not defined
 ```
 
 **Solution:** Define the variable first.
 
 ```
-மாறி பெயர் = "Tamil"
-அச்சிடு(பெயர்)   # Works!
+மாறி பெயர் = "Tamil";
+பதிப்பி(பெயர்)   # Works!;
 ```
 
 ---
@@ -94,17 +94,18 @@ Problems during program execution:
 **Error:** Cannot divide by zero.
 
 ```
-மாறி result = 10 / 0   # Error!
+மாறி result = 10 / 0   # Error!;
 ```
 
 **Solution:** Check before dividing.
 
 ```
-மாறி divisor = 0
-என்றால் divisor != 0:
-    மாறி result = 10 / divisor
-இல்லை:
-    அச்சிடு("Cannot divide by zero!")
+மாறி divisor = 0;
+எனில் divisor != 0:;
+    மாறி result = 10 / divisor;
+} இல்லையெனில் {
+    பதிப்பி("Cannot divide by zero!");
+}
 ```
 
 ---
@@ -114,18 +115,19 @@ Problems during program execution:
 **Error:** Accessing an index that doesn't exist.
 
 ```
-மாறி list = [1, 2, 3]
-அச்சிடு(list[10])   # Error: index 10 is out of range
+மாறி list = [1, 2, 3];
+பதிப்பி(list[10])   # Error: index 10 is out of range;
 ```
 
 **Solution:** Check the list length.
 
 ```
-மாறி index = 10
-என்றால் index < நீளம்(list):
-    அச்சிடு(list[index])
-இல்லை:
-    அச்சிடு("Index out of range!")
+மாறி index = 10;
+எனில் index < நீளம்(list):
+    பதிப்பி(list[index]);
+} இல்லையெனில் {
+    பதிப்பி("Index out of range!");
+}
 ```
 
 ---
@@ -135,33 +137,33 @@ Problems during program execution:
 **Error:** Missing colon after condition or function.
 
 ```
-என்றால் x > 5    # Missing colon!
-    அச்சிடு(x)
+எனில் x > 5    # Missing colon!
+    பதிப்பி(x)
 ```
 
 **Solution:** Add the colon.
 
 ```
-என்றால் x > 5:   # Correct!
-    அச்சிடு(x)
+எனில் x > 5:   # Correct!
+    பதிப்பி(x)
 ```
 
 ---
 
-### "மாறாத மாறி, மாற்ற இயலாது" (Cannot Modify Constant)
+### "நிலைமாறிலி மாறி, மாற்ற இயலாது" (Cannot Modify Constant)
 
 **Error:** Trying to change a constant value.
 
 ```
-மாறாத PI = 3.14
+நிலைமாறிலி PI = 3.14
 PI = 3.14159   # Error: cannot modify constant
 ```
 
 **Solution:** Use `மாறி` instead if the value needs to change.
 
 ```
-மாறி pi = 3.14    # Use variable instead
-pi = 3.14159      # Now it's allowed
+மாறி pi = 3.14    # Use variable instead;
+pi = 3.14159      # Now it's allowed;
 ```
 
 ---
@@ -194,13 +196,13 @@ Example:
 
 3. **Look for common issues:**
    - Missing quotes around strings
-   - Missing colons after `என்றால்`, `வரை`, `செயல்`
+   - Missing colons after `எனில்`, `வரை`, `செயல்`
    - Incorrect indentation
    - Typos in variable names
 
 4. **Use print statements** to debug:
    ```
-   அச்சிடு("Debug: x =", x)
+   பதிப்பி("Debug: x =", x)
    ```
 
 5. **Test small pieces** of code in the REPL

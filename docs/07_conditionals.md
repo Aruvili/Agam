@@ -5,62 +5,64 @@
 Conditionals let your program make decisions based on conditions.
 
 ```
-என்றால் condition:
+எனில் condition:
     # do something if condition is true
 ```
 
 ---
 
-## The என்றால் Statement (if)
+## The எனில் Statement (if)
 
-Use `என்றால்` to execute code only when a condition is true:
+Use `எனில்` to execute code only when a condition is true:
 
 ```
-மாறி age = 20
+மாறி age = 20;
 
-என்றால் age >= 18:
-    அச்சிடு("You are an adult!")
+எனில் age >= 18:;
+    பதிப்பி("You are an adult!");
 ```
 
 > **Important:** Don't forget the `:` after the condition and indent the code inside!
 
 ---
 
-## என்றால்...இல்லை (if...else)
+## எனில்...இல்லை (if...else)
 
 Use `இல்லை` to execute code when the condition is false:
 
 ```
-மாறி age = 15
+மாறி age = 15;
 
-என்றால் age >= 18:
-    அச்சிடு("You are an adult")
-இல்லை:
-    அச்சிடு("You are a minor")
+எனில் age >= 18:;
+    பதிப்பி("You are an adult");
+} இல்லையெனில் {
+    பதிப்பி("You are a minor");
 
+}
 # Output: You are a minor
 ```
 
 ---
 
-## என்றால்...இல்லையென்றால்...இல்லை (if...elif...else)
+## எனில்...இல்லையெனில்...இல்லை (if...elif...else)
 
-Use `இல்லையென்றால்` to check multiple conditions:
+Use `இல்லையெனில்` to check multiple conditions:
 
 ```
-மாறி score = 85
+மாறி score = 85;
 
-என்றால் score >= 90:
-    அச்சிடு("Grade: A")
-இல்லையென்றால் score >= 80:
-    அச்சிடு("Grade: B")
-இல்லையென்றால் score >= 70:
-    அச்சிடு("Grade: C")
-இல்லையென்றால் score >= 60:
-    அச்சிடு("Grade: D")
-இல்லை:
-    அச்சிடு("Grade: F")
+எனில் score >= 90:;
+    பதிப்பி("Grade: A");
+இல்லையெனில் score >= 80:;
+    பதிப்பி("Grade: B");
+இல்லையெனில் score >= 70:;
+    பதிப்பி("Grade: C");
+இல்லையெனில் score >= 60:;
+    பதிப்பி("Grade: D");
+} இல்லையெனில் {
+    பதிப்பி("Grade: F");
 
+}
 # Output: Grade: B
 ```
 
@@ -70,8 +72,8 @@ Use `இல்லையென்றால்` to check multiple conditions:
 
 | Tamil | English | Usage |
 |-------|---------|-------|
-| `என்றால்` | `if` | First condition |
-| `இல்லையென்றால்` | `elif` | Additional conditions |
+| `எனில்` | `if` | First condition |
+| `இல்லையெனில்` | `elif` | Additional conditions |
 | `இல்லை` | `else` | When no condition matches |
 
 ---
@@ -83,32 +85,33 @@ Combine conditions using logical operators:
 ### மற்றும் (AND) - Both must be true
 
 ```
-மாறி age = 25
-மாறி has_id = உண்மை
+மாறி age = 25;
+மாறி has_id = உண்மை;
 
-என்றால் age >= 18 மற்றும் has_id:
-    அச்சிடு("Entry allowed")
-இல்லை:
-    அச்சிடு("Entry denied")
+எனில் age >= 18 மற்றும் has_id:;
+    பதிப்பி("Entry allowed");
+} இல்லையெனில் {
+    பதிப்பி("Entry denied");
+}
 ```
 
 ### அல்லது (OR) - At least one must be true
 
 ```
-மாறி is_member = பொய்
-மாறி has_pass = உண்மை
+மாறி is_member = பொய்;
+மாறி has_pass = உண்மை;
 
-என்றால் is_member அல்லது has_pass:
-    அச்சிடு("Welcome!")
+எனில் is_member அல்லது has_pass:
+    பதிப்பி("Welcome!");
 ```
 
 ### இல்ல (NOT) - Reverse the condition
 
 ```
-மாறி is_closed = பொய்
+மாறி is_closed = பொய்;
 
-என்றால் இல்ல is_closed:
-    அச்சிடு("The shop is open")
+எனில் இல்ல is_closed:
+    பதிப்பி("The shop is open");
 ```
 
 ---
@@ -118,18 +121,19 @@ Combine conditions using logical operators:
 You can put conditions inside conditions:
 
 ```
-மாறி age = 25
-மாறி is_student = உண்மை
+மாறி age = 25;
+மாறி is_student = உண்மை;
 
-என்றால் age >= 18:
-    அச்சிடு("Adult")
+எனில் age >= 18:;
+    பதிப்பி("Adult");
     
-    என்றால் is_student:
-        அச்சிடு("Student discount: 20%")
-    இல்லை:
-        அச்சிடு("Regular price")
-இல்லை:
-    அச்சிடு("Minor - free entry!")
+    எனில் is_student:
+        பதிப்பி("Student discount: 20%");
+    } இல்லையெனில் {
+        பதிப்பி("Regular price");
+} இல்லையெனில் {
+    பதிப்பி("Minor - free entry!");
+}
 ```
 
 ---
@@ -139,47 +143,49 @@ You can put conditions inside conditions:
 ### Example 1: Login Check
 
 ```
-மாறி username = "admin"
-மாறி password = "secret123"
+மாறி username = "admin";
+மாறி password = "secret123";
 
-என்றால் username == "admin" மற்றும் password == "secret123":
-    அச்சிடு("✅ Login successful!")
-இல்லை:
-    அச்சிடு("❌ Invalid credentials")
+எனில் username == "admin" மற்றும் password == "secret123":;
+    பதிப்பி("✅ Login successful!");
+} இல்லையெனில் {
+    பதிப்பி("❌ Invalid credentials");
+}
 ```
 
 ### Example 2: Number Classification
 
 ```
-மாறி num = -5
+மாறி num = -5;
 
-என்றால் num > 0:
-    அச்சிடு("Positive number")
-இல்லையென்றால் num < 0:
-    அச்சிடு("Negative number")
-இல்லை:
-    அச்சிடு("Zero")
+எனில் num > 0:
+    பதிப்பி("Positive number");
+இல்லையெனில் num < 0:
+    பதிப்பி("Negative number");
+} இல்லையெனில் {
+    பதிப்பி("Zero");
 
+}
 # Output: Negative number
 ```
 
 ### Example 3: Ticket Pricing
 
 ```
-மாறி age = 10
-மாறி is_weekend = உண்மை
+மாறி age = 10;
+மாறி is_weekend = உண்மை;
 
-மாறி price = 100  # Base price
+மாறி price = 100  # Base price;
 
-என்றால் age < 12:
-    price = 50  # Kids discount
-இல்லையென்றால் age >= 60:
-    price = 60  # Senior discount
+எனில் age < 12:
+    price = 50  # Kids discount;
+இல்லையெனில் age >= 60:;
+    price = 60  # Senior discount;
 
-என்றால் is_weekend:
-    price = price + 20  # Weekend surcharge
+எனில் is_weekend:
+    price = price + 20  # Weekend surcharge;
 
-அச்சிடு("Ticket price:", price)
+பதிப்பி("Ticket price:", price);
 # Output: Ticket price: 70
 ```
 
@@ -198,14 +204,15 @@ Write a program that prints:
 <summary>Solution</summary>
 
 ```
-மாறி temperature = 22
+மாறி temperature = 22;
 
-என்றால் temperature < 15:
-    அச்சிடு("Cold")
-இல்லையென்றால் temperature <= 25:
-    அச்சிடு("Comfortable")
-இல்லை:
-    அச்சிடு("Hot")
+எனில் temperature < 15:
+    பதிப்பி("Cold");
+இல்லையெனில் temperature <= 25:;
+    பதிப்பி("Comfortable");
+} இல்லையெனில் {
+    பதிப்பி("Hot");
+}
 ```
 </details>
 
@@ -219,12 +226,13 @@ A year is a leap year if:
 <summary>Solution</summary>
 
 ```
-மாறி year = 2024
+மாறி year = 2024;
 
-என்றால் (year % 4 == 0 மற்றும் year % 100 != 0) அல்லது (year % 400 == 0):
-    அச்சிடு(சரமாக(year) + " is a leap year")
-இல்லை:
-    அச்சிடு(சரமாக(year) + " is not a leap year")
+எனில் (year % 4 == 0 மற்றும் year % 100 != 0) அல்லது (year % 400 == 0):;
+    பதிப்பி(சரமாக(year) + " is a leap year");
+} இல்லையெனில் {
+    பதிப்பி(சரமாக(year) + " is not a leap year");
+}
 ```
 </details>
 
@@ -234,9 +242,9 @@ A year is a leap year if:
 
 | Pattern | Usage |
 |---------|-------|
-| `என்றால் condition:` | Single condition |
-| `என்றால்...இல்லை:` | Two choices |
-| `என்றால்...இல்லையென்றால்...இல்லை:` | Multiple choices |
+| `எனில் condition:` | Single condition |
+| `எனில்...இல்லை:` | Two choices |
+| `எனில்...இல்லையெனில்...இல்லை:` | Multiple choices |
 
 ---
 

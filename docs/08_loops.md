@@ -11,12 +11,13 @@ Loops let you repeat code multiple times without writing it over and over.
 Repeats while a condition is true:
 
 ```
-மாறி count = 1
+மாறி count = 1;
 
-வரை count <= 5:
-    அச்சிடு(count)
-    count = count + 1
+வரை (count <= 5) {
+    பதிப்பி(count);
+    count = count + 1;
 
+}
 # Output:
 # 1
 # 2
@@ -39,7 +40,7 @@ Iterates over each item in a collection:
 
 ```
 ஒவ்வொரு number உள்ள [1, 2, 3, 4, 5]:
-    அச்சிடு(number)
+    பதிப்பி(number)
 
 # Output:
 # 1
@@ -53,7 +54,7 @@ Iterates over each item in a collection:
 
 ```
 ஒவ்வொரு letter உள்ள "Tamil":
-    அச்சிடு(letter)
+    பதிப்பி(letter)
 
 # Output:
 # T
@@ -68,17 +69,17 @@ Iterates over each item in a collection:
 ```
 # Numbers 0 to 4
 ஒவ்வொரு i உள்ள வரம்பு(5):
-    அச்சிடு(i)
+    பதிப்பி(i)
 # Output: 0, 1, 2, 3, 4
 
 # Numbers 1 to 5
 ஒவ்வொரு i உள்ள வரம்பு(1, 6):
-    அச்சிடு(i)
+    பதிப்பி(i)
 # Output: 1, 2, 3, 4, 5
 
 # Even numbers 2 to 10
 ஒவ்வொரு i உள்ள வரம்பு(2, 11, 2):
-    அச்சிடு(i)
+    பதிப்பி(i)
 # Output: 2, 4, 6, 8, 10
 ```
 
@@ -102,10 +103,10 @@ Exit the loop early:
 
 ```
 ஒவ்வொரு num உள்ள வரம்பு(1, 10):
-    என்றால் num == 5:
-        அச்சிடு("Found 5! Stopping.")
+    எனில் num == 5:
+        பதிப்பி("Found 5! Stopping.")
         நிறுத்து
-    அச்சிடு(num)
+    பதிப்பி(num)
 
 # Output:
 # 1
@@ -123,9 +124,9 @@ Skip the current iteration and continue with the next:
 
 ```
 ஒவ்வொரு num உள்ள வரம்பு(1, 6):
-    என்றால் num == 3:
+    எனில் num == 3:
         தொடர்   # Skip 3
-    அச்சிடு(num)
+    பதிப்பி(num)
 
 # Output:
 # 1
@@ -141,25 +142,27 @@ Skip the current iteration and continue with the next:
 ### Example 1: Sum of Numbers
 
 ```
-மாறி total = 0
+மாறி total = 0;
 
-ஒவ்வொரு num உள்ள வரம்பு(1, 11):
-    total = total + num
+சுற்று (num உள் வரம்பு(1, 11)) {
+    total = total + num;
 
-அச்சிடு("Sum 1-10:", total)
+}
+பதிப்பி("Sum 1-10:", total);
 # Output: Sum 1-10: 55
 ```
 
 ### Example 2: Countdown
 
 ```
-மாறி count = 5
+மாறி count = 5;
 
-வரை count > 0:
-    அச்சிடு(count)
-    count = count - 1
+வரை (count > 0) {
+    பதிப்பி(count);
+    count = count - 1;
 
-அச்சிடு("🚀 Blast off!")
+}
+பதிப்பி("🚀 Blast off!");
 
 # Output:
 # 5
@@ -173,28 +176,30 @@ Skip the current iteration and continue with the next:
 ### Example 3: Find First Even Number
 
 ```
-மாறி numbers = [1, 3, 7, 8, 9, 12]
+மாறி numbers = [1, 3, 7, 8, 9, 12];
 
-ஒவ்வொரு num உள்ள numbers:
-    என்றால் num % 2 == 0:
-        அச்சிடு("First even number:", num)
+சுற்று (num உள் numbers) {
+    எனில் num % 2 == 0:;
+        பதிப்பி("First even number:", num);
         நிறுத்து
 
+}
 # Output: First even number: 8
 ```
 
 ### Example 4: Multiplication Table
 
 ```
-மாறி number = 5
+மாறி number = 5;
 
-அச்சிடு("Multiplication table for", number)
-அச்சிடு("-" * 20)
+பதிப்பி("Multiplication table for", number);
+பதிப்பி("-" * 20);
 
-ஒவ்வொரு i உள்ள வரம்பு(1, 11):
-    மாறி result = number * i
-    அச்சிடு(சரமாக(number) + " x " + சரமாக(i) + " = " + சரமாக(result))
+சுற்று (i உள் வரம்பு(1, 11)) {
+    மாறி result = number * i;
+    பதிப்பி(சரமாக(number) + " x " + சரமாக(i) + " = " + சரமாக(result));
 
+}
 # Output:
 # Multiplication table for 5
 # --------------------
@@ -206,21 +211,22 @@ Skip the current iteration and continue with the next:
 ### Example 5: Password Retry
 
 ```
-மாறாத CORRECT_PASSWORD = "secret"
-மாறி attempts = 3
+நிலைமாறிலி CORRECT_PASSWORD = "secret";
+மாறி attempts = 3;
 
-வரை attempts > 0:
-    மாறி guess = உள்ளீடு("Password: ")
+வரை (attempts > 0) {
+    மாறி guess = உள்ளீடு("Password: ");
     
-    என்றால் guess == CORRECT_PASSWORD:
-        அச்சிடு("✅ Access granted!")
+    எனில் guess == CORRECT_PASSWORD:;
+        பதிப்பி("✅ Access granted!");
         நிறுத்து
-    இல்லை:
-        attempts = attempts - 1
-        அச்சிடு("❌ Wrong. Attempts left:", attempts)
+    } இல்லையெனில் {
+        attempts = attempts - 1;
+        பதிப்பி("❌ Wrong. Attempts left:", attempts);
 
-என்றால் attempts == 0:
-    அச்சிடு("🔒 Account locked!")
+    }
+எனில் attempts == 0:;
+    பதிப்பி("🔒 Account locked!");
 ```
 
 ---
@@ -232,8 +238,8 @@ Loops inside loops:
 ```
 ஒவ்வொரு i உள்ள வரம்பு(1, 4):
     ஒவ்வொரு j உள்ள வரம்பு(1, 4):
-        அச்சிடு(சரமாக(i) + "x" + சரமாக(j) + "=" + சரமாக(i*j))
-    அச்சிடு("")   # Empty line between rows
+        பதிப்பி(சரமாக(i) + "x" + சரமாக(j) + "=" + சரமாக(i*j))
+    பதிப்பி("")   # Empty line between rows
 
 # Output:
 # 1x1=1
@@ -248,7 +254,7 @@ Loops inside loops:
 
 ```
 ஒவ்வொரு i உள்ள வரம்பு(1, 6):
-    அச்சிடு("*" * i)
+    பதிப்பி("*" * i)
 
 # Output:
 # *

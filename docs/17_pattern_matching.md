@@ -23,14 +23,15 @@ Pattern matching is a powerful feature that lets you match values against patter
 ## Matching Numbers
 
 ```
-மாறி grade = 85
+மாறி grade = 85;
 
-பொருத்து grade:
-    100 => அச்சிடு("Perfect score! 🎉")
-    90 => அச்சிடு("Excellent! A+")
-    80 => அச்சிடு("Great! A")
-    70 => அச்சிடு("Good! B")
-    _ => அச்சிடு("Keep working!")
+பொருத்து (grade) {
+    100 => பதிப்பி("Perfect score! 🎉");
+    90 => பதிப்பி("Excellent! A+");
+    80 => பதிப்பி("Great! A");
+    70 => பதிப்பி("Good! B");
+    _ => பதிப்பி("Keep working!");
+}
 ```
 
 ---
@@ -38,14 +39,15 @@ Pattern matching is a powerful feature that lets you match values against patter
 ## Matching Strings
 
 ```
-மாறி command = "start"
+மாறி command = "start";
 
-பொருத்து command:
-    "start" => அச்சிடு("Starting system...")
-    "stop" => அச்சிடு("Stopping system...")
-    "restart" => அச்சிடு("Restarting system...")
-    "status" => அச்சிடு("System is running")
-    _ => அச்சிடு("Unknown command")
+பொருத்து (command) {
+    "start" => பதிப்பி("Starting system...");
+    "stop" => பதிப்பி("Stopping system...");
+    "restart" => பதிப்பி("Restarting system...");
+    "status" => பதிப்பி("System is running");
+    _ => பதிப்பி("Unknown command");
+}
 ```
 
 ---
@@ -53,11 +55,12 @@ Pattern matching is a powerful feature that lets you match values against patter
 ## Matching Booleans
 
 ```
-மாறி is_admin = உண்மை
+மாறி is_admin = உண்மை;
 
-பொருத்து is_admin:
-    உண்மை => அச்சிடு("Welcome, Administrator!")
-    பொய் => அச்சிடு("Welcome, User!")
+பொருத்து (is_admin) {
+    உண்மை => பதிப்பி("Welcome, Administrator!");
+    பொய் => பதிப்பி("Welcome, User!");
+}
 ```
 
 ---
@@ -67,19 +70,21 @@ Pattern matching is a powerful feature that lets you match values against patter
 Pattern matching works great with enums:
 
 ```
-விருப்பம் Color:
-    Red
-    Green
-    Blue
+பட்டியல் Color {
+    Red,
+    Green,
+    Blue,
 
-செயல் to_hex(color):
-    பொருத்து color:
-        Color.Red => திரும்பு "#FF0000"
-        Color.Green => திரும்பு "#00FF00"
-        Color.Blue => திரும்பு "#0000FF"
+}
+செயல் to_hex(color) {
+    பொருத்து (color) {
+        Color.Red => விடை "#FF0000";
+        Color.Green => விடை "#00FF00";
+        Color.Blue => விடை "#0000FF";
 
-மாறி my_color = Color.Blue
-அச்சிடு(to_hex(my_color))  # Output: #0000FF
+    }
+மாறி my_color = Color.Blue;
+பதிப்பி(to_hex(my_color))  # Output: #0000FF,
 ```
 
 ---
@@ -89,17 +94,18 @@ Pattern matching works great with enums:
 The underscore `_` matches any value. Always put it last:
 
 ```
-மாறி day = 4
+மாறி day = 4;
 
-பொருத்து day:
-    1 => அச்சிடு("Monday")
-    2 => அச்சிடு("Tuesday")
-    3 => அச்சிடு("Wednesday")
-    4 => அச்சிடு("Thursday")
-    5 => அச்சிடு("Friday")
-    6 => அச்சிடு("Saturday")
-    7 => அச்சிடு("Sunday")
-    _ => அச்சிடு("Invalid day number")
+பொருத்து (day) {
+    1 => பதிப்பி("Monday");
+    2 => பதிப்பி("Tuesday");
+    3 => பதிப்பி("Wednesday");
+    4 => பதிப்பி("Thursday");
+    5 => பதிப்பி("Friday");
+    6 => பதிப்பி("Saturday");
+    7 => பதிப்பி("Sunday");
+    _ => பதிப்பி("Invalid day number");
+}
 ```
 
 ---
@@ -109,18 +115,19 @@ The underscore `_` matches any value. Always put it last:
 Match expressions can return values:
 
 ```
-செயல் day_type(day):
-    திரும்பு பொருத்து day:
-        1 => "Weekday"
-        2 => "Weekday"
-        3 => "Weekday"
-        4 => "Weekday"
-        5 => "Weekday"
-        6 => "Weekend"
-        7 => "Weekend"
-        _ => "Invalid"
+செயல் day_type(day) {
+    விடை பொருத்து day:;
+        1 => "Weekday";
+        2 => "Weekday";
+        3 => "Weekday";
+        4 => "Weekday";
+        5 => "Weekday";
+        6 => "Weekend";
+        7 => "Weekend";
+        _ => "Invalid";
 
-அச்சிடு(day_type(6))  # Output: Weekend
+}
+பதிப்பி(day_type(6))  # Output: Weekend;
 ```
 
 ---
@@ -130,113 +137,123 @@ Match expressions can return values:
 ### Example 1: HTTP Status Codes
 
 ```
-செயல் status_message(code):
-    பொருத்து code:
-        200 => திரும்பு "OK"
-        201 => திரும்பு "Created"
-        400 => திரும்பு "Bad Request"
-        401 => திரும்பு "Unauthorized"
-        403 => திரும்பு "Forbidden"
-        404 => திரும்பு "Not Found"
-        500 => திரும்பு "Internal Server Error"
-        _ => திரும்பு "Unknown Status"
+செயல் status_message(code) {
+    பொருத்து (code) {
+        200 => விடை "OK";
+        201 => விடை "Created";
+        400 => விடை "Bad Request";
+        401 => விடை "Unauthorized";
+        403 => விடை "Forbidden";
+        404 => விடை "Not Found";
+        500 => விடை "Internal Server Error";
+        _ => விடை "Unknown Status";
 
-அச்சிடு(status_message(404))  # Output: Not Found
+    }
+பதிப்பி(status_message(404))  # Output: Not Found;
 ```
 
 ### Example 2: Calculator
 
 ```
-செயல் calculate(a, op, b):
-    பொருத்து op:
-        "+" => திரும்பு a + b
-        "-" => திரும்பு a - b
-        "*" => திரும்பு a * b
-        "/" => திரும்பு a / b
-        "%" => திரும்பு a % b
-        _ => திரும்பு "Unknown operator"
+செயல் calculate(a, op, b) {
+    பொருத்து (op) {
+        "+" => விடை a + b;
+        "-" => விடை a - b;
+        "*" => விடை a * b;
+        "/" => விடை a / b;
+        "%" => விடை a % b;
+        _ => விடை "Unknown operator";
 
-அச்சிடு(calculate(10, "+", 5))   # Output: 15
-அச்சிடு(calculate(10, "*", 5))   # Output: 50
+    }
+பதிப்பி(calculate(10, "+", 5))   # Output: 15;
+பதிப்பி(calculate(10, "*", 5))   # Output: 50;
 ```
 
 ### Example 3: Grade System
 
 ```
-செயல் get_grade(marks):
-    பொருத்து marks:
-        100 => திரும்பு "A+ (Perfect!)"
-        _ =>
-            என்றால் marks >= 90:
-                திரும்பு "A+"
-            இல்லையென்றால் marks >= 80:
-                திரும்பு "A"
-            இல்லையென்றால் marks >= 70:
-                திரும்பு "B"
-            இல்லையென்றால் marks >= 60:
-                திரும்பு "C"
-            இல்லை:
-                திரும்பு "F"
+செயல் get_grade(marks) {
+    பொருத்து (marks) {
+        100 => விடை "A+ (Perfect!)";
+        _ =>;
+            எனில் marks >= 90:;
+                விடை "A+";
+            இல்லையெனில் marks >= 80:;
+                விடை "A";
+            இல்லையெனில் marks >= 70:;
+                விடை "B";
+            இல்லையெனில் marks >= 60:;
+                விடை "C";
+            } இல்லையெனில் {
+                விடை "F";
 
-அச்சிடு(get_grade(85))   # Output: A
-அச்சிடு(get_grade(100))  # Output: A+ (Perfect!)
+        }
+பதிப்பி(get_grade(85))   # Output: A;
+பதிப்பி(get_grade(100))  # Output: A+ (Perfect!);
 ```
 
 ### Example 4: State Machine
 
 ```
-விருப்பம் State:
-    Idle
-    Running
-    Paused
-    Stopped
+பட்டியல் State {
+    Idle,
+    Running,
+    Paused,
+    Stopped,
 
-செயல் handle_event(state, event):
-    பொருத்து state:
-        State.Idle =>
-            பொருத்து event:
-                "start" => திரும்பு State.Running
-                _ => திரும்பு State.Idle
-        State.Running =>
-            பொருத்து event:
-                "pause" => திரும்பு State.Paused
-                "stop" => திரும்பு State.Stopped
-                _ => திரும்பு State.Running
-        State.Paused =>
-            பொருத்து event:
-                "resume" => திரும்பு State.Running
-                "stop" => திரும்பு State.Stopped
-                _ => திரும்பு State.Paused
-        State.Stopped =>
-            திரும்பு State.Stopped
+}
+செயல் handle_event(state, event) {
+    பொருத்து (state) {
+        State.Idle =>;
+            பொருத்து (event) {
+                "start" => விடை State.Running;
+                _ => விடை State.Idle;
+        }
+        State.Running =>;
+            பொருத்து (event) {
+                "pause" => விடை State.Paused;
+                "stop" => விடை State.Stopped;
+                _ => விடை State.Running;
+        }
+        State.Paused =>;
+            பொருத்து (event) {
+                "resume" => விடை State.Running;
+                "stop" => விடை State.Stopped;
+                _ => விடை State.Paused;
+        }
+        State.Stopped =>;
+            விடை State.Stopped,
 
-மாறி current = State.Idle
-current = handle_event(current, "start")
-அச்சிடு(current)  # Output: State.Running
+    }
+மாறி current = State.Idle;
+current = handle_event(current, "start");
+பதிப்பி(current)  # Output: State.Running,
 ```
 
 ### Example 5: Menu System
 
 ```
-செயல் show_menu():
-    அச்சிடு("=== Menu ===")
-    அச்சிடு("1. New Game")
-    அச்சிடு("2. Load Game")
-    அச்சிடு("3. Settings")
-    அச்சிடு("4. Exit")
+செயல் show_menu() {
+    பதிப்பி("=== Menu ===");
+    பதிப்பி("1. New Game");
+    பதிப்பி("2. Load Game");
+    பதிப்பி("3. Settings");
+    பதிப்பி("4. Exit");
 
-செயல் handle_choice(choice):
-    பொருத்து choice:
-        "1" => அச்சிடு("Starting new game...")
-        "2" => அச்சிடு("Loading saved game...")
-        "3" => அச்சிடு("Opening settings...")
-        "4" => 
-            அச்சிடு("Goodbye!")
+}
+செயல் handle_choice(choice) {
+    பொருத்து (choice) {
+        "1" => பதிப்பி("Starting new game...");
+        "2" => பதிப்பி("Loading saved game...");
+        "3" => பதிப்பி("Opening settings...");
+        "4" => ;
+            பதிப்பி("Goodbye!");
             வெளியேறு()
-        _ => அச்சிடு("Invalid choice. Try again.")
+        _ => பதிப்பி("Invalid choice. Try again.");
 
+    }
 show_menu()
-மாறி choice = உள்ளீடு("Enter choice: ")
+மாறி choice = உள்ளீடு("Enter choice: ");
 handle_choice(choice)
 ```
 
@@ -248,23 +265,25 @@ Pattern matching is often cleaner than long if-else chains:
 
 ```
 # With if-else (verbose)
-செயல் status_if(code):
-    என்றால் code == 200:
-        திரும்பு "OK"
-    இல்லையென்றால் code == 404:
-        திரும்பு "Not Found"
-    இல்லையென்றால் code == 500:
-        திரும்பு "Server Error"
-    இல்லை:
-        திரும்பு "Unknown"
+செயல் status_if(code) {
+    எனில் code == 200:;
+        விடை "OK";
+    இல்லையெனில் code == 404:;
+        விடை "Not Found";
+    இல்லையெனில் code == 500:;
+        விடை "Server Error";
+    } இல்லையெனில் {
+        விடை "Unknown";
 
+    }
 # With pattern matching (cleaner)
-செயல் status_match(code):
-    பொருத்து code:
-        200 => திரும்பு "OK"
-        404 => திரும்பு "Not Found"
-        500 => திரும்பு "Server Error"
-        _ => திரும்பு "Unknown"
+செயல் status_match(code) {
+    பொருத்து (code) {
+        200 => விடை "OK";
+        404 => விடை "Not Found";
+        500 => விடை "Server Error";
+        _ => விடை "Unknown";
+    }
 ```
 
 ---

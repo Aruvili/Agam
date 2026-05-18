@@ -55,7 +55,7 @@ static void printUsage(const char *prog) {
               << "          " << prog << " create <திட்டப்பொருள்_பெயர்> | .\n"
               << "          " << prog << " run [கோப்பு_பெயர்]\n"
               << "\nவிருப்பங்கள் (Options):\n"
-              << "  -o, --output <கோப்பு>   வெளியீட்டு கோப்பினை குறிப்பிடுக (இயல்பு: a.out / a.exe)\n"
+              << "  -o, --output <கோப்பு>   வெளியீட்டு கோப்பினை குறிப்பிடுக (இயல்பு: <உள்ளீடு>.exe / <உள்ளீடு>)\n"
               << "  -v, --version         பதிப்பு தகவலை அச்சிடுக\n"
               << "  -h, --help            இந்த உதவிச் செய்தியை அச்சிடுக\n"
               << "  --emit-ast            AST-ஐ அச்சிட்டு வெளியேறுக\n"
@@ -522,10 +522,13 @@ int main(int argc, char *argv[]) {
     codegen.getModule()->setDataLayout(targetMachine->createDataLayout());
 
     if (outputFile.empty()) {
+        // Derive output name from input: hello.agam -> hello.exe (Windows) or hello (Unix)
+        fs::path inputPath(inputFile);
+        fs::path stem = inputPath.stem(); // "hello" from "hello.agam"
 #ifdef _WIN32
-        outputFile = "a.exe";
+        outputFile = stem.string() + ".exe";
 #else
-        outputFile = "a.out";
+        outputFile = stem.string();
 #endif
     }
 

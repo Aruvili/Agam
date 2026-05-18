@@ -1,0 +1,60 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Agam",
+  "patterns": [
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#numbers"
+    }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.agam",
+          "match": "\\b(செயல்|மாறி|நிலைமாறிலி|எனில்|இல்லையெனில்|வரை|சுற்று|உள்|விடை|நிறுத்து|தொடர்|அமைப்பு|பட்டியல்|பண்பு|செயலாக்கு|மண்டலம்|கடன்|பகிரப்பட்ட|மாற்றக்கூடிய|தப்பி|புதிய|நீக்கு|பொருத்து|ஆக)\\b"
+        },
+        {
+          "name": "support.type.agam",
+          "match": "\\b(எண்|தசமம்32|தசமம்64|சரம்|மெய்|வெறுமை|சுய)\\b"
+        },
+        {
+          "name": "constant.language.agam",
+          "match": "\\b(உண்மை|பொய்|இல்லை)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.agam",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.agam",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.agam",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "numbers": {
+      "name": "constant.numeric.agam",
+      "match": "\\b[0-9]+(\\.[0-9]+)?\\b"
+    }
+  },
+  "scopeName": "source.agam"
+}

@@ -58,10 +58,10 @@ jobs:
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-llvm
-            mingw-w64-ucrt-x86_64-flex
-            mingw-w64-ucrt-x86_64-bison
-            mingw-w64-ucrt-x86_64-zip
-
+            flex
+            bison
+            zip
+            
       - name: Configure CMake (Unix)
         if: matrix.target != 'windows'
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DLLVM_DIR="${{ env.LLVM_DIR }}"

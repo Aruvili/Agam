@@ -55,8 +55,8 @@ jobs:
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-llvm
-            mingw-w64-ucrt-x86_64-flex
-            mingw-w64-ucrt-x86_64-bison
+            flex
+            bison
 
       - name: Configure
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug

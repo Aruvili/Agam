@@ -38,6 +38,9 @@ try {
     New-Item -ItemType Directory -Force -Path $StdDir | Out-Null
 
     Move-Item -Path (Join-Path $TempDir "agamc.exe") -Destination $BinDir -Force
+    if (Test-Path (Join-Path $TempDir "agam-lsp.exe")) {
+        Move-Item -Path (Join-Path $TempDir "agam-lsp.exe") -Destination $BinDir -Force
+    }
     Move-Item -Path (Join-Path $TempDir "std\*") -Destination $StdDir -Force
 
     # Add to PATH temporarily for this session

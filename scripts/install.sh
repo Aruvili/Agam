@@ -92,9 +92,11 @@ mkdir -p "$BIN_DIR"
 mkdir -p "$STD_DIR"
 
 mv agamc "$BIN_DIR/"
+mv agam-lsp "$BIN_DIR/" 2>/dev/null || true
 mv std/* "$STD_DIR/"
 
 chmod +x "$BIN_DIR/agamc"
+chmod +x "$BIN_DIR/agam-lsp" 2>/dev/null || true
 
 echo "========================================="
 echo "Agam has been installed successfully! 🎉"

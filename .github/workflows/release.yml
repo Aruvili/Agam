@@ -61,23 +61,23 @@ jobs:
             mingw-w64-ucrt-x86_64-bison
             mingw-w64-ucrt-x86_64-zip
 
-      - name: Configure CMake
-        run: |
-          if [ "${{ matrix.target }}" = "windows" ]; then
-            cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF
-          else
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DLLVM_DIR="${{ env.LLVM_DIR }}"
-          fi
-        shell: ${{ matrix.target == 'windows' && 'msys2 {0}' || 'bash' }}
+      - name: Configure CMake (Unix)
+        if: matrix.target != 'windows'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF -DLLVM_DIR="${{ env.LLVM_DIR }}"
 
-      - name: Build
-        run: |
-          if [ "${{ matrix.target }}" = "windows" ]; then
-            cmake --build build
-          else
-            cmake --build build --config Release
-          fi
-        shell: ${{ matrix.target == 'windows' && 'msys2 {0}' || 'bash' }}
+      - name: Configure CMake (Windows)
+        if: matrix.target == 'windows'
+        shell: msys2 {0}
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAGAM_BUILD_TESTS=OFF
+
+      - name: Build (Unix)
+        if: matrix.target != 'windows'
+        run: cmake --build build --config Release
+
+      - name: Build (Windows)
+        if: matrix.target == 'windows'
+        shell: msys2 {0}
+        run: cmake --build build
 
       - name: Package (Unix)
         if: matrix.target != 'windows'

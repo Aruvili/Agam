@@ -84,7 +84,7 @@ jobs:
         if: matrix.target != 'windows'
         run: |
           mkdir -p release_pack/std
-          cp build/bin/agamc release_pack/
+          cp build/bin/agamc build/bin/agam-lsp release_pack/
           cp -r std/* release_pack/std/
           cp README.md LICENSE release_pack/ || true
           cd release_pack && tar -czvf ../${{ matrix.asset_name }} *
@@ -94,7 +94,7 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir -p release_pack/std
-          cp build/bin/agamc.exe release_pack/
+          cp build/bin/agamc.exe build/bin/agam-lsp.exe release_pack/
           cp -r std/* release_pack/std/
           cp README.md LICENSE release_pack/ || true
           cd release_pack && zip -r ../${{ matrix.asset_name }} *

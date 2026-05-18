@@ -170,13 +170,34 @@ if(WIN32)
     endforeach()
 endif()
 
+# ── Agam LSP Server ──────────────────────────────────────────────────────────
+include(FetchContent)
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
+add_executable(agam-lsp
+    src/lsp/main.cpp
+)
+
+target_link_libraries(agam-lsp PRIVATE
+    agam_lib
+    nlohmann_json::nlohmann_json
+)
+
+if(MSVC)
+    target_compile_options(agam-lsp PRIVATE /W4 /WX)
+endif()
+
 # ── Testing ──────────────────────────────────────────────────────────────────
 option(AGAM_BUILD_TESTS "Build the Agam test suite" ON)
 
 if(AGAM_BUILD_TESTS)
     enable_testing()
 
-    include(FetchContent)
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
@@ -238,8 +259,8 @@ endif()
 # ── Installation ─────────────────────────────────────────────────────────────
 include(GNUInstallDirs)
 
-# Install the compiler
-install(TARGETS agamc
+# Install the compiler and LSP
+install(TARGETS agamc agam-lsp
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 

@@ -26,7 +26,7 @@ Pattern matching is a powerful feature that lets you match values against patter
 மாறி grade = 85;
 
 பொருத்து (grade) {
-    100 => பதிப்பி("Perfect score! 🎉");
+    100 => பதிப்பி("Perfect score! ");
     90 => பதிப்பி("Excellent! A+");
     80 => பதிப்பி("Great! A");
     70 => பதிப்பி("Good! B");

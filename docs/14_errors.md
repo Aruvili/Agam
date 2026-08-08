@@ -219,14 +219,14 @@ Example:
 
 ---
 
-**🎉 Congratulations!**
+** Congratulations!**
 
 You've completed The agam Book! You now know:
-- ✅ Variables and data types
-- ✅ Operators and expressions
-- ✅ Conditionals and loops
-- ✅ Functions
-- ✅ Lists and dictionaries
-- ✅ Error handling
+-  Variables and data types
+-  Operators and expressions
+-  Conditionals and loops
+-  Functions
+-  Lists and dictionaries
+-  Error handling
 
-**Happy coding in Tamil! தமிழில் நிரலாக்கம் செய்யுங்கள்!** 🇮🇳
+**Happy coding in Tamil! தமிழில் நிரலாக்கம் செய்யுங்கள்!** 

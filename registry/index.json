@@ -1,0 +1,23 @@
+{
+  "registry_version": "1.0.0",
+  "packages": {
+    "valaiccevaiyagam": {
+      "name": "வலைச்சேவையகம்",
+      "version": "1.0.0",
+      "description": "High-Performance Tamil Web Server Framework for Agam",
+      "url": "https://github.com/Aruvilil/valaiccevaiyagam.git"
+    },
+    "web_server": {
+      "name": "வலைச்சேவையகம்",
+      "version": "1.0.0",
+      "description": "High-Performance Tamil Web Server Framework for Agam",
+      "url": "https://github.com/Aruvilil/valaiccevaiyagam.git"
+    },
+    "வலைச்சேவையகம்": {
+      "name": "வலைச்சேவையகம்",
+      "version": "1.0.0",
+      "description": "High-Performance Tamil Web Server Framework for Agam",
+      "url": "https://github.com/Aruvilil/valaiccevaiyagam.git"
+    }
+  }
+}

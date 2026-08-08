@@ -241,12 +241,12 @@ A function can call itself:
 ### 1. Use Descriptive Names
 
 ```
-# Good ✅
+# Good 
 செயல் calculate_area(length, width) {
     விடை length * width;
 
 }
-# Bad ❌
+# Bad 
 செயல் calc(l, w) {
     விடை l * w;
 }
@@ -255,7 +255,7 @@ A function can call itself:
 ### 2. One Function, One Task
 
 ```
-# Good ✅ - Separate functions
+# Good  - Separate functions
 செயல் validate_input(data) {
     # validation logic
 
@@ -264,7 +264,7 @@ A function can call itself:
     # processing logic
 
 }
-# Bad ❌ - Too much in one function
+# Bad  - Too much in one function
 செயல் do_everything(data) {
     # validation + processing + output
 }

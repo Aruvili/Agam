@@ -89,6 +89,9 @@ class SymbolTable {
     /// Look up a symbol only in the current (innermost) scope.
     std::optional<SymbolInfo> lookupCurrent(const std::string &name) const;
 
+    /// Collect all declared symbol names across all active scopes.
+    std::vector<std::string> getAllSymbolNames() const;
+
     /// Get the current scope depth (0 = global).
     size_t depth() const { return scopes_.size(); }
 

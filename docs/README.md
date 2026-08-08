@@ -1,11 +1,11 @@
-﻿# அகம் புத்தகம் (The agam Book)
+# அகம் புத்தகம் (The agam Book)
 # தமிழில் நிரலாக்கம் கற்றுக்கொள்ளுங்கள்!
 
 Welcome to **The agam Book** - a comprehensive guide to learning programming in Tamil!
 
 ---
 
-## 📚 Table of Contents
+## Table of Contents
 
 ### Getting Started
 1. [Introduction](01_introduction.md) - அறிமுகம்
@@ -40,17 +40,18 @@ Welcome to **The agam Book** - a comprehensive guide to learning programming in 
 18. [Error Handling](18_error_handling.md) - பிழை கையாளுதல்
 19. [Modules](19_modules.md) - தொகுப்புகள்
 20. [File I/O](20_file_io.md) - கோப்பு படிக்க/எழுத
+21. [Package Manager](21_agamp_package_manager.md) - தொகுப்பு மேலாளர் (agamp)
 
 ---
 
-## 🎯 Who is this for?
+## Who is this for?
 
 This book is for:
 - **Beginners** who want to learn programming in their native Tamil language
 - **Teachers** who want to teach programming concepts in Tamil
 - **Developers** curious about Tamil programming languages
 
-## 🚀 Quick Example
+## Quick Example
 
 ```
 செயல் வணக்கம்(பெயர்) {
@@ -64,7 +65,7 @@ Output: `வணக்கம், உலகம்!`
 
 ---
 
-## 📊 Language Features
+## Language Features
 
 | Feature | Tamil Keyword | Description |
 |---------|---------------|-------------|

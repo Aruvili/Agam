@@ -11,11 +11,8 @@
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Type.h"
-#include "llvm/Support/raw_ostream.h"
-
-#include <cassert>
+#include "llvm/IR/DIBuilder.h"
 #include <iostream>
-#include <variant>
 
 namespace agam {
 
@@ -126,6 +123,14 @@ bool CodeGenerator::generate(MirProgram &program) {
         enumTypes_[ed.name] = enumTy;
     }
 
+    std::unique_ptr<llvm::DIBuilder> dib;
+    if (generateDebugInfo_) {
+        dib = std::make_unique<llvm::DIBuilder>(*module_);
+        auto *file = dib->createFile("main.agam", ".");
+        dib->createCompileUnit(llvm::dwarf::DW_LANG_C99, file, "Agam Compiler 1.2", false, "", 0);
+        module_->addModuleFlag(llvm::Module::Warning, "Debug Info Version", llvm::DEBUG_METADATA_VERSION);
+    }
+
     // First pass: emit all function signatures
     for (auto &func : program.functions) {
         emitFunctionSignature(func);
@@ -135,6 +140,11 @@ bool CodeGenerator::generate(MirProgram &program) {
     for (auto &func : program.functions) {
         emitFunctionBody(func);
     }
+
+    if (dib) {
+        dib->finalize();
+    }
+
     return verify();
 }
 
@@ -536,6 +546,17 @@ llvm::Value *CodeGenerator::emitRvalue(const MirRvalue &rv, llvm::Function *func
 
                 switch (r.op) {
                 case BinaryOp::Add:
+                    if (lhs->getType()->isPointerTy() || rhs->getType()->isPointerTy()) {
+                        llvm::FunctionCallee concatFunc = module_->getFunction("agam_str_concat");
+                        if (!concatFunc) {
+                            llvm::FunctionType *ft = llvm::FunctionType::get(
+                                llvm::PointerType::getUnqual(*context_),
+                                {llvm::PointerType::getUnqual(*context_), llvm::PointerType::getUnqual(*context_)},
+                                false);
+                            concatFunc = module_->getOrInsertFunction("agam_str_concat", ft);
+                        }
+                        return builder_->CreateCall(concatFunc, {lhs, rhs}, "strcat");
+                    }
                     return isFloat ? builder_->CreateFAdd(lhs, rhs, "addtmp")
                                    : builder_->CreateAdd(lhs, rhs, "addtmp");
                 case BinaryOp::Sub:

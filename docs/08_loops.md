@@ -162,7 +162,7 @@ Skip the current iteration and continue with the next:
     count = count - 1;
 
 }
-பதிப்பி("🚀 Blast off!");
+பதிப்பி(" Blast off!");
 
 # Output:
 # 5
@@ -170,7 +170,7 @@ Skip the current iteration and continue with the next:
 # 3
 # 2
 # 1
-# 🚀 Blast off!
+#  Blast off!
 ```
 
 ### Example 3: Find First Even Number
@@ -218,15 +218,15 @@ Skip the current iteration and continue with the next:
     மாறி guess = உள்ளீடு("Password: ");
     
     எனில் guess == CORRECT_PASSWORD:;
-        பதிப்பி("✅ Access granted!");
+        பதிப்பி(" Access granted!");
         நிறுத்து
     } இல்லையெனில் {
         attempts = attempts - 1;
-        பதிப்பி("❌ Wrong. Attempts left:", attempts);
+        பதிப்பி(" Wrong. Attempts left:", attempts);
 
     }
 எனில் attempts == 0:;
-    பதிப்பி("🔒 Account locked!");
+    பதிப்பி(" Account locked!");
 ```
 
 ---

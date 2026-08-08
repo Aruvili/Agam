@@ -194,8 +194,8 @@ Operations are performed in this order (highest to lowest):
 மாறி line = "-" * 20;
 பதிப்பி(line)   # Output: --------------------;
 
-மாறி stars = "★" * 5;
-பதிப்பி(stars)  # Output: ★★★★★;
+மாறி stars = "" * 5;
+பதிப்பி(stars)  # Output: ;
 ```
 
 ---

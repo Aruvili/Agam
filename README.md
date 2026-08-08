@@ -21,12 +21,12 @@
 
 ## Why Agam?
 
-- 🇮🇳 Write programs **entirely in Tamil**
-- ⚡ Compiles to native machine code via LLVM
-- 🔒 Memory-safe with the Zone-Pulse Memory (ZPM) model
-- 🐍 Simple, readable syntax — beginner-friendly
-- 🖥️ Interactive REPL — no setup required
-- 🎓 Designed for education and real-world use
+- Write programs **entirely in Tamil**
+- Compiles to native machine code via LLVM
+- Memory-safe with the Zone-Pulse Memory (ZPM) model
+- Simple, readable syntax — beginner-friendly
+- Interactive REPL — no setup required
+- Designed for education and real-world use
 
 ---
 
@@ -199,24 +199,84 @@ cd build && ctest --output-on-failure
 
 ---
 
-## Compiler CLI
+---
+
+## Compiler CLI & Debugging
 
 ```bash
 agamc --version
 
-# Compile to executable
+# Compile to optimized native binary (-O3 SIMD auto-vectorization)
 agamc hello.agam -o hello
 
-# Run with JIT
+# Compile with DWARF debug symbols for GDB / LLDB step-debugging
+agamc -g hello.agam -o hello_debug
+
+# Run with JIT execution engine
 agamc run hello.agam
 
 # Emit intermediate representations
 agamc hello.agam --emit-ast     # Abstract Syntax Tree
+agamc hello.agam --emit-hir     # High-Level IR
+agamc hello.agam --emit-mir     # Mid-Level IR
 agamc hello.agam --emit-llvm    # LLVM IR
-
-# Specify standard library search path (e.g. for dynamic std libs)
-agamc hello.agam --lib-path /path/to/agam/std
 ```
+
+---
+
+## Package Manager (`agamp`) & Central Registry
+
+`agamp` is the official Cargo-inspired package manager for Agam. It manages dependencies, builds isolated `./target/debug` and `./target/release` output artifacts, and maintains deterministic `pk.lock` lockfiles.
+
+```bash
+# Create a new binary package project
+agamp new my_project
+
+# Compile debug or release binaries
+agamp build
+agamp build --release
+
+# Compile & run
+agamp run
+
+# Perform type-checking without building
+agamp check
+
+# Install dependencies (Checks Central Registry -> Standard Library -> Git Fallback)
+agamp add valaiccevaiyagam
+agamp add https://github.com/user/custom_pkg.git
+
+# Update installed modules & clean build directory
+agamp update
+agamp clean
+```
+
+---
+
+## Enterprise Standard Library Ecosystem (18 Modules)
+
+Agam features 18 enterprise production standard library packages in `std/`:
+
+| Module | Scope & Tamil Interfaces |
+| :--- | :--- |
+| **`std/io.agam`** | Standard Output and String Printing (`வரியிறக்கி_பதிப்பி`). |
+| **`std/math.agam`** | Trigonometry, Logarithms, Square Roots (`வர்க்கமூலம்`, `சைன்`). |
+| **`std/net.agam`** | Sockets & HTTP Network Layer (`சாக்கெட்_கேள்`, `சாக்கெட்_ஏற்றுக்கொள்`). |
+| **`std/vector.agam`** | Generic Dynamic Array Allocation. |
+| **`std/string.agam`** | String Transformations & Manipulation (`சரம்_நீளம்`, `சரம்_மாற்று`). |
+| **`std/fs.agam`** | File System & I/O Operations (`கோப்பு_முழுவதும்_வாசி`, `கோப்பு_முழுவதும்_எழுது`). |
+| **`std/random.agam`** | Pseudo-Random Range & Float Generators (`சீரற்ற_எண்`, `சீரற்ற_தசமம்`). |
+| **`std/hashmap.agam`** | Generic Key-Value HashMap Dictionaries (`வரைபடம்_சேர்`). |
+| **`std/json.agam`** | JSON Serialization & Formatting (`ஜேசான்_எண்`, `ஜேசான்_சரம்`). |
+| **`std/os.agam`** | Process Environment & Shell Execution (`இயங்குதளம்_பெயர்`). |
+| **`std/time.agam`** | High-Precision Timers (`தற்போதைய_நேரம்`, `உறங்கு_மில்லி`). |
+| **`std/thread.agam`** | Multi-Threading Concurrency (`இழை_தொடங்கு`, `இழை_காத்திரு`). |
+| **`std/crypto.agam`** | Crypto Hashing & Encoding (`பேஸ்64_குறியாக்கு`, `பேஸ்64_டிகோட்`, `ஷாஹா256`). |
+| **`std/regex.agam`** | Regular Expression Engine (`சீரான_வெளிப்பாடு_தேடு`, `சீரான_வெளிப்பாடு_மாற்று`). |
+| **`std/datetime.agam`** | Calendar & Date Formatting (`தற்போதைய_தேதி`, `தேதி_வடிவமைப்பு`). |
+| **`std/cli.agam`** | CLI Flag & Option Parsing (`கொடி_உள்ளதா`, `விருப்பம்_பெறு`). |
+| **`std/sqlite.agam`** | Relational Database Persistence (`தரவுத்தளம்_திற`, `தரவுத்தளம்_இயக்கு`). |
+| **`packages/வலைச்சேவையகம்/`** | Standalone FastAPI-Level Tamil Web Server Framework (`வலை_ஜேசான்_பதில்`). |
 
 ---
 
@@ -224,21 +284,15 @@ agamc hello.agam --lib-path /path/to/agam/std
 
 ```
 agam/
-├── include/agam/
-│   ├── lexer/          # Token definitions
-│   ├── ast/            # AST node hierarchy
-│   ├── semantic/       # Type checker, symbol table
-│   └── codegen/        # LLVM IR generator
-├── src/
-│   ├── lexer/          # Flex specification
-│   ├── parser/         # Bison grammar
-│   ├── semantic/       # Semantic analysis
-│   ├── codegen/        # Code generation
-│   └── main.cpp
-├── std/                # Standard library
-├── tests/
-├── scripts/            # install.sh / install.ps1
-├── docs/
+├── include/agam/       # Core compiler headers (lexer, ast, hir, thir, mir, codegen)
+├── src/                # Implementation sources
+│   ├── agamp/          # Package manager implementation
+│   └── codegen/        # LLVM IR & JIT code generator
+├── registry/           # Centralized Package Registry Index (index.json)
+├── packages/           # Standalone Enterprise Packages (வலைச்சேவையகம்)
+├── std/                # 18 Standard Library Modules
+├── tests/              # CTest unit suite and check_all.sh integration runner
+├── docs/               # Language documentation
 └── CMakeLists.txt
 ```
 
@@ -246,7 +300,7 @@ agam/
 
 ## Documentation
 
-🌐 **[https://agam.aruvili.com](https://agam.aruvili.com)**
+**[https://agam.aruvili.com](https://agam.aruvili.com)**
 
 ---
 
@@ -266,7 +320,7 @@ agam/
 Agam is open-source and community-driven.  
 Contributions, issues, and ideas are always welcome.
 
-⭐ Star the repo if you find it useful — it helps the Tamil developer ecosystem grow.
+Star the repo if you find it useful — it helps the Tamil developer ecosystem grow.
 
 ---
 
@@ -276,4 +330,4 @@ MIT License © [Aruvili](https://github.com/Aruvili)
 
 ---
 
-🇮🇳 **அகம் — தமிழில் நிரலாக்கத்தின் எதிர்காலம்**
+ **அகம் — தமிழில் நிரலாக்கத்தின் எதிர்காலம்**

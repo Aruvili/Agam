@@ -19,6 +19,8 @@ vendor/*/
 *.dll
 *.exe
 a.out
+target/
+packages/
 
 # Caches
 .cache/

@@ -130,7 +130,7 @@ agam நிறுவல் வெற்றி!
 Installation successful!
 ```
 
-🎉 **Congratulations!** agam is working!
+ **Congratulations!** agam is working!
 
 ---
 

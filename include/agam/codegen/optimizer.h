@@ -4,6 +4,10 @@
 
 #include <string>
 
+namespace llvm {
+class TargetMachine;
+}
+
 namespace agam {
 
 /// Wraps LLVM's new pass manager to optimize a module.
@@ -13,7 +17,7 @@ class Optimizer {
     enum class Level { O0, O1, O2, O3 };
 
     /// Run optimization passes on the module.
-    static void optimize(llvm::Module &module, Level level = Level::O2);
+    static void optimize(llvm::Module &module, Level level = Level::O2, llvm::TargetMachine *targetMachine = nullptr);
 
     /// Parse a string like "0", "1", "2", "3" into a Level.
     static Level parseLevel(const std::string &s);

@@ -194,8 +194,8 @@ Operations are performed in this order (highest to lowest):
 மாறி line = "-" * 20
 அச்சிடு(line)   # Output: --------------------
 
-மாறி stars = "★" * 5
-அச்சிடு(stars)  # Output: ★★★★★
+மாறி stars = "" * 5
+அச்சிடு(stars)  # Output: 
 ```
 
 ---

@@ -8,11 +8,11 @@
 
 | Feature | Benefit |
 |---------|---------|
-| 🇮🇳 **Tamil Keywords** | Program using words you already know |
-| 🐍 **Python-like Syntax** | Easy to learn, familiar structure |
-| ⚡ **Fast** | Built with Rust for speed |
-| 🔒 **Safe** | Memory-safe and type-checked |
-| 🌐 **Bilingual** | Supports English keywords too |
+|  **Tamil Keywords** | Program using words you already know |
+|  **Python-like Syntax** | Easy to learn, familiar structure |
+|  **Fast** | Built with Rust for speed |
+|  **Safe** | Memory-safe and type-checked |
+|  **Bilingual** | Supports English keywords too |
 
 ---
 
@@ -97,13 +97,13 @@ Use `#` to write comments that explain your code:
 
 By the end of this book, you'll be able to:
 
-1. ✅ Write programs in Tamil
-2. ✅ Create variables and use different data types
-3. ✅ Make decisions with if/else
-4. ✅ Repeat actions with loops
-5. ✅ Create your own functions
-6. ✅ Work with lists and dictionaries
-7. ✅ Build complete programs!
+1.  Write programs in Tamil
+2.  Create variables and use different data types
+3.  Make decisions with if/else
+4.  Repeat actions with loops
+5.  Create your own functions
+6.  Work with lists and dictionaries
+7.  Build complete programs!
 
 ---
 

@@ -1,4 +1,5 @@
 #include "agam/semantic/type_checker.h"
+#include "agam/utils/string_utils.h"
 
 #include <string>
 #include <vector>
@@ -634,7 +635,12 @@ void TypeChecker::visit(NullLiteralExpr &node) {
 void TypeChecker::visit(VariableExpr &node) {
     auto info = symbols_.lookup(node.name);
     if (!info) {
-        error(node.loc, "Undefined variable '" + node.name + "'");
+        std::string suggestion = findDidYouMean(node.name, symbols_.getAllSymbolNames());
+        std::string msg = "Undefined variable '" + node.name + "'";
+        if (!suggestion.empty()) {
+            msg += "; did you mean '" + suggestion + "'?";
+        }
+        error(node.loc, msg);
         lastExprInfo_ = TypeInfo::scalar(TypeKind::Unknown);
         lastExprMutable_ = false;
         return;
@@ -760,7 +766,12 @@ void TypeChecker::visit(CallExpr &node) {
             lastExprInfo_ = TypeInfo::scalar(TypeKind::Int32);
             return;
         }
-        error(node.loc, "வரையறுக்கப்படாத செயல் (Undefined function): '" + node.callee + "'");
+        std::string suggestion = findDidYouMean(node.callee, symbols_.getAllSymbolNames());
+        std::string msg = "வரையறுக்கப்படாத செயல் (Undefined function): '" + node.callee + "'";
+        if (!suggestion.empty()) {
+            msg += "; did you mean '" + suggestion + "'?";
+        }
+        error(node.loc, msg);
         lastExprInfo_ = TypeInfo::scalar(TypeKind::Unknown);
         return;
     }
@@ -955,7 +966,12 @@ void TypeChecker::visit(MethodCallExpr &node) {
 void TypeChecker::visit(AssignExpr &node) {
     auto info = symbols_.lookup(node.name);
     if (!info) {
-        error(node.loc, "வரையறுக்கப்படாத மாறி (undefined variable): '" + node.name + "'");
+        std::string suggestion = findDidYouMean(node.name, symbols_.getAllSymbolNames());
+        std::string msg = "வரையறுக்கப்படாத மாறி (undefined variable): '" + node.name + "'";
+        if (!suggestion.empty()) {
+            msg += "; did you mean '" + suggestion + "'?";
+        }
+        error(node.loc, msg);
         return;
     }
 

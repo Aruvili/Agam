@@ -28,6 +28,9 @@ class CodeGenerator {
     /// Legacy: generate from AST (kept for backward compat in existing tests).
     bool generate(class Program &program);
 
+    void setDebugInfo(bool enable) { generateDebugInfo_ = enable; }
+    bool generateDebugInfo() const { return generateDebugInfo_; }
+
     llvm::Module *getModule() { return module_.get(); }
     std::string getIRString() const;
     void dumpIR() const;
@@ -63,6 +66,7 @@ class CodeGenerator {
     void emitTerminator(const MirTerminator &term, llvm::Function *func,
                         std::unordered_map<MirBlockId, llvm::BasicBlock *> &blockMap);
 
+    bool generateDebugInfo_ = false;
     llvm::Value *emitOperand(const MirOperand &op);
     llvm::Value *emitRvalue(const MirRvalue &rv, llvm::Function *func);
 };

@@ -31,6 +31,7 @@ class Parser {
     std::string filename_;
     DiagnosticEngine &diag_;
     std::vector<std::string> currentTypeParams_;
+    size_t exprDepth_ = 0;
 
     // ── Token navigation ─────────────────────────────────────────────────────
     const Token &peek() const;

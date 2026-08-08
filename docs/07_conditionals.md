@@ -147,9 +147,9 @@ You can put conditions inside conditions:
 மாறி password = "secret123";
 
 எனில் username == "admin" மற்றும் password == "secret123":;
-    பதிப்பி("✅ Login successful!");
+    பதிப்பி(" Login successful!");
 } இல்லையெனில் {
-    பதிப்பி("❌ Invalid credentials");
+    பதிப்பி(" Invalid credentials");
 }
 ```
 

@@ -251,4 +251,14 @@ std::string SymbolTable::currentZone() const {
     return zones_.back();
 }
 
+std::vector<std::string> SymbolTable::getAllSymbolNames() const {
+    std::vector<std::string> names;
+    for (const auto &scope : scopes_) {
+        for (const auto &pair : scope) {
+            names.push_back(pair.first);
+        }
+    }
+    return names;
+}
+
 } // namespace agam

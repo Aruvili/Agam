@@ -86,7 +86,7 @@ Compare enum values using `==`:
 }
 மாறி today = Day.Saturday;
 எனில் is_weekend(today):,
-    பதிப்பி("It's the weekend! 🎉"),
+    பதிப்பி("It's the weekend! "),
 } இல்லையெனில் {
     பதிப்பி("It's a workday."),
 }
@@ -190,14 +190,14 @@ Use `பொருத்து` (match) for cleaner enum handling:
 }
 செயல் describe(season) {
     பொருத்து (season) {
-        Season.Spring => விடை "Flowers bloom 🌸";
-        Season.Summer => விடை "Hot and sunny ☀️";
-        Season.Autumn => விடை "Leaves fall 🍂";
-        Season.Winter => விடை "Cold and snowy ❄️";
+        Season.Spring => விடை "Flowers bloom ";
+        Season.Summer => விடை "Hot and sunny ️";
+        Season.Autumn => விடை "Leaves fall ";
+        Season.Winter => விடை "Cold and snowy ️";
 
     }
 மாறி current = Season.Winter;
-பதிப்பி(describe(current))  # Output: Cold and snowy ❄️,
+பதிப்பி(describe(current))  # Output: Cold and snowy ️,
 ```
 
 ---

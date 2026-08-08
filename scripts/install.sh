@@ -99,7 +99,7 @@ chmod +x "$BIN_DIR/agamc"
 chmod +x "$BIN_DIR/agam-lsp" 2>/dev/null || true
 
 echo "========================================="
-echo "Agam has been installed successfully! 🎉"
+echo "Agam has been installed successfully!"
 echo "Installed at: $INSTALL_DIR"
 echo ""
 echo "Please add the following to your ~/.bashrc or ~/.zshrc:"

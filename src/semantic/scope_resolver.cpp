@@ -1,4 +1,5 @@
 #include "agam/semantic/scope_resolver.h"
+#include "agam/utils/string_utils.h"
 
 namespace agam {
 
@@ -26,7 +27,12 @@ void ScopeResolver::visit(NullLiteralExpr &) {}
 
 void ScopeResolver::visit(VariableExpr &node) {
     if (!symbols_.lookup(node.name)) {
-        error(node.loc, "அறிவிக்கப்படாத மாறி (Undeclared variable): '" + node.name + "'");
+        std::string suggestion = findDidYouMean(node.name, symbols_.getAllSymbolNames());
+        std::string msg = "அறிவிக்கப்படாத மாறி (Undeclared variable): '" + node.name + "'";
+        if (!suggestion.empty()) {
+            msg += "; did you mean '" + suggestion + "'?";
+        }
+        error(node.loc, msg);
     }
 }
 
@@ -45,7 +51,12 @@ void ScopeResolver::visit(CastExpr &node) {
 
 void ScopeResolver::visit(CallExpr &node) {
     if (!symbols_.lookup(node.callee)) {
-        error(node.loc, "அறிவிக்கப்படாத செயல் (Undeclared function): '" + node.callee + "'");
+        std::string suggestion = findDidYouMean(node.callee, symbols_.getAllSymbolNames());
+        std::string msg = "அறிவிக்கப்படாத செயல் (Undeclared function): '" + node.callee + "'";
+        if (!suggestion.empty()) {
+            msg += "; did you mean '" + suggestion + "'?";
+        }
+        error(node.loc, msg);
     }
     for (auto &arg : node.args) {
         arg->accept(*this);
@@ -54,7 +65,12 @@ void ScopeResolver::visit(CallExpr &node) {
 
 void ScopeResolver::visit(AssignExpr &node) {
     if (!symbols_.lookup(node.name)) {
-        error(node.loc, "அறிவிக்கப்படாத மாறி (Undeclared variable): '" + node.name + "'");
+        std::string suggestion = findDidYouMean(node.name, symbols_.getAllSymbolNames());
+        std::string msg = "அறிவிக்கப்படாத மாறி (Undeclared variable): '" + node.name + "'";
+        if (!suggestion.empty()) {
+            msg += "; did you mean '" + suggestion + "'?";
+        }
+        error(node.loc, msg);
     }
     node.value->accept(*this);
 }

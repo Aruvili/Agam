@@ -7,6 +7,9 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Transforms/Scalar.h"
 
+#include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/Target/TargetMachine.h"
+
 namespace agam {
 
 Optimizer::Level Optimizer::parseLevel(const std::string &s) {
@@ -21,16 +24,20 @@ Optimizer::Level Optimizer::parseLevel(const std::string &s) {
     return Level::O0;
 }
 
-void Optimizer::optimize(llvm::Module &module, Level level) {
+void Optimizer::optimize(llvm::Module &module, Level level, llvm::TargetMachine *targetMachine) {
     if (level == Level::O0)
         return; // No optimization
 
-    llvm::PassBuilder passBuilder;
+    llvm::PassBuilder passBuilder(targetMachine);
 
     llvm::LoopAnalysisManager LAM;
     llvm::FunctionAnalysisManager FAM;
     llvm::CGSCCAnalysisManager CGAM;
     llvm::ModuleAnalysisManager MAM;
+
+    if (targetMachine) {
+        FAM.registerPass([&] { return targetMachine->getTargetIRAnalysis(); });
+    }
 
     passBuilder.registerModuleAnalyses(MAM);
     passBuilder.registerCGSCCAnalyses(CGAM);

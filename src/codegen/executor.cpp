@@ -47,183 +47,70 @@ extern "C" int agam_printf_float(const char *fmt, double f) {
     return printf(fmt, f);
 }
 
-// ── ZPM Runtime (High-Performance Linear Allocator) ──────────────────────────
+// ── Runtime Function Declarations (Implemented in agam_runtime.c) ──────────────
 
-const size_t ZPM_BLOCK_SIZE = 8 * 1024 * 1024; // 8MB Blocks
-
-struct AgamZoneBlock {
-    uint8_t *data;
-    size_t used;
-    size_t size;
-    AgamZoneBlock *next;
-};
-
-struct AgamZone {
-    AgamZoneBlock *head;
-    AgamZoneBlock *current;
-};
-
-extern "C" void *agam_zone_create() {
-    AgamZone *zone = new AgamZone();
-    AgamZoneBlock *block = new AgamZoneBlock();
-    block->data = (uint8_t *)malloc(ZPM_BLOCK_SIZE);
-    block->used = 0;
-    block->size = ZPM_BLOCK_SIZE;
-    block->next = nullptr;
-    zone->head = block;
-    zone->current = block;
-    return zone;
+extern "C" {
+void *agam_zone_create();
+void *agam_zone_alloc(void *zonePtr, size_t size);
+void agam_zone_destroy(void *zonePtr);
+void agam_zone_reset(void *zonePtr);
+void agam_zone_push(void *zonePtr);
+void agam_zone_pop();
+size_t agam_zone_allocated_bytes(void *zonePtr);
+size_t agam_zone_block_count(void *zonePtr);
+void print_int(int32_t i);
+int printf_int(const char *fmt, int64_t i);
+int printf_float(const char *fmt, double f);
+int printf_hex(const char *fmt, int64_t i);
+void printf_bin(int64_t i);
+int scanf_int(const char *fmt, int *p);
+int scanf_int64(const char *fmt, int64_t *p);
+int scanf_float(const char *fmt, double *p);
+int agam_getchar();
+char *agam_readline();
+int agam_putchar(int c);
+int fprintf_stderr(const char *fmt, const char *s);
+int fprintf_stderr_int(const char *fmt, int64_t i);
+int fprintf_stderr_float(const char *fmt, double f);
+void agam_os_exit(int64_t code);
+const char *agam_os_getenv(const char *name);
+int64_t agam_os_system(const char *cmd);
+const char *agam_os_name();
+int64_t agam_time_epoch();
+void agam_time_sleep(double seconds);
+void agam_time_sleep_ms(int64_t ms);
+int64_t agam_net_listen(int64_t port);
+int64_t agam_net_accept(int64_t server_fd);
+int64_t agam_net_send(int64_t client_fd, const char *data);
+const char *agam_net_recv(int64_t client_fd);
+void agam_net_close(int64_t fd);
+const char* agam_str_substring(const char* s, int64_t start, int64_t len);
+const char* agam_str_trim(const char* s);
+const char* agam_str_to_upper(const char* s);
+const char* agam_str_to_lower(const char* s);
+int64_t agam_str_contains(const char* s, const char* sub);
+int64_t agam_fs_mkdir(const char* path);
+int64_t agam_fs_exists(const char* path);
+int64_t agam_fs_is_dir(const char* path);
+int64_t agam_fs_size(const char* path);
+int64_t agam_rand_range(int64_t min_val, int64_t max_val);
+double agam_rand_float(void);
+int64_t agam_str_len(const char* s);
+const char* agam_str_replace(const char* s, const char* old_sub, const char* new_sub);
+const char* agam_fs_read_all(const char* path);
+int64_t agam_fs_write_all(const char* path, const char* content);
+int64_t agam_thread_spawn(void* fn_ptr, void* arg);
+int64_t agam_thread_join(int64_t thread_id);
+const char* agam_base64_encode(const char* data);
+const char* agam_base64_decode(const char* data);
+const char* agam_crypto_sha256(const char* data);
+int64_t agam_regex_match(const char* text, const char* pattern);
+const char* agam_datetime_now(void);
+const char* agam_datetime_format(int64_t timestamp, const char* format);
+int64_t agam_db_open(const char* db_name);
+int64_t agam_db_exec(int64_t handle, const char* query);
+const char* agam_str_concat(const char* s1, const char* s2);
 }
-
-extern "C" void *agam_zone_alloc(void *zonePtr, size_t size) {
-    if (!zonePtr)
-        return malloc(size);
-    AgamZone *zone = static_cast<AgamZone *>(zonePtr);
-
-    // Aligmnent padding (8-byte)
-    size = (size + 7) & ~7;
-
-    if (zone->current->used + size > zone->current->size) {
-        // Current block full, allocate new
-        size_t newSize = size > ZPM_BLOCK_SIZE ? size : ZPM_BLOCK_SIZE;
-        AgamZoneBlock *block = new AgamZoneBlock();
-        block->data = (uint8_t *)malloc(newSize);
-        block->used = 0;
-        block->size = newSize;
-        block->next = zone->head;
-        zone->head = block;
-        zone->current = block;
-    }
-
-    void *ptr = zone->current->data + zone->current->used;
-    zone->current->used += size;
-    return ptr;
-}
-
-extern "C" void agam_zone_destroy(void *zonePtr) {
-    if (!zonePtr)
-        return;
-    AgamZone *zone = static_cast<AgamZone *>(zonePtr);
-    AgamZoneBlock *block = zone->head;
-    while (block) {
-        AgamZoneBlock *next = block->next;
-        free(block->data);
-        delete block;
-        block = next;
-    }
-    delete zone;
-}
-
-extern "C" void agam_print_int(int i) {
-    printf("%d\n", i);
-}
-
-// ── Input helpers ────────────────────────────────────────────────────────────
-
-extern "C" int agam_scanf_int(const char *fmt, int *p) {
-    return scanf(fmt, p);
-}
-
-extern "C" int agam_scanf_int64(const char *fmt, long long *p) {
-    return scanf(fmt, p);
-}
-
-extern "C" int agam_scanf_float(const char *fmt, double *p) {
-    return scanf(fmt, p);
-}
-
-extern "C" int agam_getchar() {
-    return getchar();
-}
-
-// Read one line from stdin, strip trailing newline, return pointer.
-// Uses a static buffer — valid until next call.
-static char agam_readline_buf[4096];
-extern "C" const char *agam_readline() {
-    if (!fgets(agam_readline_buf, sizeof(agam_readline_buf), stdin)) {
-        agam_readline_buf[0] = '\0';
-        return agam_readline_buf;
-    }
-    // Strip trailing newline
-    agam_readline_buf[strcspn(agam_readline_buf, "\n")] = '\0';
-    return agam_readline_buf;
-}
-
-// ── Additional output helpers ────────────────────────────────────────────────
-
-extern "C" int agam_putchar(int c) {
-    return putchar(c);
-}
-
-extern "C" int agam_fprintf_stderr(const char *fmt, const char *s) {
-    return fprintf(stderr, fmt, s);
-}
-
-extern "C" int agam_fprintf_stderr_int(const char *fmt, int i) {
-    return fprintf(stderr, fmt, i);
-}
-
-extern "C" int agam_fprintf_stderr_float(const char *fmt, double f) {
-    return fprintf(stderr, fmt, f);
-}
-
-// ── OS Library JIT Wrappers ──
-
-extern "C" void agam_os_exit(int64_t code) {
-    exit((int)code);
-}
-
-extern "C" const char *agam_os_getenv(const char *name) {
-    const char *val = getenv(name);
-    return val ? val : "";
-}
-
-extern "C" int64_t agam_os_system(const char *cmd) {
-    return system(cmd);
-}
-
-extern "C" const char *agam_os_name() {
-#ifdef _WIN32
-    return "windows";
-#elif __APPLE__
-    return "macos";
-#else
-    return "linux";
-#endif
-}
-
-// ── Time Library JIT Wrappers ──
-
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#include <time.h>
-#endif
-
-extern "C" int64_t agam_time_epoch() {
-    return (int64_t)time(nullptr);
-}
-
-extern "C" void agam_time_sleep(double seconds) {
-#ifdef _WIN32
-    Sleep((DWORD)(seconds * 1000.0));
-#else
-    struct timespec ts;
-    ts.tv_sec = (time_t)seconds;
-    ts.tv_nsec = (long)((seconds - ts.tv_sec) * 1e9);
-    nanosleep(&ts, nullptr);
-#endif
-}
-
-extern "C" void agam_time_sleep_ms(int64_t ms) {
-#ifdef _WIN32
-    Sleep((DWORD)ms);
-#else
-    usleep(ms * 1000);
-#endif
-}
-
 
 namespace agam {
 
@@ -297,8 +184,23 @@ int Executor::run(llvm::Module &module, const std::string &entryPoint) {
         symbols[jit->mangleAndIntern("agam_zone_destroy")] = llvm::orc::ExecutorSymbolDef(
             llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_zone_destroy)),
             llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_zone_reset")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_zone_reset)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_zone_push")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_zone_push)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_zone_pop")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_zone_pop)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_zone_allocated_bytes")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_zone_allocated_bytes)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_zone_block_count")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_zone_block_count)),
+            llvm::JITSymbolFlags::Exported);
         symbols[jit->mangleAndIntern("print_int")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_print_int)),
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(print_int)),
             llvm::JITSymbolFlags::Exported);
         if (auto err =
                 jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
@@ -386,13 +288,13 @@ int Executor::run(llvm::Module &module, const std::string &entryPoint) {
     {
         llvm::orc::SymbolMap symbols;
         symbols[jit->mangleAndIntern("scanf_int")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_scanf_int)),
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(scanf_int)),
             llvm::JITSymbolFlags::Exported);
         symbols[jit->mangleAndIntern("scanf_int64")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_scanf_int64)),
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(scanf_int64)),
             llvm::JITSymbolFlags::Exported);
         symbols[jit->mangleAndIntern("scanf_float")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_scanf_float)),
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(scanf_float)),
             llvm::JITSymbolFlags::Exported);
         symbols[jit->mangleAndIntern("agam_getchar")] = llvm::orc::ExecutorSymbolDef(
             llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_getchar)),
@@ -414,14 +316,14 @@ int Executor::run(llvm::Module &module, const std::string &entryPoint) {
             llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_putchar)),
             llvm::JITSymbolFlags::Exported);
         symbols[jit->mangleAndIntern("fprintf_stderr")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_fprintf_stderr)),
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(fprintf_stderr)),
             llvm::JITSymbolFlags::Exported);
         symbols[jit->mangleAndIntern("fprintf_stderr_int")] = llvm::orc::ExecutorSymbolDef(
-            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_fprintf_stderr_int)),
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(fprintf_stderr_int)),
             llvm::JITSymbolFlags::Exported);
         symbols[jit->mangleAndIntern("fprintf_stderr_float")] = llvm::orc::ExecutorSymbolDef(
             llvm::orc::ExecutorAddr::fromPtr(
-                reinterpret_cast<void (*)()>(agam_fprintf_stderr_float)),
+                reinterpret_cast<void (*)()>(fprintf_stderr_float)),
             llvm::JITSymbolFlags::Exported);
         if (auto err =
                 jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
@@ -467,6 +369,119 @@ int Executor::run(llvm::Module &module, const std::string &entryPoint) {
         if (auto err =
                 jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
             std::cerr << "Warning: failed to define Time helpers: "
+                      << llvm::toString(std::move(err)) << "\n";
+        }
+    }
+
+    // Register Network helpers
+    {
+        llvm::orc::SymbolMap symbols;
+        symbols[jit->mangleAndIntern("agam_net_listen")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_net_listen)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_net_accept")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_net_accept)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_net_send")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_net_send)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_net_recv")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_net_recv)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_net_close")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_net_close)),
+            llvm::JITSymbolFlags::Exported);
+        if (auto err =
+                jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
+            std::cerr << "Warning: failed to define Network helpers: "
+                      << llvm::toString(std::move(err)) << "\n";
+        }
+    }
+
+    // Register Extended String, FS, and Random helpers
+    {
+        llvm::orc::SymbolMap symbols;
+        symbols[jit->mangleAndIntern("agam_str_substring")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_str_substring)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_str_trim")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_str_trim)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_str_to_upper")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_str_to_upper)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_str_to_lower")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_str_to_lower)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_str_contains")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_str_contains)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_fs_mkdir")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_fs_mkdir)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_fs_exists")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_fs_exists)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_fs_is_dir")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_fs_is_dir)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_fs_size")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_fs_size)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_rand_range")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_rand_range)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_rand_float")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_rand_float)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_str_len")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_str_len)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_str_replace")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_str_replace)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_fs_read_all")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_fs_read_all)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_fs_write_all")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_fs_write_all)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_thread_spawn")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_thread_spawn)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_thread_join")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_thread_join)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_base64_encode")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_base64_encode)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_base64_decode")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_base64_decode)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_crypto_sha256")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_crypto_sha256)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_regex_match")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_regex_match)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_datetime_now")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_datetime_now)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_datetime_format")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_datetime_format)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_db_open")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_db_open)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_db_exec")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_db_exec)),
+            llvm::JITSymbolFlags::Exported);
+        symbols[jit->mangleAndIntern("agam_str_concat")] = llvm::orc::ExecutorSymbolDef(
+            llvm::orc::ExecutorAddr::fromPtr(reinterpret_cast<void (*)()>(agam_str_concat)),
+            llvm::JITSymbolFlags::Exported);
+        if (auto err =
+                jit->getMainJITDylib().define(llvm::orc::absoluteSymbols(std::move(symbols)))) {
+            std::cerr << "Warning: failed to define extended std helpers: "
                       << llvm::toString(std::move(err)) << "\n";
         }
     }

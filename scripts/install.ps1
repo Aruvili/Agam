@@ -57,7 +57,7 @@ try {
     [Environment]::SetEnvironmentVariable("AGAM_STD_PATH", $StdDir, "User")
 
     Write-Host "=========================================" -ForegroundColor Green
-    Write-Host "Agam has been installed successfully! 🎉" -ForegroundColor Green
+    Write-Host "Agam has been installed successfully!" -ForegroundColor Green
     Write-Host "Installed at: $InstallDir"
     Write-Host ""
     Write-Host "agamc is now in your PATH."

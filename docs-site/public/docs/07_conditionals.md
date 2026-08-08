@@ -143,9 +143,9 @@ You can put conditions inside conditions:
 மாறி password = "secret123"
 
 என்றால் username == "admin" மற்றும் password == "secret123":
-    அச்சிடு("✅ Login successful!")
+    அச்சிடு(" Login successful!")
 இல்லை:
-    அச்சிடு("❌ Invalid credentials")
+    அச்சிடு(" Invalid credentials")
 ```
 
 ### Example 2: Number Classification

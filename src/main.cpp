@@ -124,12 +124,12 @@ namespace agam {
 
 static std::string trim(const std::string &s) {
     auto start = s.begin();
-    while (start != s.end() && std::isspace(*start))
+    while (start != s.end() && std::isspace(static_cast<unsigned char>(*start)))
         start++;
     auto end = s.end();
     do {
         end--;
-    } while (std::distance(start, end) > 0 && std::isspace(*end));
+    } while (std::distance(start, end) > 0 && std::isspace(static_cast<unsigned char>(*end)));
     return std::string(start, end + 1);
 }
 
@@ -271,6 +271,7 @@ int main(int argc, char *argv[]) {
     std::string outputFile;
     bool emitAst = false, emitHir = false, emitThir = false, emitMir = false, emitLlvm = false;
     bool runJit = false;
+    bool generateDebugInfo = false;
     Optimizer::Level optLevel = Optimizer::Level::O0;
 
     int argStart = 1;
@@ -341,6 +342,8 @@ int main(int argc, char *argv[]) {
             emitLlvm = true;
         } else if (arg == "--run") {
             runJit = true;
+        } else if (arg == "-g" || arg == "--debug") {
+            generateDebugInfo = true;
         } else if (arg == "-v" || arg == "--version") {
             std::cout << "அகம் (Agam) கம்பைலர் பதிப்பு " << AGAM_VERSION << "\n";
             return 0;
@@ -469,27 +472,13 @@ int main(int argc, char *argv[]) {
 
     // ── Codegen ─────────────────────────────────────────────────────────────
     CodeGenerator codegen;
+    codegen.setDebugInfo(generateDebugInfo);
     if (!codegen.generate(*mir)) {
         std::cerr << "பிழை: குறியாக்கத்தில் (code generation) பிழை ஏற்பட்டது\n";
         return 1;
     }
 
-    if (optLevel != Optimizer::Level::O0) {
-        Optimizer::optimize(*codegen.getModule(), optLevel);
-    }
-
-    if (emitLlvm) {
-        std::cout << codegen.getIRString();
-        return 0;
-    }
-
-    // ── JIT Execute ─────────────────────────────────────────────────────────
-    if (runJit) {
-        int exitCode = Executor::run(*codegen.getModule(), "மைய");
-        return exitCode;
-    }
-
-    // ── Compile to object file -> link to executable ─────────────────────────
+    // ── Target Machine & Vectorization Setup ─────────────────────────────
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmPrinter();
     llvm::InitializeNativeTargetAsmParser();
@@ -509,27 +498,61 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    auto CPU = "generic";
-    auto Features = "";
+    std::string hostCPU = llvm::sys::getHostCPUName().str();
+    llvm::StringMap<bool> hostFeatures = llvm::sys::getHostCPUFeatures();
+    std::string featureStr;
+    for (auto &f : hostFeatures) {
+        if (!featureStr.empty()) featureStr += ",";
+        featureStr += (f.second ? "+" : "-");
+        featureStr += f.first().str();
+    }
+
     llvm::TargetOptions opt;
     auto RM = std::optional<llvm::Reloc::Model>();
 #if LLVM_VERSION_MAJOR >= 22
-    auto targetMachine = target->createTargetMachine(targetTriple, CPU, Features, opt, RM);
+    auto targetMachine = target->createTargetMachine(targetTriple, hostCPU, featureStr, opt, RM);
 #else
-    auto targetMachine = target->createTargetMachine(targetTriple.getTriple(), CPU, Features, opt, RM);
+    auto targetMachine = target->createTargetMachine(targetTriple.getTriple(), hostCPU, featureStr, opt, RM);
 #endif
 
     codegen.getModule()->setDataLayout(targetMachine->createDataLayout());
 
+    if (optLevel != Optimizer::Level::O0) {
+        Optimizer::optimize(*codegen.getModule(), optLevel, targetMachine);
+    }
+
+    if (emitLlvm) {
+        std::cout << codegen.getIRString();
+        return 0;
+    }
+
+    // ── JIT Execute ─────────────────────────────────────────────────────────
+    if (runJit) {
+        int exitCode = Executor::run(*codegen.getModule(), "மைய");
+        return exitCode;
+    }
+
     if (outputFile.empty()) {
-        // Derive output name from input: hello.agam -> hello.exe (Windows) or hello (Unix)
+        // Default output to target/debug/ or target/release/ directory
         fs::path inputPath(inputFile);
-        fs::path stem = inputPath.stem(); // "hello" from "hello.agam"
+        fs::path stem = inputPath.stem(); // "main" from "main.agam"
+        fs::path targetSubDir = fs::current_path() / "target" / (optLevel != Optimizer::Level::O0 ? "release" : "debug");
+        
+        if (!fs::exists(targetSubDir)) {
+            fs::create_directories(targetSubDir);
+        }
+
 #ifdef _WIN32
-        outputFile = stem.string() + ".exe";
+        outputFile = (targetSubDir / (stem.string() + ".exe")).string();
 #else
-        outputFile = stem.string();
+        outputFile = (targetSubDir / stem.string()).string();
 #endif
+    } else {
+        // Ensure parent output directory exists if custom -o path provided
+        fs::path outPath(outputFile);
+        if (outPath.has_parent_path() && !fs::exists(outPath.parent_path())) {
+            fs::create_directories(outPath.parent_path());
+        }
     }
 
     std::error_code ec;

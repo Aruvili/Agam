@@ -30,7 +30,7 @@ Use `மாறி` (meaning "variable" or "let") to create a variable:
 
 ## Variable Names
 
-### Valid Names ✅
+### Valid Names 
 
 ```
 மாறி பெயர் = "name"        # Tamil letters;
@@ -40,7 +40,7 @@ Use `மாறி` (meaning "variable" or "let") to create a variable:
 மாறி எண்_1 = 100          # Mixed;
 ```
 
-### Invalid Names ❌
+### Invalid Names 
 
 ```
 மாறி 1பெயர் = "bad"       # Can't start with number;

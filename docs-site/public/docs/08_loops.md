@@ -159,7 +159,7 @@ Skip the current iteration and continue with the next:
     அச்சிடு(count)
     count = count - 1
 
-அச்சிடு("🚀 Blast off!")
+அச்சிடு(" Blast off!")
 
 # Output:
 # 5
@@ -167,7 +167,7 @@ Skip the current iteration and continue with the next:
 # 3
 # 2
 # 1
-# 🚀 Blast off!
+#  Blast off!
 ```
 
 ### Example 3: Find First Even Number
@@ -213,14 +213,14 @@ Skip the current iteration and continue with the next:
     மாறி guess = உள்ளீடு("Password: ")
     
     என்றால் guess == CORRECT_PASSWORD:
-        அச்சிடு("✅ Access granted!")
+        அச்சிடு(" Access granted!")
         நிறுத்து
     இல்லை:
         attempts = attempts - 1
-        அச்சிடு("❌ Wrong. Attempts left:", attempts)
+        அச்சிடு(" Wrong. Attempts left:", attempts)
 
 என்றால் attempts == 0:
-    அச்சிடு("🔒 Account locked!")
+    அச்சிடு(" Account locked!")
 ```
 
 ---

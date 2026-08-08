@@ -1,4 +1,11 @@
 $AGAMC = "./build/bin/agamc.exe"
+if (-not (Test-Path $AGAMC)) {
+    $AGAMC = "./build/bin/agamc"
+}
+if (-not (Test-Path $AGAMC)) {
+    $AGAMC = "./build/bin/Release/agamc.exe"
+}
+
 $FILES = Get-ChildItem -Path "." -Recurse -Filter "*.agam" | Where-Object { 
     $_.FullName -notmatch "build" -and 
     $_.FullName -notmatch "tests\\samples\\errors" -and 

@@ -25,7 +25,7 @@ cargo run --release -- hello.agam
 வணக்கம் உலகம்!
 ```
 
-🎉 **You just wrote your first Tamil program!**
+ **You just wrote your first Tamil program!**
 
 ---
 
@@ -119,13 +119,13 @@ Use `#` to write notes that are ignored by the computer:
 
 ## Common Mistakes
 
-### ❌ Missing Quotes
+###  Missing Quotes
 
 ```
 அச்சிடு(வணக்கம்)  # Error! Text needs quotes
 ```
 
-### ✅ Correct
+###  Correct
 
 ```
 அச்சிடு("வணக்கம்")  # Correct!
@@ -133,13 +133,13 @@ Use `#` to write notes that are ignored by the computer:
 
 ---
 
-### ❌ Wrong Parentheses
+###  Wrong Parentheses
 
 ```
 அச்சிடு "வணக்கம்"  # Error! Missing parentheses
 ```
 
-### ✅ Correct
+###  Correct
 
 ```
 அச்சிடு("வணக்கம்")  # Correct!

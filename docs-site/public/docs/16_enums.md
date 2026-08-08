@@ -80,7 +80,7 @@ Compare enum values using `==`:
 
 மாறி today = Day.Saturday
 என்றால் is_weekend(today):
-    அச்சிடு("It's the weekend! 🎉")
+    அச்சிடு("It's the weekend! ")
 இல்லை:
     அச்சிடு("It's a workday.")
 ```
@@ -174,13 +174,13 @@ Use `பொருத்து` (match) for cleaner enum handling:
 
 செயல் describe(season):
     பொருத்து season:
-        Season.Spring => திரும்பு "Flowers bloom 🌸"
-        Season.Summer => திரும்பு "Hot and sunny ☀️"
-        Season.Autumn => திரும்பு "Leaves fall 🍂"
-        Season.Winter => திரும்பு "Cold and snowy ❄️"
+        Season.Spring => திரும்பு "Flowers bloom "
+        Season.Summer => திரும்பு "Hot and sunny ️"
+        Season.Autumn => திரும்பு "Leaves fall "
+        Season.Winter => திரும்பு "Cold and snowy ️"
 
 மாறி current = Season.Winter
-அச்சிடு(describe(current))  # Output: Cold and snowy ❄️
+அச்சிடு(describe(current))  # Output: Cold and snowy ️
 ```
 
 ---

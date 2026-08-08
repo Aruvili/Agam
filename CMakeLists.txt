@@ -39,17 +39,20 @@ separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
 # Map LLVM components to libraries
-# We use individual components to ensure static linking
-llvm_map_components_to_libnames(LLVM_LIBS
-    Core
-    IRReader
-    Support
-    Target
-    ExecutionEngine
-    OrcJIT
-    native
-    nativecodegen
-)
+if(TARGET LLVM)
+    set(LLVM_LIBS LLVM)
+else()
+    llvm_map_components_to_libnames(LLVM_LIBS
+        Core
+        IRReader
+        Support
+        Target
+        ExecutionEngine
+        OrcJIT
+        native
+        nativecodegen
+    )
+endif()
 
 # Extract system libraries required for static LLVM linking
 # (e.g., zlib, tinfo, shell32, etc.)
@@ -103,6 +106,7 @@ add_library(agam_lib STATIC
     src/codegen/codegen.cpp
     src/codegen/optimizer.cpp
     src/codegen/executor.cpp
+    src/runtime/agam_runtime.c
     src/utils/diagnostic_renderer.cpp
 )
 
@@ -256,11 +260,16 @@ if(AGAM_BUILD_TESTS)
     add_test(NAME RangeForTests COMMAND agam_test_range_for)
 endif()
 
+# ── Agam Package Manager (agamp) ──────────────────────────────────────────────
+add_executable(agamp
+    src/agamp/main.cpp
+)
+
 # ── Installation ─────────────────────────────────────────────────────────────
 include(GNUInstallDirs)
 
-# Install the compiler and LSP
-install(TARGETS agamc agam-lsp
+# Install the compiler, LSP, and Package Manager
+install(TARGETS agamc agam-lsp agamp
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 

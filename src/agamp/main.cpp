@@ -16,8 +16,52 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <sstream>
+#if defined(__linux__) || defined(__APPLE__)
+#include <unistd.h>
+#endif
+#if defined(_WIN32)
+#include <windows.h>
+#endif
 
 namespace fs = std::filesystem;
+
+static fs::path getExecutableDir(const char *argv0) {
+#if defined(__linux__)
+    char result[1024];
+    ssize_t count = ::readlink("/proc/self/exe", result, sizeof(result) - 1);
+    if (count != -1) {
+        result[count] = '\0';
+        return fs::path(result).parent_path();
+    }
+#elif defined(_WIN32)
+    char result[MAX_PATH];
+    DWORD ret = GetModuleFileNameA(NULL, result, MAX_PATH);
+    if (ret > 0) {
+        return fs::path(result).parent_path();
+    }
+#endif
+    fs::path p(argv0);
+    if (p.is_absolute()) return p.parent_path();
+    if (p.has_parent_path()) return fs::absolute(p).parent_path();
+    const char *pathEnv = std::getenv("PATH");
+    if (pathEnv) {
+        std::stringstream ss(pathEnv);
+        std::string item;
+#if defined(_WIN32)
+        char delim = ';';
+#else
+        char delim = ':';
+#endif
+        while (std::getline(ss, item, delim)) {
+            fs::path candidate = fs::path(item) / p;
+            if (fs::exists(candidate)) {
+                return fs::canonical(candidate).parent_path();
+            }
+        }
+    }
+    return fs::absolute(p).parent_path();
+}
 
 static void printUsage() {
     std::cout << "========================================================\n"
@@ -130,8 +174,75 @@ static void updateLockfile(const std::string &pkgName, const std::string &versio
     }
 }
 
+static bool isPackageInstalled(const std::string &pkgName, const fs::path &currentDir) {
+    fs::path modulesDir = currentDir / "modules";
+    std::string stemName = fs::path(pkgName).stem().string();
+
+    if (stemName.length() > 4 && stemName.substr(stemName.length() - 4) == ".git") {
+        stemName = stemName.substr(0, stemName.length() - 4);
+    }
+
+    bool fileOrDirExists = false;
+    if (fs::exists(modulesDir)) {
+        if (fs::exists(modulesDir / pkgName) ||
+            fs::exists(modulesDir / (pkgName + ".agam")) ||
+            fs::exists(modulesDir / stemName) ||
+            fs::exists(modulesDir / (stemName + ".agam"))) {
+            fileOrDirExists = true;
+        }
+        if (pkgName == "web_server" || pkgName == "server" || pkgName == "web" || pkgName == "valaiccevaiyagam") {
+            if (fs::exists(modulesDir / "வலைச்சேவையகம்.agam") ||
+                fs::exists(modulesDir / "valaiccevaiyagam.agam") ||
+                fs::exists(modulesDir / "valaiccevaiyagam")) {
+                fileOrDirExists = true;
+            }
+        }
+    }
+
+    bool inArpk = false;
+    fs::path arpkPath = currentDir / "pk.arpk";
+    if (fs::exists(arpkPath)) {
+        std::ifstream arpk(arpkPath);
+        std::string line;
+        while (std::getline(arpk, line)) {
+            size_t start = line.find_first_not_of(" \t");
+            if (start != std::string::npos) {
+                line = line.substr(start);
+            }
+            if (line.rfind(pkgName + ":", 0) == 0 || line.rfind(stemName + ":", 0) == 0) {
+                inArpk = true;
+                break;
+            }
+        }
+    }
+
+    bool inLock = false;
+    fs::path lockPath = currentDir / "pk.lock";
+    if (fs::exists(lockPath)) {
+        std::ifstream lock(lockPath);
+        std::string line;
+        std::string targetNameQuote = "name = \"" + pkgName + "\"";
+        std::string targetStemQuote = "name = \"" + stemName + "\"";
+        while (std::getline(lock, line)) {
+            if (line.find(targetNameQuote) != std::string::npos ||
+                line.find(targetStemQuote) != std::string::npos) {
+                inLock = true;
+                break;
+            }
+        }
+    }
+
+    return fileOrDirExists || inArpk || inLock;
+}
+
 static int handleAdd(const std::string &pkgName, const fs::path &exeDir) {
     fs::path currentDir = fs::current_path();
+
+    if (isPackageInstalled(pkgName, currentDir)) {
+        std::cout << "[INFO] தொகுப்பு '" << pkgName << "' ஏற்கனவே சேர்க்கப்பட்டு/நிறுவப்பட்டு உள்ளது (Package '" << pkgName << "' is already added or installed).\n";
+        return 0;
+    }
+
     fs::path arpkPath = currentDir / "pk.arpk";
     fs::path modulesDir = currentDir / "modules";
     if (!fs::exists(modulesDir)) {
@@ -379,7 +490,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    fs::path exeDir = fs::absolute(argv[0]).parent_path();
+    fs::path exeDir = getExecutableDir(argv[0]);
     std::string cmd = argv[1];
 
     bool isRelease = false;

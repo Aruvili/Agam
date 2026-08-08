@@ -3,12 +3,20 @@
 All notable changes to the Agam compiler, standard library, and ecosystem will be documented in this file. 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to Semantic Versioning.
 
+## [1.3.1] - 2026-08-08
+### Added & Improved
+- **Package Manager (`agamp`) Duplicate Package Detection:**
+  - Added pre-installation check in `agamp add` / `agamp i` to check if a package module or repository is already installed in `modules/`, listed in `pk.arpk`, or tracked in `pk.lock`.
+  - Displays user-friendly notification `[INFO] தொகுப்பு '<package>' ஏற்கனவே சேர்க்கப்பட்டு/நிறுவப்பட்டு உள்ளது (Package '<package>' is already added or installed)` without duplicating lockfile entries or re-cloning.
+- **Central Registry URL Fix:**
+  - Corrected central package registry index repository URL mappings to `https://github.com/Aruvili/valaiccevaiyagam.git`.
+
 ## [1.3.0] - 2026-08-08
 ### Added
 - **Full Standard Library Ecosystem (18 Modules):**
   - Expanded all standard library packages: `std/io.agam`, `std/math.agam`, `std/net.agam`, `std/vector.agam`, `std/string.agam`, `std/fs.agam`, `std/random.agam`, `std/hashmap.agam`, `std/json.agam`, `std/os.agam`, `std/time.agam`, `std/thread.agam`, `std/crypto.agam`, `std/regex.agam`, `std/datetime.agam`, `std/cli.agam`, `std/sqlite.agam`, and `packages/வலைச்சேவையகம்/`.
 - **Standalone FastAPI-Level Web Server Framework (`packages/வலைச்சேவையகம்/`):**
-  - High-performance Tamil REST API Web Framework with JSON responses (`வலை_ஜேசான்_பதில்`), status code handlers (`200`, `201`, `400`, `404`, `422`, `500`), CORS pre-flight middleware (`சிஓஆர்எஸ்_பதில்_அனுப்பு`), and URL path/method parsing. Hosted in official repository `https://github.com/Aruvilil/valaiccevaiyagam.git`.
+  - High-performance Tamil REST API Web Framework with JSON responses (`வலை_ஜேசான்_பதில்`), status code handlers (`200`, `201`, `400`, `404`, `422`, `500`), CORS pre-flight middleware (`சிஓஆர்எஸ்_பதில்_அனுப்பு`), and URL path/method parsing. Hosted in official repository `https://github.com/Aruvili/valaiccevaiyagam.git`.
 - **Central Package Registry & 3-Tier Resolution Pipeline (`agamp`):**
   - Official central package registry index (`registry/index.json`) mapping short package names to official repository URLs.
   - 3-tier package resolution order: `Central Registry` -> `Local Standard Library` -> `Git Remote Repository`.

@@ -41,9 +41,15 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#if defined(__linux__) || defined(__APPLE__)
+#include <unistd.h>
+#endif
+#if defined(_WIN32)
+#include <windows.h>
+#endif
 
 #ifndef AGAM_VERSION
-#define AGAM_VERSION "1.3.0"
+#define AGAM_VERSION "1.3.1"
 #endif
 
 using namespace agam;
@@ -154,6 +160,43 @@ static std::string trim(const std::string &s) {
         end--;
     } while (std::distance(start, end) > 0 && std::isspace(static_cast<unsigned char>(*end)));
     return std::string(start, end + 1);
+}
+
+static fs::path getExecutableDir(const char *argv0) {
+#if defined(__linux__)
+    char result[1024];
+    ssize_t count = ::readlink("/proc/self/exe", result, sizeof(result) - 1);
+    if (count != -1) {
+        result[count] = '\0';
+        return fs::path(result).parent_path();
+    }
+#elif defined(_WIN32)
+    char result[MAX_PATH];
+    DWORD ret = GetModuleFileNameA(NULL, result, MAX_PATH);
+    if (ret > 0) {
+        return fs::path(result).parent_path();
+    }
+#endif
+    fs::path p(argv0);
+    if (p.is_absolute()) return p.parent_path();
+    if (p.has_parent_path()) return fs::absolute(p).parent_path();
+    const char *pathEnv = std::getenv("PATH");
+    if (pathEnv) {
+        std::stringstream ss(pathEnv);
+        std::string item;
+#if defined(_WIN32)
+        char delim = ';';
+#else
+        char delim = ':';
+#endif
+        while (std::getline(ss, item, delim)) {
+            fs::path candidate = fs::path(item) / p;
+            if (fs::exists(candidate)) {
+                return fs::canonical(candidate).parent_path();
+            }
+        }
+    }
+    return fs::absolute(p).parent_path();
 }
 
 static fs::path g_exeDir;
@@ -280,7 +323,7 @@ std::unique_ptr<Program> parseWithImports(const std::string &filename,
 } // namespace agam
 
 int main(int argc, char *argv[]) {
-    g_exeDir = fs::absolute(argv[0]).parent_path();
+    g_exeDir = getExecutableDir(argv[0]);
     const char *envPath = std::getenv("AGAM_STD_PATH");
     if (envPath)
         g_stdEnvPath = trim(envPath);

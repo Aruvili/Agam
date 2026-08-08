@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(Agam
-    VERSION 1.3.0
+    VERSION 1.3.1
     DESCRIPTION "Agam Programming Language Compiler"
     LANGUAGES C CXX
 )
@@ -280,6 +280,11 @@ install(TARGETS agamc agam-lsp agamp
 # Install the standard library
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/std/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/agam/std
+)
+
+# Install the central registry index
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/registry/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/agam/registry
 )
 
 # Install headers (for FFI/Extension development)

@@ -238,6 +238,15 @@ static int handleAdd(const std::string &pkgName, const fs::path &exeDir) {
     return 1;
 }
 
+static fs::path findAgamcExecutable(const fs::path &exeDir) {
+    fs::path cand = exeDir / "agamc";
+#ifdef _WIN32
+    if (!fs::exists(cand)) cand = exeDir / "agamc.exe";
+#endif
+    if (fs::exists(cand)) return cand;
+    return "agamc";
+}
+
 static int handleCheck(const fs::path &exeDir) {
     fs::path mainPath = fs::current_path() / "src" / "main.agam";
     if (!fs::exists(mainPath)) mainPath = fs::current_path() / "main.agam";
@@ -247,10 +256,7 @@ static int handleCheck(const fs::path &exeDir) {
         return 1;
     }
 
-    fs::path agamcPath = exeDir / "agamc";
-#ifdef _WIN32
-    if (!fs::exists(agamcPath)) agamcPath = exeDir / "agamc.exe";
-#endif
+    fs::path agamcPath = findAgamcExecutable(exeDir);
 
     std::cout << "    [CHECKING] Checking project for errors...\n";
     std::string cmd = "\"" + agamcPath.string() + "\" --emit-mir \"" + mainPath.string() + "\" > /dev/null";
@@ -276,10 +282,7 @@ static int handleBuild(bool isRelease, const fs::path &exeDir) {
     fs::path projName = fs::current_path().filename();
     fs::path outBin = targetSubDir / projName;
 
-    fs::path agamcPath = exeDir / "agamc";
-#ifdef _WIN32
-    if (!fs::exists(agamcPath)) agamcPath = exeDir / "agamc.exe";
-#endif
+    fs::path agamcPath = findAgamcExecutable(exeDir);
 
     std::cout << "   [COMPILING] " << projName.string() << " (" << (isRelease ? "release [optimized]" : "debug [unoptimized]") << ")...\n";
     std::string optFlag = isRelease ? "-O3" : "-O0";
@@ -305,10 +308,7 @@ static int handleRun(bool isRelease, const fs::path &exeDir) {
     fs::path projName = fs::current_path().filename();
     std::cout << "    [RUNNING] `target/" << (isRelease ? "release" : "debug") << "/" << projName.string() << "`\n";
 
-    fs::path agamcPath = exeDir / "agamc";
-#ifdef _WIN32
-    if (!fs::exists(agamcPath)) agamcPath = exeDir / "agamc.exe";
-#endif
+    fs::path agamcPath = findAgamcExecutable(exeDir);
 
     std::string optFlag = isRelease ? "-O3" : "-O0";
     std::string cmd = "\"" + agamcPath.string() + "\" " + optFlag + " --run \"" + mainPath.string() + "\"";

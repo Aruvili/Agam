@@ -308,6 +308,7 @@ const char* agam_os_name() {
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <direct.h>
+#pragma comment(lib, "ws2_32.lib")
 #else
 #include <unistd.h>
 #include <sys/socket.h>

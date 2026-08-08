@@ -131,6 +131,10 @@ target_link_libraries(agam_lib PUBLIC
     ${LLVM_SYSTEM_LIBS}
 )
 
+if(WIN32)
+    target_link_libraries(agam_lib PUBLIC ws2_32)
+endif()
+
 # ── Agam compiler executable ────────────────────────────────────────────────
 add_executable(agamc
     src/main.cpp

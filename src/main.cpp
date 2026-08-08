@@ -49,6 +49,25 @@
 using namespace agam;
 namespace fs = std::filesystem;
 
+namespace {
+    template <typename F>
+    static auto callHostFeatures(F fn, int) -> decltype(fn()) {
+        return fn();
+    }
+
+    template <typename F>
+    static auto callHostFeatures(F fn, long) -> llvm::StringMap<bool> {
+        llvm::StringMap<bool> m;
+        using fn_ptr_t = bool (*)(llvm::StringMap<bool>&);
+        reinterpret_cast<fn_ptr_t>(fn)(m);
+        return m;
+    }
+
+    inline llvm::StringMap<bool> fetchHostCPUFeatures() {
+        return callHostFeatures(llvm::sys::getHostCPUFeatures, 0);
+    }
+}
+
 // Global diagnostic infrastructure
 SourceManager g_sourceManager;
 DiagnosticEngine g_diagEngine(g_sourceManager);
@@ -503,7 +522,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::string hostCPU = llvm::sys::getHostCPUName().str();
-    llvm::StringMap<bool> hostFeatures = llvm::sys::getHostCPUFeatures();
+    llvm::StringMap<bool> hostFeatures = fetchHostCPUFeatures();
     std::string featureStr;
     for (auto &f : hostFeatures) {
         if (!featureStr.empty()) featureStr += ",";

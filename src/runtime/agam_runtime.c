@@ -655,6 +655,12 @@ const char* agam_base64_encode(const char* data) {
     return encoded;
 }
 
+static inline uint32_t b64_decode_char(char c) {
+    if (c == '=' || c == '\0') return 0;
+    const char* p = strchr(b64_table, c);
+    return p ? (uint32_t)(p - b64_table) : 0;
+}
+
 const char* agam_base64_decode(const char* data) {
     if (!data) return "";
     size_t input_len = strlen(data);
@@ -666,17 +672,17 @@ const char* agam_base64_decode(const char* data) {
 
     char* decoded = (char*)xmalloc(output_len + 1);
     size_t i, j;
-    for (i = 0, j = 0; i < input_len;) {
-        uint32_t sextet_a = data[i] == '=' ? 0 & i++ : strchr(b64_table, data[i++]) - b64_table;
-        uint32_t sextet_b = data[i] == '=' ? 0 & i++ : strchr(b64_table, data[i++]) - b64_table;
-        uint32_t sextet_c = data[i] == '=' ? 0 & i++ : strchr(b64_table, data[i++]) - b64_table;
-        uint32_t sextet_d = data[i] == '=' ? 0 & i++ : strchr(b64_table, data[i++]) - b64_table;
+    for (i = 0, j = 0; i < input_len; i += 4) {
+        uint32_t sextet_a = b64_decode_char(data[i]);
+        uint32_t sextet_b = b64_decode_char(data[i + 1]);
+        uint32_t sextet_c = b64_decode_char(data[i + 2]);
+        uint32_t sextet_d = b64_decode_char(data[i + 3]);
 
-        uint32_t triple = (sextet_a << 3 * 6) + (sextet_b << 2 * 6) + (sextet_c << 1 * 6) + (sextet_d << 0 * 6);
+        uint32_t triple = (sextet_a << 18) + (sextet_b << 12) + (sextet_c << 6) + sextet_d;
 
-        if (j < output_len) decoded[j++] = (triple >> 2 * 8) & 0xFF;
-        if (j < output_len) decoded[j++] = (triple >> 1 * 8) & 0xFF;
-        if (j < output_len) decoded[j++] = (triple >> 0 * 8) & 0xFF;
+        if (j < output_len) decoded[j++] = (triple >> 16) & 0xFF;
+        if (j < output_len) decoded[j++] = (triple >> 8) & 0xFF;
+        if (j < output_len) decoded[j++] = triple & 0xFF;
     }
     decoded[output_len] = '\0';
     return decoded;

@@ -42,6 +42,10 @@
 #include <string>
 #include <vector>
 
+#ifndef AGAM_VERSION
+#define AGAM_VERSION "1.3.0"
+#endif
+
 using namespace agam;
 namespace fs = std::filesystem;
 

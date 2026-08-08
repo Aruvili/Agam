@@ -696,7 +696,7 @@ const char* agam_crypto_sha256(const char* data) {
         hash *= 1099511628211ULL;
     }
     char* buf = (char*)xmalloc(33);
-    snprintf(buf, 33, "%016lx%016lx", hash, hash ^ 0xDEADBEEF);
+    snprintf(buf, 33, "%016llx%016llx", (unsigned long long)hash, (unsigned long long)(hash ^ 0xDEADBEEFULL));
     return buf;
 }
 

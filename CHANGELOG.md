@@ -3,6 +3,12 @@
 All notable changes to the Agam compiler, standard library, and ecosystem will be documented in this file. 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to Semantic Versioning.
 
+## [1.3.2] - 2026-08-08
+### Added & Improved
+- **Remote Central Package Registry Resolution (`agamp`):**
+  - Integrated remote central package registry index fetching from `https://raw.githubusercontent.com/Aruvili/Agam/refs/heads/master/registry/index.json`.
+  - Automatically fetches and caches the central registry index when local index files are not present, enabling global package resolution anywhere.
+
 ## [1.3.1] - 2026-08-08
 ### Added & Improved
 - **Package Manager (`agamp`) Duplicate Package Detection:**

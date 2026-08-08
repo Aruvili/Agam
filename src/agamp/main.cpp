@@ -145,7 +145,7 @@ static int handleNew(const std::string &projName) {
     return 0;
 }
 
-static fs::path findRegistryPath(const fs::path &exeDir) {
+static std::string getRegistryContent(const fs::path &exeDir, fs::path &outRegPath) {
     std::vector<fs::path> candidates = {
         exeDir / ".." / "registry" / "index.json",
         exeDir / ".." / "share" / "agam" / "registry" / "index.json",
@@ -155,9 +155,36 @@ static fs::path findRegistryPath(const fs::path &exeDir) {
 
     for (const auto &p : candidates) {
         if (fs::exists(p)) {
-            return p;
+            std::ifstream f(p);
+            if (f.is_open()) {
+                outRegPath = p;
+                return std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+            }
         }
     }
+
+    fs::path cachePath = fs::temp_directory_path() / "agam_registry_index.json";
+    const std::string remoteUrl = "https://raw.githubusercontent.com/Aruvili/Agam/refs/heads/master/registry/index.json";
+
+    std::string fetchCmd = "curl -s -f -L \"" + remoteUrl + "\" -o \"" + cachePath.string() + "\" > /dev/null 2>&1";
+    int res = std::system(fetchCmd.c_str());
+    if (res == 0 && fs::exists(cachePath)) {
+        std::ifstream f(cachePath);
+        if (f.is_open()) {
+            outRegPath = cachePath;
+            return std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+        }
+    }
+
+    if (fs::exists(cachePath)) {
+        std::ifstream f(cachePath);
+        if (f.is_open()) {
+            outRegPath = cachePath;
+            return std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+        }
+    }
+
+    outRegPath = "";
     return "";
 }
 
@@ -252,41 +279,36 @@ static int handleAdd(const std::string &pkgName, const fs::path &exeDir) {
     fs::path targetPkgFile;
     std::string sourceName = pkgName;
 
-    // ── Tier 1: Check Central Registry Index (registry/index.json) ───────────
-    fs::path regPath = findRegistryPath(exeDir);
-    if (!regPath.empty()) {
-        std::ifstream regFile(regPath);
-        if (regFile.is_open()) {
-            std::string content((std::istreambuf_iterator<char>(regFile)), std::istreambuf_iterator<char>());
-            regFile.close();
-
-            std::string searchKey = "\"" + pkgName + "\"";
-            size_t pos = content.find(searchKey);
-            if (pos != std::string::npos) {
-                size_t urlPos = content.find("\"url\"", pos);
-                if (urlPos != std::string::npos) {
-                    size_t startQuote = content.find("\"", urlPos + 5);
-                    size_t endQuote = content.find("\"", startQuote + 1);
-                    if (startQuote != std::string::npos && endQuote != std::string::npos) {
-                        std::string relUrl = content.substr(startQuote + 1, endQuote - startQuote - 1);
-                        if (relUrl.rfind("http://", 0) == 0 || relUrl.rfind("https://", 0) == 0 || relUrl.rfind("git@", 0) == 0 || relUrl.find(".git") != std::string::npos) {
-                            fs::path destRepo = modulesDir / pkgName;
-                            std::cout << "    [REGISTRY] Resolved '" << pkgName << "' -> " << relUrl << "\n";
-                            std::cout << "  [FETCHING] Remote Git repository: " << relUrl << " ...\n";
-                            std::string cloneCmd = "git clone --depth 1 \"" + relUrl + "\" \"" + destRepo.string() + "\" > /dev/null 2>&1";
-                            int res = std::system(cloneCmd.c_str());
-                            if (res == 0) {
-                                updateLockfile(pkgName, "1.0.0", relUrl, "modules/" + pkgName);
-                                std::cout << "[SUCCESS] Remote package '" << pkgName << "' cloned into modules/\n";
-                                std::cout << "[SUCCESS] Updated pk.lock\n";
-                                return 0;
-                            }
-                        } else {
-                            fs::path cand = regPath.parent_path() / ".." / relUrl;
-                            if (fs::exists(cand)) {
-                                targetPkgFile = cand;
-                                sourceName = "registry:" + pkgName;
-                            }
+    // ── Tier 1: Check Central Registry Index ──────────────────────────────────
+    fs::path regPath;
+    std::string content = getRegistryContent(exeDir, regPath);
+    if (!content.empty()) {
+        std::string searchKey = "\"" + pkgName + "\"";
+        size_t pos = content.find(searchKey);
+        if (pos != std::string::npos) {
+            size_t urlPos = content.find("\"url\"", pos);
+            if (urlPos != std::string::npos) {
+                size_t startQuote = content.find("\"", urlPos + 5);
+                size_t endQuote = content.find("\"", startQuote + 1);
+                if (startQuote != std::string::npos && endQuote != std::string::npos) {
+                    std::string relUrl = content.substr(startQuote + 1, endQuote - startQuote - 1);
+                    if (relUrl.rfind("http://", 0) == 0 || relUrl.rfind("https://", 0) == 0 || relUrl.rfind("git@", 0) == 0 || relUrl.find(".git") != std::string::npos) {
+                        fs::path destRepo = modulesDir / pkgName;
+                        std::cout << "    [REGISTRY] Resolved '" << pkgName << "' -> " << relUrl << "\n";
+                        std::cout << "  [FETCHING] Remote Git repository: " << relUrl << " ...\n";
+                        std::string cloneCmd = "git clone --depth 1 \"" + relUrl + "\" \"" + destRepo.string() + "\" > /dev/null 2>&1";
+                        int res = std::system(cloneCmd.c_str());
+                        if (res == 0) {
+                            updateLockfile(pkgName, "1.0.0", relUrl, "modules/" + pkgName);
+                            std::cout << "[SUCCESS] Remote package '" << pkgName << "' cloned into modules/\n";
+                            std::cout << "[SUCCESS] Updated pk.lock\n";
+                            return 0;
+                        }
+                    } else if (!regPath.empty()) {
+                        fs::path cand = regPath.parent_path() / ".." / relUrl;
+                        if (fs::exists(cand)) {
+                            targetPkgFile = cand;
+                            sourceName = "registry:" + pkgName;
                         }
                     }
                 }

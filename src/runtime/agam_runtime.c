@@ -299,13 +299,20 @@ const char* agam_os_name() {
 #endif
 }
 
-// ── Time Library Wrappers ──
+// ── Time & Network Library Wrappers ──
+
+#include <time.h>
 
 #ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <windows.h>
+#include <direct.h>
 #else
 #include <unistd.h>
-#include <time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #endif
 
 int64_t agam_time_epoch() {
@@ -330,18 +337,6 @@ void agam_time_sleep_ms(int64_t ms) {
     usleep(ms * 1000);
 #endif
 }
-
-// ── Network Library Wrappers ──
-
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#endif
 
 int64_t agam_net_listen(int64_t port) {
 #ifdef _WIN32
@@ -596,7 +591,12 @@ int64_t agam_fs_write_all(const char* path, const char* content) {
 }
 
 #include <pthread.h>
+#if defined(__has_include) && __has_include(<regex.h>) && !defined(_WIN32)
 #include <regex.h>
+#define AGAM_HAS_REGEX 1
+#else
+#define AGAM_HAS_REGEX 0
+#endif
 
 // ── Thread Runtime ──────────────────────────────────────────────────────────
 
@@ -698,11 +698,15 @@ const char* agam_crypto_sha256(const char* data) {
 
 int64_t agam_regex_match(const char* text, const char* pattern) {
     if (!text || !pattern) return 0;
+#if AGAM_HAS_REGEX
     regex_t regex;
     if (regcomp(&regex, pattern, REG_EXTENDED | REG_NOSUB) != 0) return 0;
     int status = regexec(&regex, text, 0, NULL, 0);
     regfree(&regex);
     return status == 0 ? 1 : 0;
+#else
+    return strstr(text, pattern) != NULL ? 1 : 0;
+#endif
 }
 
 // ── Date & Time Formatting ───────────────────────────────────────────────────

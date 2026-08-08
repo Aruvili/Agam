@@ -486,7 +486,14 @@ std::unique_ptr<ReturnStmt> Parser::parseReturnStmt() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 std::unique_ptr<Expr> Parser::parseExpression() {
-    return parseAssignment();
+    if (++exprDepth_ > 256) {
+        error(peek(), "கோவை ஆழ எல்லை கடந்துவிட்டது (Expression depth limit exceeded)");
+        --exprDepth_;
+        return nullptr;
+    }
+    auto res = parseAssignment();
+    --exprDepth_;
+    return res;
 }
 
 std::unique_ptr<Expr> Parser::parseAssignment() {

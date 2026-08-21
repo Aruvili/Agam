@@ -73,6 +73,11 @@ if(NOT LLVM_SYSTEM_LIBS)
         endif()
     endif()
 endif()
+if(APPLE)
+    link_directories(/opt/homebrew/lib /usr/local/lib /opt/homebrew/opt/zstd/lib)
+    include_directories(/opt/homebrew/include /usr/local/include /opt/homebrew/opt/zstd/include)
+endif()
+
 message(STATUS "LLVM System Libs: ${LLVM_SYSTEM_LIBS}")
 
 if(WIN32 AND LLVM_SYSTEM_LIBS)
@@ -92,7 +97,18 @@ endif()
 # ── Find SQLite3 (optional, for std/sqlite.agam) ─────────────────────────────
 find_package(SQLite3)
 if(SQLite3_FOUND)
-    message(STATUS "Found SQLite3: ${SQLite3_VERSION}")
+    message(STATUS "Found SQLite3 ${SQLite3_VERSION}: ${SQLite3_LIBRARIES}")
+    if(NOT TARGET SQLite3::SQLite3)
+        if(TARGET SQLite::SQLite3)
+            add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+        else()
+            add_library(SQLite3::SQLite3 UNKNOWN IMPORTED)
+            set_target_properties(SQLite3::SQLite3 PROPERTIES
+                IMPORTED_LOCATION "${SQLite3_LIBRARIES}"
+                INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIRS}"
+            )
+        endif()
+    endif()
 else()
     message(WARNING "SQLite3 not found — std/sqlite.agam will be non-functional")
 endif()

@@ -21,7 +21,7 @@ jobs:
           sudo apt-get install -y \
             cmake flex bison \
             llvm-18-dev libllvm18 \
-            libsqlite3-dev \
+            libsqlite3-dev libzstd-dev libz-dev \
             build-essential
 
       - name: Configure (GCC)
@@ -51,6 +51,8 @@ jobs:
           brew install cmake llvm@18 zstd zlib ncurses sqlite
           echo "/opt/homebrew/opt/llvm@18/bin" >> $GITHUB_PATH
           echo "LLVM_DIR=/opt/homebrew/opt/llvm@18/lib/cmake/llvm" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/opt/homebrew/opt/zstd/lib -L/opt/homebrew/opt/zlib/lib -L/opt/homebrew/opt/ncurses/lib -L/opt/homebrew/opt/sqlite/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I/opt/homebrew/opt/zstd/include -I/opt/homebrew/opt/zlib/include -I/opt/homebrew/opt/ncurses/include -I/opt/homebrew/opt/sqlite/include" >> $GITHUB_ENV
 
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug

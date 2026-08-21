@@ -33,7 +33,7 @@ jobs:
         if: matrix.target == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake llvm-18-dev libllvm18 libsqlite3-dev build-essential
+          sudo apt-get install -y cmake llvm-18-dev libllvm18 libsqlite3-dev libzstd-dev libz-dev build-essential
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "LLVM_DIR=$(llvm-config-18 --cmakedir)" >> $GITHUB_ENV

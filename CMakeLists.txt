@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(Agam
-    VERSION 1.3.2
+    VERSION 1.4.0
     DESCRIPTION "Agam Programming Language Compiler"
     LANGUAGES C CXX
 )

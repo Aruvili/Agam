@@ -3,6 +3,24 @@
 All notable changes to the Agam compiler, standard library, and ecosystem will be documented in this file. 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to Semantic Versioning.
 
+## [1.4.0] - 2026-08-21
+### Added & Hardened
+- **Native AOT Linker Pass (`agamc`):**
+  - Integrated system C compiler (`cc`/`gcc`) linker pass emitting linked executable binaries (ELF / PE) with a C entry wrapper (`int main() { return மைய(); }`) and PIC relocation model (`llvm::Reloc::PIC_`).
+  - Bundled standalone runtime library (`libagam_rt.a`) installed to `${CMAKE_INSTALL_LIBDIR}/agam/`.
+- **FIPS 180-4 SHA-256 Digest (`std/crypto.agam`):**
+  - Fully compliant FIPS 180-4 SHA-256 implementation producing exact 64-character hex digests.
+- **Native SQLite3 Engine (`std/sqlite.agam`):**
+  - Direct native SQLite3 database engine bindings (`sqlite3_open`, `sqlite3_exec`) with a 64-slot handle pool.
+- **Arena-Aware ZPM Allocation Routing:**
+  - `agam_rt_alloc` automatically redirects string, datetime, and crypto dynamic memory allocations to active TLS ZPM zone arenas when executing inside `மண்டலம்` block scopes for zero-leak $O(1)$ reclamation.
+- **Thread Safety & High-Quality PRNG:**
+  - `_Thread_local static char buf[4096]` socket receive buffer in `std/net.agam` and lock-free thread-local `xorshift128+` PRNG.
+- **Compiler Internal Panic Interceptor:**
+  - Signal handlers for `SIGSEGV`, `SIGABRT`, `SIGFPE`, `SIGILL` in `main.cpp` that render user-friendly formatted Tamil compiler crash diagnostics.
+- **Full 3-Platform macOS CI:**
+  - Complete Linux, macOS, and Windows matrix testing in `.github/workflows/ci.yml`.
+
 ## [1.3.2] - 2026-08-08
 ### Added & Improved
 - **Remote Central Package Registry Resolution (`agamp`):**

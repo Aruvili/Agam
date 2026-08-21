@@ -86,14 +86,19 @@ tar -xzf agam.tar.gz
 INSTALL_DIR="$HOME/.agam"
 BIN_DIR="$INSTALL_DIR/bin"
 STD_DIR="$INSTALL_DIR/std"
+LIB_DIR="$INSTALL_DIR/lib/agam"
 
 rm -rf "$INSTALL_DIR"
 mkdir -p "$BIN_DIR"
 mkdir -p "$STD_DIR"
+mkdir -p "$LIB_DIR"
 
 mv agamc "$BIN_DIR/"
 mv agam-lsp "$BIN_DIR/" 2>/dev/null || true
 mv std/* "$STD_DIR/"
+if [ -d "lib/agam" ]; then
+    mv lib/agam/* "$LIB_DIR/" 2>/dev/null || true
+fi
 
 chmod +x "$BIN_DIR/agamc"
 chmod +x "$BIN_DIR/agam-lsp" 2>/dev/null || true

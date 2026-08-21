@@ -33,7 +33,7 @@ jobs:
         if: matrix.target == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake llvm-18-dev libllvm18 build-essential
+          sudo apt-get install -y cmake llvm-18-dev libllvm18 libsqlite3-dev build-essential
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "LLVM_DIR=$(llvm-config-18 --cmakedir)" >> $GITHUB_ENV
@@ -41,7 +41,7 @@ jobs:
       - name: Install Dependencies (macOS)
         if: matrix.target == 'macos'
         run: |
-          brew install cmake llvm@18 zstd zlib ncurses
+          brew install cmake llvm@18 zstd zlib ncurses sqlite
           echo "/opt/homebrew/opt/llvm@18/bin" >> $GITHUB_PATH
           echo "LLVM_DIR=/opt/homebrew/opt/llvm@18/lib/cmake/llvm" >> $GITHUB_ENV
           echo "LDFLAGS=-L/opt/homebrew/opt/zstd/lib -L/opt/homebrew/opt/zlib/lib -L/opt/homebrew/opt/ncurses/lib" >> $GITHUB_ENV
@@ -58,6 +58,7 @@ jobs:
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-llvm
+            mingw-w64-ucrt-x86_64-sqlite3
             flex
             bison
             zip
@@ -83,8 +84,9 @@ jobs:
       - name: Package (Unix)
         if: matrix.target != 'windows'
         run: |
-          mkdir -p release_pack/std
+          mkdir -p release_pack/std release_pack/lib/agam
           cp build/bin/agamc build/bin/agam-lsp release_pack/
+          cp build/lib/libagam_rt.a release_pack/lib/agam/ || true
           cp -r std/* release_pack/std/
           cp README.md LICENSE release_pack/ || true
           cd release_pack && tar -czvf ../${{ matrix.asset_name }} *
@@ -93,8 +95,9 @@ jobs:
         if: matrix.target == 'windows'
         shell: msys2 {0}
         run: |
-          mkdir -p release_pack/std
+          mkdir -p release_pack/std release_pack/lib/agam
           cp build/bin/agamc.exe build/bin/agam-lsp.exe release_pack/
+          cp build/lib/libagam_rt.a release_pack/lib/agam/ || true
           cp -r std/* release_pack/std/
           cp README.md LICENSE release_pack/ || true
           cd release_pack && zip -r ../${{ matrix.asset_name }} *

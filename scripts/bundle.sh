@@ -42,6 +42,14 @@ else
     echo "Warning: std library not found!"
 fi
 
+# 4. Copy Runtime Library
+mkdir -p "${BUNDLE_DIR}/lib/agam"
+if [ -f "build/lib/libagam_rt.a" ]; then
+    cp build/lib/libagam_rt.a "${BUNDLE_DIR}/lib/agam/"
+else
+    echo "Warning: libagam_rt.a not found! AOT compilation will not produce executables."
+fi
+
 # 4. Create Archive
 if [[ "$PLATFORM" == *"windows"* ]]; then
     # Create zip on windows if possible, otherwise tar.gz

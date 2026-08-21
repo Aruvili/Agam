@@ -32,16 +32,21 @@ try {
     $InstallDir = Join-Path $env:USERPROFILE ".agam"
     $BinDir = Join-Path $InstallDir "bin"
     $StdDir = Join-Path $InstallDir "std"
+    $LibDir = Join-Path $InstallDir "lib\agam"
 
     if (Test-Path $InstallDir) { Remove-Item -Recurse -Force $InstallDir }
     New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
     New-Item -ItemType Directory -Force -Path $StdDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $LibDir | Out-Null
 
     Move-Item -Path (Join-Path $TempDir "agamc.exe") -Destination $BinDir -Force
     if (Test-Path (Join-Path $TempDir "agam-lsp.exe")) {
         Move-Item -Path (Join-Path $TempDir "agam-lsp.exe") -Destination $BinDir -Force
     }
     Move-Item -Path (Join-Path $TempDir "std\*") -Destination $StdDir -Force
+    if (Test-Path (Join-Path $TempDir "lib\agam")) {
+        Move-Item -Path (Join-Path $TempDir "lib\agam\*") -Destination $LibDir -Force
+    }
 
     # Add to PATH temporarily for this session
     $env:PATH += ";$BinDir"

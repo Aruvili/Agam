@@ -49,6 +49,17 @@ typedef struct AgamZone {
 static _Thread_local void* tls_zone_stack[MAX_TLS_ZONE_STACK];
 static _Thread_local int tls_zone_stack_top = -1;
 
+// Forward declaration
+void* agam_zone_alloc(void* zonePtr, size_t size);
+
+// Arena-aware allocation helper: allocates from active TLS zone if present, else xmalloc
+static inline void* agam_rt_alloc(size_t size) {
+    if (tls_zone_stack_top >= 0 && tls_zone_stack[tls_zone_stack_top]) {
+        return agam_zone_alloc(tls_zone_stack[tls_zone_stack_top], size);
+    }
+    return xmalloc(size);
+}
+
 void* agam_zone_create() {
     AgamZone* zone = (AgamZone*)xmalloc(sizeof(AgamZone));
     AgamZoneBlock* block = (AgamZoneBlock*)xmalloc(sizeof(AgamZoneBlock));
@@ -392,7 +403,7 @@ int64_t agam_net_send(int64_t client_fd, const char* data) {
 }
 
 const char* agam_net_recv(int64_t client_fd) {
-    static char buf[4096];
+    static _Thread_local char buf[4096];
     int bytes = recv((int)client_fd, buf, sizeof(buf) - 1, 0);
     if (bytes <= 0) return "";
     buf[bytes] = '\0';
@@ -431,7 +442,7 @@ const char* agam_str_substring(const char* s, int64_t start, int64_t len) {
     if (start < 0 || start >= s_len || len <= 0) return "";
     if (start + len > s_len) len = s_len - start;
     
-    char* buf = (char*)xmalloc((size_t)len + 1);
+    char* buf = (char*)agam_rt_alloc((size_t)len + 1);
     memcpy(buf, s + start, (size_t)len);
     buf[len] = '\0';
     return buf;
@@ -444,7 +455,7 @@ const char* agam_str_trim(const char* s) {
     const char* end = s + strlen(s) - 1;
     while (end > s && isspace((unsigned char)*end)) end--;
     size_t len = (size_t)(end - s + 1);
-    char* buf = (char*)xmalloc(len + 1);
+    char* buf = (char*)agam_rt_alloc(len + 1);
     memcpy(buf, s, len);
     buf[len] = '\0';
     return buf;
@@ -453,7 +464,7 @@ const char* agam_str_trim(const char* s) {
 const char* agam_str_to_upper(const char* s) {
     if (!s) return "";
     size_t len = strlen(s);
-    char* buf = (char*)xmalloc(len + 1);
+    char* buf = (char*)agam_rt_alloc(len + 1);
     for (size_t i = 0; i < len; i++) buf[i] = (char)toupper((unsigned char)s[i]);
     buf[len] = '\0';
     return buf;
@@ -462,7 +473,7 @@ const char* agam_str_to_upper(const char* s) {
 const char* agam_str_to_lower(const char* s) {
     if (!s) return "";
     size_t len = strlen(s);
-    char* buf = (char*)xmalloc(len + 1);
+    char* buf = (char*)agam_rt_alloc(len + 1);
     for (size_t i = 0; i < len; i++) buf[i] = (char)tolower((unsigned char)s[i]);
     buf[len] = '\0';
     return buf;
@@ -508,25 +519,33 @@ int64_t agam_fs_size(const char* path) {
     return -1;
 }
 
-// ── Extended Random Helpers ──────────────────────────────────────────────────
+// ── Extended Random Helpers (Thread-Safe xorshift128+) ───────────────────────
+
+static _Thread_local uint64_t tls_rng_state[2] = {0, 0};
+
+static inline uint64_t xorshift128plus(void) {
+    if (tls_rng_state[0] == 0 && tls_rng_state[1] == 0) {
+        uint64_t seed = (uint64_t)time(NULL);
+        uint64_t ptr_seed = (uint64_t)(uintptr_t)&tls_rng_state;
+        tls_rng_state[0] = seed ^ ptr_seed ^ 0x9E3779B97F4A7C15ULL;
+        tls_rng_state[1] = (seed << 32) ^ (ptr_seed >> 16) ^ 0xD6E8FEB86659FD93ULL;
+    }
+    uint64_t s1 = tls_rng_state[0];
+    const uint64_t s0 = tls_rng_state[1];
+    tls_rng_state[0] = s0;
+    s1 ^= s1 << 23;
+    tls_rng_state[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);
+    return tls_rng_state[1] + s0;
+}
 
 int64_t agam_rand_range(int64_t min_val, int64_t max_val) {
     if (min_val >= max_val) return min_val;
-    static int seeded = 0;
-    if (!seeded) {
-        srand((unsigned int)time(NULL));
-        seeded = 1;
-    }
-    return min_val + (rand() % (max_val - min_val + 1));
+    uint64_t range = (uint64_t)(max_val - min_val + 1);
+    return min_val + (int64_t)(xorshift128plus() % range);
 }
 
 double agam_rand_float(void) {
-    static int seeded = 0;
-    if (!seeded) {
-        srand((unsigned int)time(NULL));
-        seeded = 1;
-    }
-    return (double)rand() / (double)RAND_MAX;
+    return (double)(xorshift128plus() >> 11) * (1.0 / 9007199254740992.0);
 }
 
 int64_t agam_str_len(const char* s) {
@@ -549,7 +568,7 @@ const char* agam_str_replace(const char* s, const char* old_sub, const char* new
 
     size_t new_len = strlen(new_sub);
     size_t result_len = strlen(s) + count * (new_len - old_len);
-    char* result = (char*)xmalloc(result_len + 1);
+    char* result = (char*)agam_rt_alloc(result_len + 1);
     
     char* dst = result;
     while (*s) {
@@ -576,7 +595,7 @@ const char* agam_fs_read_all(const char* path) {
         fclose(f);
         return "";
     }
-    char* buf = (char*)xmalloc((size_t)sz + 1);
+    char* buf = (char*)agam_rt_alloc((size_t)sz + 1);
     size_t read_bytes = fread(buf, 1, (size_t)sz, f);
     fclose(f);
     buf[read_bytes] = '\0';
@@ -599,6 +618,13 @@ int64_t agam_fs_write_all(const char* path, const char* content) {
 #define AGAM_HAS_REGEX 1
 #else
 #define AGAM_HAS_REGEX 0
+#endif
+
+#ifndef AGAM_HAS_SQLITE
+#define AGAM_HAS_SQLITE 0
+#endif
+#if AGAM_HAS_SQLITE
+#include <sqlite3.h>
 #endif
 
 // ── Thread Runtime ──────────────────────────────────────────────────────────
@@ -630,7 +656,7 @@ const char* agam_base64_encode(const char* data) {
     if (!data) return "";
     size_t input_len = strlen(data);
     size_t output_len = 4 * ((input_len + 2) / 3);
-    char* encoded = (char*)xmalloc(output_len + 1);
+    char* encoded = (char*)agam_rt_alloc(output_len + 1);
 
     size_t i, j;
     for (i = 0, j = 0; i < input_len;) {
@@ -673,7 +699,7 @@ const char* agam_base64_decode(const char* data) {
     if (data[input_len - 1] == '=') output_len--;
     if (data[input_len - 2] == '=') output_len--;
 
-    char* decoded = (char*)xmalloc(output_len + 1);
+    char* decoded = (char*)agam_rt_alloc(output_len + 1);
     size_t i, j;
     for (i = 0, j = 0; i < input_len; i += 4) {
         uint32_t sextet_a = b64_decode_char(data[i]);
@@ -691,16 +717,103 @@ const char* agam_base64_decode(const char* data) {
     return decoded;
 }
 
+// ── SHA-256 (FIPS 180-4) ─────────────────────────────────────────────────────
+
+static const uint32_t sha256_k[64] = {
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+    0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+    0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+    0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+    0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+    0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
+    0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
+    0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+    0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+};
+
+#define SHA256_ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
+#define SHA256_CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
+#define SHA256_MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define SHA256_EP0(x) (SHA256_ROTR(x, 2) ^ SHA256_ROTR(x, 13) ^ SHA256_ROTR(x, 22))
+#define SHA256_EP1(x) (SHA256_ROTR(x, 6) ^ SHA256_ROTR(x, 11) ^ SHA256_ROTR(x, 25))
+#define SHA256_SIG0(x) (SHA256_ROTR(x, 7) ^ SHA256_ROTR(x, 18) ^ ((x) >> 3))
+#define SHA256_SIG1(x) (SHA256_ROTR(x, 17) ^ SHA256_ROTR(x, 19) ^ ((x) >> 10))
+
 const char* agam_crypto_sha256(const char* data) {
     if (!data) return "";
-    uint64_t hash = 14695981039346656037ULL;
-    while (*data) {
-        hash ^= (uint64_t)(unsigned char)*data++;
-        hash *= 1099511628211ULL;
+
+    size_t len = strlen(data);
+
+    // Initial hash values (first 32 bits of fractional parts of sqrt of first 8 primes)
+    uint32_t h[8] = {
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+    };
+
+    // Pre-processing: pad message to a multiple of 512 bits (64 bytes)
+    uint64_t bit_len = (uint64_t)len * 8;
+    size_t padded_len = ((len + 8) / 64 + 1) * 64;
+    uint8_t* msg = (uint8_t*)calloc(padded_len, 1);
+    if (!msg) return "";
+    memcpy(msg, data, len);
+    msg[len] = 0x80;
+
+    // Append original bit length as big-endian 64-bit integer
+    for (int i = 0; i < 8; i++) {
+        msg[padded_len - 1 - i] = (uint8_t)(bit_len >> (i * 8));
     }
-    char* buf = (char*)xmalloc(33);
-    snprintf(buf, 33, "%016llx%016llx", (unsigned long long)hash, (unsigned long long)(hash ^ 0xDEADBEEFULL));
-    return buf;
+
+    // Process each 512-bit (64-byte) block
+    for (size_t offset = 0; offset < padded_len; offset += 64) {
+        uint32_t w[64];
+
+        // Prepare message schedule
+        for (int i = 0; i < 16; i++) {
+            w[i] = ((uint32_t)msg[offset + i * 4] << 24) |
+                   ((uint32_t)msg[offset + i * 4 + 1] << 16) |
+                   ((uint32_t)msg[offset + i * 4 + 2] << 8) |
+                   ((uint32_t)msg[offset + i * 4 + 3]);
+        }
+        for (int i = 16; i < 64; i++) {
+            w[i] = SHA256_SIG1(w[i - 2]) + w[i - 7] + SHA256_SIG0(w[i - 15]) + w[i - 16];
+        }
+
+        // Initialize working variables
+        uint32_t a = h[0], b = h[1], c = h[2], d = h[3];
+        uint32_t e = h[4], f = h[5], g = h[6], hh = h[7];
+
+        // 64 rounds of compression
+        for (int i = 0; i < 64; i++) {
+            uint32_t t1 = hh + SHA256_EP1(e) + SHA256_CH(e, f, g) + sha256_k[i] + w[i];
+            uint32_t t2 = SHA256_EP0(a) + SHA256_MAJ(a, b, c);
+            hh = g;
+            g = f;
+            f = e;
+            e = d + t1;
+            d = c;
+            c = b;
+            b = a;
+            a = t1 + t2;
+        }
+
+        h[0] += a; h[1] += b; h[2] += c; h[3] += d;
+        h[4] += e; h[5] += f; h[6] += g; h[7] += hh;
+    }
+
+    free(msg);
+
+    // Format as 64-character lowercase hex string
+    char* result = (char*)agam_rt_alloc(65);
+    snprintf(result, 65, "%08x%08x%08x%08x%08x%08x%08x%08x",
+             h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
+    return result;
 }
 
 // ── Regex Runtime ────────────────────────────────────────────────────────────
@@ -725,7 +838,7 @@ const char* agam_datetime_now(void) {
     struct tm * timeinfo;
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    char* buf = (char*)xmalloc(64);
+    char* buf = (char*)agam_rt_alloc(64);
     strftime(buf, 64, "%Y-%m-%d %H:%M:%S", timeinfo);
     return buf;
 }
@@ -734,30 +847,64 @@ const char* agam_datetime_format(int64_t timestamp, const char* format) {
     if (!format) format = "%Y-%m-%d %H:%M:%S";
     time_t rawtime = (time_t)timestamp;
     struct tm * timeinfo = localtime(&rawtime);
-    char* buf = (char*)xmalloc(128);
+    char* buf = (char*)agam_rt_alloc(128);
     strftime(buf, 128, format, timeinfo);
     return buf;
 }
 
 // ── Database (SQLite Interface) ──────────────────────────────────────────────
 
+#if AGAM_HAS_SQLITE
+
+#define AGAM_MAX_DB_HANDLES 64
+static sqlite3* agam_db_handles[AGAM_MAX_DB_HANDLES] = {0};
+
 int64_t agam_db_open(const char* db_name) {
     if (!db_name) return -1;
-    return 1;
+    for (int i = 0; i < AGAM_MAX_DB_HANDLES; i++) {
+        if (!agam_db_handles[i]) {
+            if (sqlite3_open(db_name, &agam_db_handles[i]) != SQLITE_OK) {
+                agam_db_handles[i] = NULL;
+                return -1;
+            }
+            return (int64_t)(i + 1); // 1-based handle
+        }
+    }
+    return -1; // No free handle slots
+}
+
+int64_t agam_db_exec(int64_t handle, const char* query) {
+    int idx = (int)handle - 1;
+    if (idx < 0 || idx >= AGAM_MAX_DB_HANDLES || !agam_db_handles[idx]) return -1;
+    if (!query) return -1;
+    char* err_msg = NULL;
+    int rc = sqlite3_exec(agam_db_handles[idx], query, NULL, NULL, &err_msg);
+    if (err_msg) sqlite3_free(err_msg);
+    return (rc == SQLITE_OK) ? 0 : -1;
+}
+
+#else
+
+int64_t agam_db_open(const char* db_name) {
+    (void)db_name;
+    fprintf(stderr, "Warning: SQLite support not compiled in\n");
+    return -1;
 }
 
 int64_t agam_db_exec(int64_t handle, const char* query) {
     (void)handle;
-    if (!query) return -1;
-    return 0;
+    (void)query;
+    return -1;
 }
+
+#endif /* AGAM_HAS_SQLITE */
 
 const char* agam_str_concat(const char* s1, const char* s2) {
     if (!s1) s1 = "";
     if (!s2) s2 = "";
     size_t l1 = strlen(s1);
     size_t l2 = strlen(s2);
-    char* buf = (char*)xmalloc(l1 + l2 + 1);
+    char* buf = (char*)agam_rt_alloc(l1 + l2 + 1);
     memcpy(buf, s1, l1);
     memcpy(buf + l1, s2, l2);
     buf[l1 + l2] = '\0';

@@ -89,6 +89,14 @@ if(WIN32 AND LLVM_SYSTEM_LIBS)
     set(LLVM_SYSTEM_LIBS ${CLEANED_LIBS})
 endif()
 
+# ── Find SQLite3 (optional, for std/sqlite.agam) ─────────────────────────────
+find_package(SQLite3)
+if(SQLite3_FOUND)
+    message(STATUS "Found SQLite3: ${SQLite3_VERSION}")
+else()
+    message(WARNING "SQLite3 not found — std/sqlite.agam will be non-functional")
+endif()
+
 # ── Agam compiler library (shared between compiler and tests) ────────────────
 add_library(agam_lib STATIC
     src/lexer/lexer.cpp
@@ -131,8 +139,33 @@ target_link_libraries(agam_lib PUBLIC
     ${LLVM_SYSTEM_LIBS}
 )
 
+if(SQLite3_FOUND)
+    target_link_libraries(agam_lib PUBLIC SQLite3::SQLite3)
+    target_compile_definitions(agam_lib PUBLIC AGAM_HAS_SQLITE=1)
+endif()
+
 if(WIN32)
     target_link_libraries(agam_lib PUBLIC ws2_32)
+endif()
+
+# ── Agam Runtime Library (linked into AOT executables) ───────────────────────
+add_library(agam_rt STATIC
+    src/runtime/agam_runtime.c
+)
+
+target_include_directories(agam_rt PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+)
+
+if(MSVC)
+    target_compile_options(agam_rt PRIVATE /W4)
+else()
+    target_compile_options(agam_rt PRIVATE -Wall -Wextra -Wno-unused-parameter)
+endif()
+
+if(SQLite3_FOUND)
+    target_link_libraries(agam_rt PRIVATE SQLite3::SQLite3)
+    target_compile_definitions(agam_rt PRIVATE AGAM_HAS_SQLITE=1)
 endif()
 
 # ── Agam compiler executable ────────────────────────────────────────────────
@@ -275,6 +308,11 @@ include(GNUInstallDirs)
 # Install the compiler, LSP, and Package Manager
 install(TARGETS agamc agam-lsp agamp
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# Install the runtime library for AOT linking
+install(TARGETS agam_rt
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/agam
 )
 
 # Install the standard library

@@ -33,6 +33,7 @@
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/Triple.h"
 
+#include <csignal>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -41,6 +42,15 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+namespace {
+    static void agamSignalHandler(int sig) {
+        std::cerr << "\n\033[1;31mமுக்கிய பிழை (fatal): கம்பைலரில் எதிர்பாராத அகப்பின்னடைவு பிழை "
+                  << "(Compiler Internal Crash, signal " << sig << ")\033[0m\n"
+                  << "உதவிக்குறிப்பு: இந்த கோளாறை https://github.com/Aruvili/Agam/issues இல் தெரிவிக்கவும்.\n";
+        std::exit(128 + sig);
+    }
+}
 #if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
 #endif
@@ -323,6 +333,11 @@ std::unique_ptr<Program> parseWithImports(const std::string &filename,
 } // namespace agam
 
 int main(int argc, char *argv[]) {
+    std::signal(SIGSEGV, agamSignalHandler);
+    std::signal(SIGABRT, agamSignalHandler);
+    std::signal(SIGFPE,  agamSignalHandler);
+    std::signal(SIGILL,  agamSignalHandler);
+
     g_exeDir = getExecutableDir(argv[0]);
     const char *envPath = std::getenv("AGAM_STD_PATH");
     if (envPath)
@@ -574,7 +589,7 @@ int main(int argc, char *argv[]) {
     }
 
     llvm::TargetOptions opt;
-    auto RM = std::optional<llvm::Reloc::Model>();
+    auto RM = std::optional<llvm::Reloc::Model>(llvm::Reloc::PIC_);
 #if LLVM_VERSION_MAJOR >= 22
     auto targetMachine = target->createTargetMachine(targetTriple, hostCPU, featureStr, opt, RM);
 #else
@@ -596,6 +611,25 @@ int main(int argc, char *argv[]) {
     if (runJit) {
         int exitCode = Executor::run(*codegen.getModule(), "மைய");
         return exitCode;
+    }
+
+    // ── Emit C `main` wrapper for AOT linking ───────────────────────────────
+    // The system linker expects a `main` symbol. Agam's entry point is `மைய`.
+    // We emit: int main() { return மைய(); }
+    {
+        auto *mod = codegen.getModule();
+        auto &ctx = mod->getContext();
+        llvm::Function *entryFn = mod->getFunction("மைய");
+        if (entryFn && !mod->getFunction("main")) {
+            llvm::FunctionType *mainTy = llvm::FunctionType::get(
+                llvm::Type::getInt32Ty(ctx), false);
+            llvm::Function *mainFn = llvm::Function::Create(
+                mainTy, llvm::Function::ExternalLinkage, "main", mod);
+            llvm::BasicBlock *bb = llvm::BasicBlock::Create(ctx, "entry", mainFn);
+            llvm::IRBuilder<> b(bb);
+            llvm::Value *ret = b.CreateCall(entryFn);
+            b.CreateRet(ret);
+        }
     }
 
     if (outputFile.empty()) {
@@ -621,28 +655,92 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    std::error_code ec;
-    llvm::raw_fd_ostream dest(outputFile, ec, llvm::sys::fs::OF_None);
+    // ── Emit object file to a temp path ─────────────────────────────────────
+    std::string objFile = outputFile + ".o";
 
-    if (ec) {
-        std::cerr << "கோப்பினைத் திறக்க முடியவில்லை: " << ec.message() << std::endl;
-        return 1;
-    }
+    {
+        std::error_code ec;
+        llvm::raw_fd_ostream dest(objFile, ec, llvm::sys::fs::OF_None);
 
-    llvm::legacy::PassManager pass;
+        if (ec) {
+            std::cerr << "கோப்பினைத் திறக்க முடியவில்லை: " << ec.message() << std::endl;
+            return 1;
+        }
+
+        llvm::legacy::PassManager pass;
 #if LLVM_VERSION_MAJOR >= 18
-    auto FileType = llvm::CodeGenFileType::ObjectFile;
+        auto FileType = llvm::CodeGenFileType::ObjectFile;
 #else
-    auto FileType = llvm::CGFT_ObjectFile;
+        auto FileType = llvm::CGFT_ObjectFile;
 #endif
 
-    if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
-        std::cerr << "இந்த வகை கோப்பினை உருவாக்க முடியாது" << std::endl;
-        return 1;
+        if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
+            std::cerr << "இந்த வகை கோப்பினை உருவாக்க முடியாது" << std::endl;
+            fs::remove(objFile);
+            return 1;
+        }
+
+        pass.run(*codegen.getModule());
+        dest.flush();
     }
 
-    pass.run(*codegen.getModule());
-    dest.flush();
+    // ── Locate runtime library (libagam_rt.a) ───────────────────────────────
+    fs::path rtLib;
+    std::vector<fs::path> rtSearchPaths = {
+        g_exeDir / ".." / "lib" / "agam" / "libagam_rt.a",  // Installed layout (Unix)
+        g_exeDir / ".." / "lib" / "libagam_rt.a",            // Build-tree layout
+        g_exeDir / "lib" / "libagam_rt.a",                   // Flat layout
+        g_exeDir / ".." / "lib" / "agam" / "agam_rt.lib",    // Installed layout (Windows/MSVC)
+    };
+    for (auto& p : rtSearchPaths) {
+        if (fs::exists(p)) {
+            rtLib = fs::canonical(p);
+            break;
+        }
+    }
+
+    // ── Link into executable ────────────────────────────────────────────────
+    std::string linkCmd;
+
+#ifdef _WIN32
+    linkCmd = "gcc";
+#else
+    linkCmd = "cc";
+#endif
+
+    // Object file
+    linkCmd += " \"" + objFile + "\"";
+
+    // Runtime library
+    if (!rtLib.empty()) {
+        linkCmd += " \"" + rtLib.string() + "\"";
+    } else {
+        std::cerr << "எச்சரிக்கை: libagam_rt.a கண்டுபிடிக்கப்படவில்லை. இணைப்பு தோல்வியடையலாம்.\n";
+    }
+
+    // System libraries
+    linkCmd += " -lm -lpthread";
+
+#ifdef _WIN32
+    linkCmd += " -lws2_32";
+#endif
+
+    // SQLite3 (if available on system; linker will only pull symbols actually referenced)
+    linkCmd += " -lsqlite3";
+
+    // Output
+    linkCmd += " -o \"" + outputFile + "\"";
+
+    int linkResult = std::system(linkCmd.c_str());
+
+    // Clean up temp object file
+    fs::remove(objFile);
+
+    if (linkResult != 0) {
+        std::cerr << "பிழை: இணைப்பு (linking) தோல்வியடைந்தது. "
+                  << "C கம்பைலர் (cc/gcc) நிறுவப்பட்டுள்ளதா எனச் சரிபார்க்கவும்.\n";
+        return 1;
+    }
 
     return 0;
 }
